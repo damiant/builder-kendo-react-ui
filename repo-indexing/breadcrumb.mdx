@@ -1,0 +1,435 @@
+# Breadcrumb Components
+
+## Overview
+
+### Purpose
+Use this component group to generate breadcrumb navigation with all required sub-components
+
+### When to Use
+Breadcrumb components are ideal for providing hierarchical navigation in applications with deep page structures. Use breadcrumbs when you need to:
+- Help users understand their current location within a multi-level navigation hierarchy
+- Provide a quick way for users to navigate back to parent pages
+- Improve website accessibility by showing the navigation path
+- Enhance SEO with structured navigation data
+- Support applications with complex folder structures, e-commerce category navigation, or multi-step processes
+
+### Architecture
+**Critical/Strong Coupling**: The Breadcrumb component group follows a compositional hierarchy where the main Breadcrumb component orchestrates the rendering of its child components. The components share context through prop injection and work together to create a cohesive navigation experience.
+
+### Component Interdependencies
+- **Breadcrumb** (Primary) → Controls overall structure and provides data context to child components
+- **BreadcrumbOrderedList** → Container component that wraps breadcrumb items in semantic HTML structure
+- **BreadcrumbListItem** → Individual item wrapper component that receives data from the parent Breadcrumb
+- **BreadcrumbDelimiter** → Visual separator component rendered between breadcrumb items
+- **BreadcrumbLink** → Interactive link component that handles user navigation actions
+
+## Components
+
+### Breadcrumb {Primary Component}
+
+**Purpose:** The main orchestrator component that manages breadcrumb data, renders the complete navigation structure, and coordinates child component behavior.
+
+**Interface:**
+```typescript
+interface BreadcrumbProps {
+  id?: string; // Sets the id property of the top div element
+  style?: React.CSSProperties; // Additional CSS styles
+  className?: string; // Additional CSS classes
+  breadcrumbOrderedList?: React.ComponentType<BreadcrumbOrderedListProps>; // Custom ordered list component
+  breadcrumbListItem?: React.ComponentType<BreadcrumbListItemProps>; // Custom list item component
+  breadcrumbDelimiter?: React.ComponentType<BreadcrumbDelimiterProps>; // Custom delimiter component
+  breadcrumbLink?: React.ComponentType<BreadcrumbLinkProps>; // Custom link component
+  data: DataModel[]; // Required breadcrumb navigation data
+  size?: 'small' | 'medium' | 'large'; // Visual size of breadcrumb elements
+  dir?: 'ltr' | 'rtl'; // Text direction
+  tabIndex?: number; // Tab index for keyboard navigation
+  disabled?: boolean; // Disabled state
+  valueField?: string; // Field name for item identifiers
+  textField?: string; // Field name for item text
+  iconField?: string; // Field name for item icons
+  iconClassField?: string; // Field name for item icon classes
+  onItemSelect?: (event: BreadcrumbLinkMouseEvent) => void; // Item click handler
+  onKeyDown?: (event: BreadcrumbLinkKeyDownEvent) => void; // Keyboard navigation handler
+  ariaLabel?: string; // Accessibility label
+}
+
+interface DataModel {
+  id?: string; // Unique identifier for the breadcrumb item
+  text?: string; // Display text for the breadcrumb item
+  icon?: React.ReactNode; // Icon element for the breadcrumb item
+  iconClass?: string; // CSS class for the breadcrumb icon
+  disabled?: boolean; // Whether the item is disabled
+}
+```
+
+**Dependencies:** Requires data array and renders child components internally
+**Provides:** Data context, configuration, and event handling to all child components
+
+**Usage Example:**
+```tsx
+import { Breadcrumb } from '@progress/kendo-react-layout';
+
+const breadcrumbData = [
+  { id: 'home', text: 'Home', iconClass: 'k-i-home' },
+  { id: 'products', text: 'Products' },
+  { id: 'laptops', text: 'Laptops' },
+  { id: 'gaming', text: 'Gaming Laptops' }
+];
+
+function Example() {
+  const handleItemSelect = (event) => {
+    console.log('Selected:', event.id);
+  };
+
+  return (
+    <Breadcrumb
+      data={breadcrumbData}
+      size="medium"
+      onItemSelect={handleItemSelect}
+      ariaLabel="Breadcrumb navigation"
+    />
+  );
+}
+```
+
+### BreadcrumbOrderedList {Container Component}
+
+**Purpose:** Provides the semantic HTML structure (ordered list) that contains all breadcrumb items, ensuring proper accessibility and SEO.
+
+**Interface:**
+```typescript
+interface BreadcrumbOrderedListProps {
+  id?: string; // Element identifier
+  style?: React.CSSProperties; // Additional CSS styles
+  className?: string; // Additional CSS classes
+  children?: React.ReactNode; // Child breadcrumb items
+  tabIndex?: number; // Tab index for keyboard navigation
+  dir?: string; // Text direction
+  disabled?: boolean; // Disabled state
+  rootItem?: boolean; // Whether this is the root container
+}
+```
+
+**Context Dependencies:** Receives configuration from parent Breadcrumb component
+**Parent Requirements:** Must be used within Breadcrumb component for proper functionality
+
+**Usage Example:**
+```tsx
+// Typically used internally by Breadcrumb component
+// Can be customized via breadcrumbOrderedList prop
+const CustomOrderedList = (props) => (
+  <ol {...props} className="custom-breadcrumb-list" />
+);
+
+<Breadcrumb 
+  data={breadcrumbData}
+  breadcrumbOrderedList={CustomOrderedList}
+/>
+```
+
+### BreadcrumbListItem {Item Wrapper Component}
+
+**Purpose:** Wraps individual breadcrumb items in proper list item semantics and applies contextual styling based on item position.
+
+**Interface:**
+```typescript
+interface BreadcrumbListItemProps {
+  id?: string; // Element identifier
+  style?: React.CSSProperties; // Additional CSS styles
+  className?: string; // Additional CSS classes
+  children?: React.ReactNode; // Content (typically BreadcrumbLink)
+  isFirstItem: boolean; // Whether this is the first item in the breadcrumb
+  isLastItem: boolean; // Whether this is the last item in the breadcrumb
+}
+```
+
+**Context Dependencies:** Receives position information and styling context from parent
+**Parent Requirements:** Must be used within BreadcrumbOrderedList for proper structure
+
+**Usage Example:**
+```tsx
+// Typically used internally by Breadcrumb component
+// Can be customized via breadcrumbListItem prop
+const CustomListItem = (props) => (
+  <li {...props} className="custom-breadcrumb-item" />
+);
+
+<Breadcrumb 
+  data={breadcrumbData}
+  breadcrumbListItem={CustomListItem}
+/>
+```
+
+### BreadcrumbDelimiter {Separator Component}
+
+**Purpose:** Renders visual separators between breadcrumb items, providing clear visual hierarchy and supporting RTL text direction.
+
+**Interface:**
+```typescript
+interface BreadcrumbDelimiterProps {
+  id?: string; // Element identifier
+  className?: string; // Additional CSS classes
+  style?: React.CSSProperties; // Additional CSS styles
+  tabIndex?: number; // Tab index for keyboard navigation
+  dir?: string; // Text direction (affects icon orientation)
+}
+```
+
+**Context Dependencies:** Receives direction configuration from parent Breadcrumb
+**Parent Requirements:** Rendered automatically between breadcrumb items
+
+**Usage Example:**
+```tsx
+// Can be customized via breadcrumbDelimiter prop
+const CustomDelimiter = () => <span className="custom-separator">/</span>;
+
+<Breadcrumb 
+  data={breadcrumbData}
+  breadcrumbDelimiter={CustomDelimiter}
+/>
+```
+
+### BreadcrumbLink {Interactive Component}
+
+**Purpose:** Renders clickable navigation links for each breadcrumb item, handling user interactions and providing accessibility features.
+
+**Interface:**
+```typescript
+interface BreadcrumbLinkProps {
+  id?: string; // Element identifier
+  style?: React.CSSProperties; // Additional CSS styles
+  className?: string; // Additional CSS classes
+  tabIndex?: number; // Tab index for keyboard navigation
+  dir?: string; // Text direction
+  disabled?: boolean; // Disabled state
+  text?: string; // Link text content
+  icon?: React.ReactNode; // Icon element
+  iconClass?: string; // Icon CSS class
+  onItemSelect?: (event: BaseEvent<BreadcrumbLinkHandle>) => void; // Click handler
+  onKeyDown?: (event: BaseEvent<BreadcrumbLinkHandle>) => void; // Keyboard handler
+  ariaCurrent?: boolean; // ARIA current page indicator
+  isLast?: boolean; // Whether this is the last breadcrumb item
+  isFirst?: boolean; // Whether this is the first breadcrumb item
+}
+```
+
+**Context Dependencies:** Receives item data, event handlers, and position context from parent
+**Parent Requirements:** Must be used within BreadcrumbListItem for proper structure and functionality
+
+**Usage Example:**
+```tsx
+// Can be customized via breadcrumbLink prop
+const CustomLink = (props) => (
+  <a 
+    href={`#${props.id}`} 
+    onClick={props.onItemSelect}
+    className="custom-breadcrumb-link"
+  >
+    {props.icon && props.icon}
+    <span>{props.text}</span>
+  </a>
+);
+
+<Breadcrumb 
+  data={breadcrumbData}
+  breadcrumbLink={CustomLink}
+/>
+```
+
+## Integration Patterns
+
+### Basic Usage
+```tsx
+import { Breadcrumb } from '@progress/kendo-react-layout';
+
+// Minimal required structure
+function BasicExample() {
+  const data = [
+    { id: '1', text: 'Home' },
+    { id: '2', text: 'Products' },
+    { id: '3', text: 'Laptops' }
+  ];
+
+  return (
+    <Breadcrumb data={data} />
+  );
+}
+```
+
+### Advanced Usage
+```tsx
+// Complex usage with all features
+function AdvancedExample() {
+  const [breadcrumbData, setBreadcrumbData] = useState([
+    { id: 'home', text: 'Home', iconClass: 'k-i-home' },
+    { id: 'category', text: 'Electronics', icon: <span>📱</span> },
+    { id: 'subcategory', text: 'Laptops' },
+    { id: 'product', text: 'Gaming Laptops' }
+  ]);
+
+  const handleItemSelect = (event) => {
+    // Navigate to parent level
+    const itemIndex = breadcrumbData.findIndex(item => item.id === event.id);
+    const newData = breadcrumbData.slice(0, itemIndex + 1);
+    setBreadcrumbData(newData);
+  };
+
+  const handleKeyDown = (event) => {
+    if (event.syntheticEvent.key === 'Enter') {
+      handleItemSelect(event);
+    }
+  };
+
+  return (
+    <Breadcrumb 
+      data={breadcrumbData}
+      size="large"
+      onItemSelect={handleItemSelect}
+      onKeyDown={handleKeyDown}
+      valueField="id"
+      textField="text"
+      iconField="icon"
+      iconClassField="iconClass"
+      ariaLabel="Product category navigation"
+    />
+  );
+}
+```
+
+### Custom Component Variations
+```tsx
+// Using custom sub-components
+function CustomizedExample() {
+  const CustomDelimiter = () => (
+    <span style={{ margin: '0 8px', color: '#999' }}>›</span>
+  );
+
+  const CustomLink = (props) => (
+    <button
+      onClick={props.onItemSelect}
+      disabled={props.disabled || props.isLast}
+      className={`breadcrumb-button ${props.isLast ? 'current' : ''}`}
+    >
+      {props.iconClass && <i className={props.iconClass} />}
+      {props.icon && props.icon}
+      <span>{props.text}</span>
+    </button>
+  );
+
+  return (
+    <Breadcrumb 
+      data={breadcrumbData}
+      breadcrumbDelimiter={CustomDelimiter}
+      breadcrumbLink={CustomLink}
+    />
+  );
+}
+```
+
+## Component Relationships
+
+### Data Flow
+1. **Breadcrumb** receives data array and configuration props
+2. **Breadcrumb** iterates through data items and renders **BreadcrumbOrderedList**
+3. **BreadcrumbOrderedList** contains multiple **BreadcrumbListItem** components
+4. Each **BreadcrumbListItem** wraps a **BreadcrumbLink** component
+5. **BreadcrumbDelimiter** components are rendered between adjacent items
+6. User interactions on **BreadcrumbLink** bubble up to **Breadcrumb** event handlers
+
+### Context Sharing
+- **Configuration Context**: Size, direction, disabled state flow from Breadcrumb to all children
+- **Data Context**: Individual item data (text, icon, id) passed to BreadcrumbLink components  
+- **Position Context**: First/last item indicators passed to BreadcrumbListItem and BreadcrumbLink
+- **Event Context**: Click and keyboard handlers propagated from Breadcrumb to BreadcrumbLink
+
+### Event Handling
+- **BreadcrumbLink** captures user interactions (click, keyboard)
+- Events bubble up to **Breadcrumb** component through onItemSelect and onKeyDown props
+- **Breadcrumb** component can modify data array based on user navigation
+- Parent application receives events through Breadcrumb's event handler props
+
+## Best Practices
+
+### Usage Guidelines
+- Always provide meaningful text for each breadcrumb item to support screen readers
+- Use the `ariaLabel` prop to describe the breadcrumb's purpose (e.g., "Product category navigation")
+- Implement proper navigation logic by handling `onItemSelect` events to update the breadcrumb data
+- Consider using icons for the home/root level item to provide visual hierarchy
+- Limit breadcrumb depth to 5-7 levels to maintain usability
+
+### Accessibility
+- The component automatically sets `aria-current="page"` on the last breadcrumb item
+- Use semantic ordered list structure for proper screen reader navigation
+- Ensure adequate color contrast for breadcrumb text and separators
+- Support keyboard navigation with Tab and Enter keys
+- Provide descriptive `ariaLabel` for the entire breadcrumb navigation
+
+### Performance
+- Use React.memo for custom component implementations when dealing with large breadcrumb data
+- Implement efficient event handlers that avoid unnecessary re-renders
+- Consider virtualizing breadcrumbs for applications with very deep navigation hierarchies
+- Cache breadcrumb data when possible to reduce prop drilling
+
+## Common Patterns
+
+### Pattern 1: E-commerce Category Navigation
+```tsx
+// Hierarchical product category breadcrumbs
+function EcommerceBreadcrumb() {
+  const categoryPath = [
+    { id: 'home', text: 'Home', iconClass: 'k-i-home' },
+    { id: 'electronics', text: 'Electronics' },
+    { id: 'computers', text: 'Computers' },
+    { id: 'laptops', text: 'Laptops' },
+    { id: 'gaming-laptops', text: 'Gaming Laptops' }
+  ];
+
+  const navigateToCategory = (event) => {
+    // Navigate to category page and update breadcrumb
+    const categoryId = event.id;
+    router.push(`/category/${categoryId}`);
+  };
+
+  return (
+    <Breadcrumb 
+      data={categoryPath}
+      onItemSelect={navigateToCategory}
+      size="medium"
+      ariaLabel="Product category navigation"
+    />
+  );
+}
+```
+
+### Pattern 2: File System Navigation
+```tsx
+// File/folder hierarchy breadcrumbs with custom styling
+function FileSystemBreadcrumb() {
+  const folderPath = [
+    { id: 'root', text: 'Documents', iconClass: 'k-i-folder' },
+    { id: 'projects', text: 'Projects' },
+    { id: 'webapp', text: 'Web Application' },
+    { id: 'src', text: 'src' },
+    { id: 'components', text: 'components' }
+  ];
+
+  const CustomFolderLink = (props) => (
+    <span
+      onClick={props.onItemSelect}
+      className={`folder-link ${props.isLast ? 'current-folder' : 'clickable-folder'}`}
+    >
+      <i className="k-i-folder" />
+      {props.text}
+    </span>
+  );
+
+  return (
+    <Breadcrumb 
+      data={folderPath}
+      breadcrumbLink={CustomFolderLink}
+      size="small"
+      ariaLabel="Folder navigation"
+    />
+  );
+}
+```

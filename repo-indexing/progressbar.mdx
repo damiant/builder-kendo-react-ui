@@ -1,0 +1,998 @@
+# ProgressBar Component
+
+## Overview
+
+### Purpose
+Use this component to generate progress bar functionality
+
+### When to Use
+The ProgressBar component is ideal for scenarios where you need to visually communicate the completion status of ongoing operations or indicate progress through multi-step processes. Common use cases include:
+
+- **File operations** - Upload progress, download status, file processing, or data import/export operations
+- **Multi-step workflows** - Registration forms, checkout processes, onboarding flows, or setup wizards
+- **Data loading** - API requests, database operations, or content loading with known duration or percentage
+- **System processes** - Installation progress, backup operations, synchronization, or batch processing
+- **Media playback** - Video/audio progress tracking, streaming buffer status, or playlist advancement
+- **Form validation** - Real-time validation progress, completion status, or field completion tracking
+- **Gaming applications** - Experience points, health bars, loading screens, or achievement progress
+- **Performance metrics** - CPU usage, memory consumption, disk space, or bandwidth utilization
+- **Goal tracking** - Fundraising campaigns, sales targets, project milestones, or learning progress
+- **Battery indicators** - Device power levels, charging status, or energy consumption monitoring
+
+### Architecture
+**No Coupling**: ProgressBar is a standalone component that operates independently without requiring other components. It provides a complete progress indication solution with built-in value management, accessibility features, customizable appearance, animation support, and flexible label positioning.
+
+## Components
+
+### ProgressBar
+
+**Purpose:** Provides a visual indicator that displays the completion percentage or status of an ongoing operation, with support for both determinate progress (specific percentage) and indeterminate states (ongoing activity without specific progress).
+
+**Interface:**
+```typescript
+interface ProgressBarProps {
+  // Value management
+  value?: number | null; // Current progress value (null for indeterminate state)
+  min?: number; // Minimum value (default: 0)
+  max?: number; // Maximum value (default: 100)
+  
+  // Animation and timing
+  animation?: boolean | ProgressBarAnimation; // Enable/configure animations
+  
+  // Label configuration
+  label?: React.ComponentType<LabelProps>; // Custom label component
+  labelVisible?: boolean; // Show/hide progress label (default: true)
+  labelPlacement?: 'start' | 'center' | 'end'; // Label position (default: 'end')
+  
+  // Orientation and layout
+  orientation?: 'horizontal' | 'vertical'; // Bar orientation (default: 'horizontal')
+  reverse?: boolean; // Reverse progress direction (default: false)
+  type?: 'linear' | 'circular'; // Progress bar type (default: 'linear')
+  
+  // Interaction control
+  disabled?: boolean; // Disable user interaction
+  
+  // Styling and appearance
+  className?: string; // Custom CSS classes
+  style?: React.CSSProperties; // Inline styles
+  emptyStyle?: React.CSSProperties; // Styles for empty portion
+  emptyClassName?: string; // CSS classes for empty portion
+  progressStyle?: React.CSSProperties; // Styles for filled portion
+  progressClassName?: string; // CSS classes for filled portion
+  
+  // Accessibility
+  ariaLabel?: string; // Accessible label for screen readers
+  tabIndex?: number; // Tab order position
+  dir?: string; // Text direction for internationalization
+}
+
+interface ProgressBarAnimation {
+  duration: number; // Animation duration in milliseconds (default: 400)
+}
+
+interface LabelProps {
+  value?: number | null; // Current progress value for custom label
+}
+
+interface ProgressBarHandle {
+  element: HTMLDivElement | null; // Main progress bar element
+  progressStatusElement: HTMLDivElement | null; // Progress status element
+  progressStatusWrapElement: HTMLSpanElement | null; // Progress status wrapper
+  focus: () => void; // Programmatically focus the progress bar
+}
+```
+
+**Usage Example:**
+```tsx
+import { ProgressBar } from '@progress/kendo-react-progressbars';
+import { useState, useEffect } from 'react';
+
+// Basic progress bar usage
+function BasicProgressBar() {
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setProgress(prev => prev >= 100 ? 0 : prev + 10);
+    }, 500);
+    
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div>
+      <h3>Upload Progress</h3>
+      <ProgressBar
+        value={progress}
+        ariaLabel={`Upload progress: ${progress}% complete`}
+      />
+      <p>Progress: {progress}%</p>
+    </div>
+  );
+}
+
+// Indeterminate progress bar
+function IndeterminateProgressBar() {
+  const [isLoading, setIsLoading] = useState(true);
+
+  return (
+    <div>
+      <h3>Loading Data...</h3>
+      <ProgressBar
+        value={isLoading ? null : 100}
+        ariaLabel="Loading data, please wait"
+      />
+      <button onClick={() => setIsLoading(!isLoading)}>
+        {isLoading ? 'Complete' : 'Start Loading'}
+      </button>
+    </div>
+  );
+}
+
+// Animated progress bar with custom label
+function AnimatedProgressBar() {
+  const [progress, setProgress] = useState(25);
+
+  const CustomLabel = ({ value }) => (
+    <span style={{ fontWeight: 'bold', color: '#0078d4' }}>
+      {value !== null ? `${value}% Complete` : 'Processing...'}
+    </span>
+  );
+
+  return (
+    <div className="animated-progress">
+      <h3>File Processing</h3>
+      <ProgressBar
+        value={progress}
+        animation={{ duration: 800 }}
+        label={CustomLabel}
+        labelPlacement="center"
+        progressStyle={{ backgroundColor: '#0078d4' }}
+      />
+      <div className="progress-controls">
+        <button onClick={() => setProgress(0)}>Reset</button>
+        <button onClick={() => setProgress(50)}>50%</button>
+        <button onClick={() => setProgress(100)}>Complete</button>
+      </div>
+    </div>
+  );
+}
+
+// Vertical progress bar
+function VerticalProgressBar() {
+  const [batteryLevel, setBatteryLevel] = useState(85);
+
+  return (
+    <div className="battery-indicator">
+      <h3>Battery Status</h3>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+        <ProgressBar
+          value={batteryLevel}
+          orientation="vertical"
+          style={{ height: '150px', width: '30px' }}
+          progressStyle={{ 
+            backgroundColor: batteryLevel > 20 ? '#4caf50' : '#f44336' 
+          }}
+          ariaLabel={`Battery level: ${batteryLevel}%`}
+        />
+        <div>
+          <p>Level: {batteryLevel}%</p>
+          <p>Status: {batteryLevel > 20 ? 'Good' : 'Low Battery'}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+
+## Integration Patterns
+
+### File Upload with Progress Tracking
+```tsx
+import { ProgressBar } from '@progress/kendo-react-progressbars';
+import { Button } from '@progress/kendo-react-buttons';
+import { useState, useRef } from 'react';
+
+function FileUploadProgress() {
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState([]);
+  const fileInputRef = useRef(null);
+
+  const simulateUpload = (file) => {
+    setIsUploading(true);
+    setUploadProgress(0);
+
+    // Simulate upload progress
+    const interval = setInterval(() => {
+      setUploadProgress(prev => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          setIsUploading(false);
+          setUploadedFiles(current => [...current, {
+            name: file.name,
+            size: file.size,
+            uploadedAt: new Date()
+          }]);
+          return 100;
+        }
+        return prev + Math.random() * 15;
+      });
+    }, 200);
+  };
+
+  const handleFileSelect = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      simulateUpload(file);
+    }
+  };
+
+  const UploadLabel = ({ value }) => (
+    <span>
+      {value !== null 
+        ? `${Math.round(value)}% - ${Math.round((value / 100) * 1024)} KB uploaded`
+        : 'Preparing upload...'
+      }
+    </span>
+  );
+
+  return (
+    <div className="file-upload-container">
+      <h3>File Upload</h3>
+      
+      <div className="upload-area">
+        <input
+          ref={fileInputRef}
+          type="file"
+          onChange={handleFileSelect}
+          disabled={isUploading}
+          style={{ display: 'none' }}
+        />
+        
+        <Button
+          onClick={() => fileInputRef.current?.click()}
+          disabled={isUploading}
+          primary
+        >
+          {isUploading ? 'Uploading...' : 'Select File'}
+        </Button>
+      </div>
+
+      {isUploading && (
+        <div className="upload-progress">
+          <ProgressBar
+            value={uploadProgress}
+            animation={{ duration: 200 }}
+            label={UploadLabel}
+            labelPlacement="center"
+            progressStyle={{ backgroundColor: '#1976d2' }}
+            emptyStyle={{ backgroundColor: '#e3f2fd' }}
+          />
+        </div>
+      )}
+
+      {uploadedFiles.length > 0 && (
+        <div className="uploaded-files">
+          <h4>Uploaded Files</h4>
+          {uploadedFiles.map((file, index) => (
+            <div key={index} className="file-item">
+              <span>{file.name}</span>
+              <span>{(file.size / 1024).toFixed(1)} KB</span>
+              <ProgressBar value={100} style={{ width: '100px' }} />
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+### Multi-Step Process Indicator
+```tsx
+import { ProgressBar } from '@progress/kendo-react-progressbars';
+import { Button } from '@progress/kendo-react-buttons';
+import { useState } from 'react';
+
+function MultiStepProcess() {
+  const [currentStep, setCurrentStep] = useState(1);
+  const [completedSteps, setCompletedSteps] = useState(new Set());
+  
+  const steps = [
+    { id: 1, title: 'Personal Information', description: 'Basic details' },
+    { id: 2, title: 'Account Setup', description: 'Username and password' },
+    { id: 3, title: 'Preferences', description: 'Customize your experience' },
+    { id: 4, title: 'Verification', description: 'Verify your email' },
+    { id: 5, title: 'Complete', description: 'Account created successfully' }
+  ];
+
+  const totalSteps = steps.length;
+  const progressPercentage = (currentStep / totalSteps) * 100;
+
+  const nextStep = () => {
+    if (currentStep < totalSteps) {
+      setCompletedSteps(prev => new Set([...prev, currentStep]));
+      setCurrentStep(prev => prev + 1);
+    }
+  };
+
+  const previousStep = () => {
+    if (currentStep > 1) {
+      setCurrentStep(prev => prev - 1);
+    }
+  };
+
+  const StepLabel = ({ value }) => (
+    <span style={{ fontSize: '14px', fontWeight: '500' }}>
+      Step {currentStep} of {totalSteps} ({Math.round(value)}% Complete)
+    </span>
+  );
+
+  return (
+    <div className="multi-step-process">
+      <h2>Account Registration</h2>
+      
+      <div className="progress-section">
+        <ProgressBar
+          value={progressPercentage}
+          animation={{ duration: 600 }}
+          label={StepLabel}
+          labelPlacement="center"
+          progressStyle={{ 
+            background: 'linear-gradient(90deg, #4caf50, #8bc34a)' 
+          }}
+          emptyStyle={{ backgroundColor: '#f5f5f5' }}
+          style={{ marginBottom: '20px' }}
+        />
+      </div>
+
+      <div className="steps-indicator">
+        {steps.map((step, index) => (
+          <div 
+            key={step.id} 
+            className={`step-item ${currentStep === step.id ? 'active' : ''} ${completedSteps.has(step.id) ? 'completed' : ''}`}
+          >
+            <div className="step-number">
+              {completedSteps.has(step.id) ? '✓' : step.id}
+            </div>
+            <div className="step-content">
+              <h4>{step.title}</h4>
+              <p>{step.description}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="current-step-content">
+        <div className="step-form">
+          <h3>{steps[currentStep - 1]?.title}</h3>
+          <p>{steps[currentStep - 1]?.description}</p>
+          
+          {/* Step-specific content would go here */}
+          <div className="form-placeholder">
+            <p>Form content for {steps[currentStep - 1]?.title} would appear here.</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="navigation-buttons">
+        <Button
+          onClick={previousStep}
+          disabled={currentStep === 1}
+        >
+          Previous
+        </Button>
+        
+        <Button
+          onClick={nextStep}
+          disabled={currentStep === totalSteps}
+          primary
+        >
+          {currentStep === totalSteps ? 'Finish' : 'Next'}
+        </Button>
+      </div>
+    </div>
+  );
+}
+```
+
+### System Performance Dashboard
+```tsx
+import { ProgressBar } from '@progress/kendo-react-progressbars';
+import { useState, useEffect } from 'react';
+
+function SystemDashboard() {
+  const [metrics, setMetrics] = useState({
+    cpu: 45,
+    memory: 68,
+    disk: 32,
+    network: 12,
+    battery: 85
+  });
+
+  // Simulate real-time metrics updates
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setMetrics(prev => ({
+        cpu: Math.max(0, Math.min(100, prev.cpu + (Math.random() - 0.5) * 20)),
+        memory: Math.max(0, Math.min(100, prev.memory + (Math.random() - 0.5) * 10)),
+        disk: Math.max(0, Math.min(100, prev.disk + (Math.random() - 0.5) * 5)),
+        network: Math.max(0, Math.min(100, prev.network + (Math.random() - 0.5) * 30)),
+        battery: Math.max(0, Math.min(100, prev.battery - 0.1))
+      }));
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const getColorForValue = (value, thresholds = { high: 80, medium: 50 }) => {
+    if (value > thresholds.high) return '#f44336'; // Red for high usage
+    if (value > thresholds.medium) return '#ff9800'; // Orange for medium
+    return '#4caf50'; // Green for low usage
+  };
+
+  const MetricLabel = ({ value, unit = '%', name }) => (
+    <div style={{ 
+      display: 'flex', 
+      justifyContent: 'space-between', 
+      alignItems: 'center',
+      fontSize: '12px'
+    }}>
+      <span>{name}</span>
+      <span style={{ fontWeight: 'bold' }}>
+        {Math.round(value)}{unit}
+      </span>
+    </div>
+  );
+
+  return (
+    <div className="system-dashboard">
+      <h2>System Performance Monitor</h2>
+      
+      <div className="metrics-grid">
+        <div className="metric-card">
+          <MetricLabel value={metrics.cpu} name="CPU Usage" />
+          <ProgressBar
+            value={metrics.cpu}
+            animation={{ duration: 300 }}
+            progressStyle={{ backgroundColor: getColorForValue(metrics.cpu) }}
+            emptyStyle={{ backgroundColor: '#e0e0e0' }}
+            labelVisible={false}
+          />
+        </div>
+
+        <div className="metric-card">
+          <MetricLabel value={metrics.memory} name="Memory Usage" />
+          <ProgressBar
+            value={metrics.memory}
+            animation={{ duration: 300 }}
+            progressStyle={{ backgroundColor: getColorForValue(metrics.memory) }}
+            emptyStyle={{ backgroundColor: '#e0e0e0' }}
+            labelVisible={false}
+          />
+        </div>
+
+        <div className="metric-card">
+          <MetricLabel value={metrics.disk} name="Disk Usage" />
+          <ProgressBar
+            value={metrics.disk}
+            animation={{ duration: 300 }}
+            progressStyle={{ backgroundColor: getColorForValue(metrics.disk, { high: 90, medium: 70 }) }}
+            emptyStyle={{ backgroundColor: '#e0e0e0' }}
+            labelVisible={false}
+          />
+        </div>
+
+        <div className="metric-card">
+          <MetricLabel value={metrics.network} name="Network Usage" />
+          <ProgressBar
+            value={metrics.network}
+            animation={{ duration: 300 }}
+            progressStyle={{ backgroundColor: getColorForValue(metrics.network, { high: 70, medium: 40 }) }}
+            emptyStyle={{ backgroundColor: '#e0e0e0' }}
+            labelVisible={false}
+          />
+        </div>
+
+        <div className="metric-card vertical">
+          <h4>Battery Level</h4>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+            <ProgressBar
+              value={metrics.battery}
+              orientation="vertical"
+              style={{ height: '100px', width: '20px' }}
+              progressStyle={{ 
+                backgroundColor: getColorForValue(100 - metrics.battery, { high: 80, medium: 50 })
+              }}
+              emptyStyle={{ backgroundColor: '#f0f0f0' }}
+              reverse={true}
+              labelVisible={false}
+            />
+            <div>
+              <p style={{ margin: 0, fontSize: '24px', fontWeight: 'bold' }}>
+                {Math.round(metrics.battery)}%
+              </p>
+              <p style={{ margin: 0, fontSize: '12px', color: '#666' }}>
+                {metrics.battery > 20 ? 'Good' : 'Low Battery'}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="alerts-section">
+        <h3>System Alerts</h3>
+        {metrics.cpu > 80 && (
+          <div className="alert high-cpu">⚠️ High CPU usage detected</div>
+        )}
+        {metrics.memory > 85 && (
+          <div className="alert high-memory">⚠️ Memory usage is critical</div>
+        )}
+        {metrics.battery < 20 && (
+          <div className="alert low-battery">🔋 Battery level is low</div>
+        )}
+        {metrics.cpu <= 80 && metrics.memory <= 85 && metrics.battery >= 20 && (
+          <div className="alert all-good">✅ All systems operating normally</div>
+        )}
+      </div>
+    </div>
+  );
+}
+```
+
+### Loading States and Async Operations
+```tsx
+import { ProgressBar } from '@progress/kendo-react-progressbars';
+import { Button } from '@progress/kendo-react-buttons';
+import { useState } from 'react';
+
+function AsyncOperationsDemo() {
+  const [operations, setOperations] = useState({
+    dataFetch: { progress: 0, status: 'idle' },
+    imageProcess: { progress: 0, status: 'idle' },
+    fileExport: { progress: 0, status: 'idle' }
+  });
+
+  const simulateOperation = async (operationKey, duration = 3000) => {
+    setOperations(prev => ({
+      ...prev,
+      [operationKey]: { progress: 0, status: 'running' }
+    }));
+
+    const steps = 20;
+    const stepDuration = duration / steps;
+
+    for (let i = 0; i <= steps; i++) {
+      await new Promise(resolve => setTimeout(resolve, stepDuration));
+      
+      setOperations(prev => ({
+        ...prev,
+        [operationKey]: {
+          progress: (i / steps) * 100,
+          status: i === steps ? 'completed' : 'running'
+        }
+      }));
+    }
+  };
+
+  const resetOperation = (operationKey) => {
+    setOperations(prev => ({
+      ...prev,
+      [operationKey]: { progress: 0, status: 'idle' }
+    }));
+  };
+
+  const OperationCard = ({ title, operation, operationKey, description }) => {
+    const isRunning = operation.status === 'running';
+    const isCompleted = operation.status === 'completed';
+    const isIdle = operation.status === 'idle';
+
+    return (
+      <div className="operation-card">
+        <div className="operation-header">
+          <h4>{title}</h4>
+          <span className={`status-badge ${operation.status}`}>
+            {operation.status === 'idle' ? 'Ready' : 
+             operation.status === 'running' ? 'In Progress' : 'Completed'}
+          </span>
+        </div>
+        
+        <p>{description}</p>
+        
+        <div className="progress-container">
+          <ProgressBar
+            value={isIdle ? null : operation.progress}
+            animation={{ duration: 200 }}
+            progressStyle={{
+              backgroundColor: isCompleted ? '#4caf50' : 
+                            isRunning ? '#2196f3' : '#9e9e9e'
+            }}
+            emptyStyle={{ backgroundColor: '#f5f5f5' }}
+            labelPlacement="end"
+          />
+        </div>
+
+        <div className="operation-controls">
+          <Button
+            onClick={() => simulateOperation(operationKey)}
+            disabled={isRunning}
+            primary={isIdle}
+            fillMode={isCompleted ? 'outline' : 'solid'}
+          >
+            {isIdle ? 'Start' : isRunning ? 'Running...' : 'Restart'}
+          </Button>
+          
+          {!isIdle && (
+            <Button
+              onClick={() => resetOperation(operationKey)}
+              disabled={isRunning}
+              fillMode="flat"
+            >
+              Reset
+            </Button>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const allCompleted = Object.values(operations).every(op => op.status === 'completed');
+  const anyRunning = Object.values(operations).some(op => op.status === 'running');
+
+  return (
+    <div className="async-operations-demo">
+      <div className="demo-header">
+        <h2>Async Operations Monitor</h2>
+        <div className="global-controls">
+          <Button
+            onClick={() => {
+              Object.keys(operations).forEach(key => simulateOperation(key));
+            }}
+            disabled={anyRunning}
+            primary
+          >
+            Run All Operations
+          </Button>
+          
+          <Button
+            onClick={() => {
+              setOperations({
+                dataFetch: { progress: 0, status: 'idle' },
+                imageProcess: { progress: 0, status: 'idle' },
+                fileExport: { progress: 0, status: 'idle' }
+              });
+            }}
+            disabled={anyRunning}
+            fillMode="outline"
+          >
+            Reset All
+          </Button>
+        </div>
+      </div>
+
+      <div className="operations-grid">
+        <OperationCard
+          title="Data Fetch"
+          operation={operations.dataFetch}
+          operationKey="dataFetch"
+          description="Fetching user data from remote server"
+        />
+        
+        <OperationCard
+          title="Image Processing"
+          operation={operations.imageProcess}
+          operationKey="imageProcess"
+          description="Processing and optimizing uploaded images"
+        />
+        
+        <OperationCard
+          title="File Export"
+          operation={operations.fileExport}
+          operationKey="fileExport"
+          description="Generating and preparing report files"
+        />
+      </div>
+
+      {allCompleted && (
+        <div className="completion-message">
+          <h3>🎉 All operations completed successfully!</h3>
+          <ProgressBar 
+            value={100} 
+            progressStyle={{ backgroundColor: '#4caf50' }}
+            emptyStyle={{ backgroundColor: '#e8f5e8' }}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+## Best Practices
+
+### Usage Guidelines
+- Always provide meaningful `ariaLabel` values for accessibility, especially when the visual context isn't sufficient
+- Use determinate progress (specific `value`) when you can calculate actual completion percentage
+- Use indeterminate progress (`value={null}`) for operations with unknown duration or when fetching data
+- Consider enabling animations for smoother visual transitions, but keep duration reasonable (300-800ms)
+- Provide clear labeling that explains what operation is in progress and current status
+- Use appropriate color schemes that convey meaning (green for success, red for errors, blue for progress)
+
+### Accessibility
+- Ensure progress bars have proper ARIA labels that describe the operation being tracked
+- Use `ariaLabel` or associate with visible labels to provide context for screen readers
+- Test with keyboard navigation and ensure the progress bar is focusable when interactive
+- Announce progress updates to screen readers by updating aria-live regions or labels
+- Maintain sufficient color contrast for progress indicators, especially in custom themes
+- Consider providing alternative text updates for users who may not perceive visual progress changes
+
+### Performance
+- Use controlled animations with reasonable durations to avoid performance issues on slower devices
+- Implement debounced or throttled progress updates for rapidly changing values to prevent excessive re-renders
+- Consider using React.memo for progress bar components that receive frequent updates but don't change often
+- Avoid creating new style objects on every render - define them outside components or use useMemo
+- For real-time metrics, implement proper cleanup of intervals and timeouts to prevent memory leaks
+- Use CSS transitions instead of JavaScript animations when possible for better performance
+
+## Common Patterns
+
+### Progress with Time Estimation
+```tsx
+function ProgressWithTimeEstimation() {
+  const [progress, setProgress] = useState(0);
+  const [startTime, setStartTime] = useState(null);
+  const [isRunning, setIsRunning] = useState(false);
+
+  const estimatedTotalTime = 10000; // 10 seconds
+  const elapsedTime = startTime ? Date.now() - startTime : 0;
+  const remainingTime = Math.max(0, estimatedTotalTime - elapsedTime);
+
+  useEffect(() => {
+    if (!isRunning) return;
+
+    const interval = setInterval(() => {
+      setProgress(prev => {
+        const newProgress = prev + 2;
+        if (newProgress >= 100) {
+          setIsRunning(false);
+          return 100;
+        }
+        return newProgress;
+      });
+    }, 200);
+
+    return () => clearInterval(interval);
+  }, [isRunning]);
+
+  const startProgress = () => {
+    setProgress(0);
+    setStartTime(Date.now());
+    setIsRunning(true);
+  };
+
+  const formatTime = (ms) => {
+    const seconds = Math.ceil(ms / 1000);
+    return `${seconds}s`;
+  };
+
+  const TimeEstimateLabel = ({ value }) => (
+    <div style={{ textAlign: 'center', fontSize: '12px' }}>
+      <div>{Math.round(value)}% Complete</div>
+      {isRunning && remainingTime > 0 && (
+        <div style={{ color: '#666' }}>
+          Estimated time remaining: {formatTime(remainingTime)}
+        </div>
+      )}
+    </div>
+  );
+
+  return (
+    <div className="progress-with-time">
+      <h3>Download Progress</h3>
+      <ProgressBar
+        value={progress}
+        animation={{ duration: 150 }}
+        label={TimeEstimateLabel}
+        labelPlacement="center"
+        progressStyle={{ backgroundColor: '#1976d2' }}
+      />
+      
+      <div style={{ marginTop: '10px', textAlign: 'center' }}>
+        <Button 
+          onClick={startProgress} 
+          disabled={isRunning}
+          primary
+        >
+          {isRunning ? 'Downloading...' : 'Start Download'}
+        </Button>
+      </div>
+    </div>
+  );
+}
+```
+
+### Validation Progress Indicator
+```tsx
+function ValidationProgress() {
+  const [validationState, setValidationState] = useState({
+    email: false,
+    password: false,
+    confirmation: false,
+    terms: false
+  });
+
+  const completedValidations = Object.values(validationState).filter(Boolean).length;
+  const totalValidations = Object.keys(validationState).length;
+  const validationProgress = (completedValidations / totalValidations) * 100;
+
+  const toggleValidation = (field) => {
+    setValidationState(prev => ({
+      ...prev,
+      [field]: !prev[field]
+    }));
+  };
+
+  const ValidationLabel = ({ value }) => (
+    <span style={{ fontSize: '13px', fontWeight: '500' }}>
+      {completedValidations} of {totalValidations} requirements met ({Math.round(value)}%)
+    </span>
+  );
+
+  const validationItems = [
+    { key: 'email', label: 'Valid email address', description: 'Must be a valid email format' },
+    { key: 'password', label: 'Strong password', description: 'At least 8 characters with numbers and symbols' },
+    { key: 'confirmation', label: 'Password confirmation', description: 'Passwords must match' },
+    { key: 'terms', label: 'Accept terms', description: 'Must agree to terms and conditions' }
+  ];
+
+  return (
+    <div className="validation-progress">
+      <h3>Registration Requirements</h3>
+      
+      <div className="progress-header">
+        <ProgressBar
+          value={validationProgress}
+          animation={{ duration: 400 }}
+          label={ValidationLabel}
+          labelPlacement="center"
+          progressStyle={{ 
+            backgroundColor: validationProgress === 100 ? '#4caf50' : '#2196f3'
+          }}
+          emptyStyle={{ backgroundColor: '#f0f0f0' }}
+        />
+      </div>
+
+      <div className="validation-checklist">
+        {validationItems.map(item => (
+          <div key={item.key} className="validation-item">
+            <label className="validation-checkbox">
+              <input
+                type="checkbox"
+                checked={validationState[item.key]}
+                onChange={() => toggleValidation(item.key)}
+              />
+              <span className={`checkmark ${validationState[item.key] ? 'checked' : ''}`}>
+                {validationState[item.key] ? '✓' : '○'}
+              </span>
+              <div className="validation-text">
+                <div className="validation-label">{item.label}</div>
+                <div className="validation-description">{item.description}</div>
+              </div>
+            </label>
+          </div>
+        ))}
+      </div>
+
+      {validationProgress === 100 && (
+        <div className="success-message">
+          <p style={{ color: '#4caf50', fontWeight: 'bold' }}>
+            ✅ All requirements satisfied! Ready to proceed.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+### Circular Progress with Custom Content
+```tsx
+function CircularProgressDemo() {
+  const [score, setScore] = useState(75);
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  const animateScore = (targetScore) => {
+    setIsAnimating(true);
+    let currentScore = 0;
+    const duration = 2000;
+    const steps = 50;
+    const increment = targetScore / steps;
+    const stepDuration = duration / steps;
+
+    const interval = setInterval(() => {
+      currentScore += increment;
+      if (currentScore >= targetScore) {
+        setScore(targetScore);
+        setIsAnimating(false);
+        clearInterval(interval);
+      } else {
+        setScore(Math.round(currentScore));
+      }
+    }, stepDuration);
+  };
+
+  const getGradeFromScore = (score) => {
+    if (score >= 90) return { grade: 'A', color: '#4caf50' };
+    if (score >= 80) return { grade: 'B', color: '#8bc34a' };
+    if (score >= 70) return { grade: 'C', color: '#ff9800' };
+    if (score >= 60) return { grade: 'D', color: '#ff5722' };
+    return { grade: 'F', color: '#f44336' };
+  };
+
+  const { grade, color } = getGradeFromScore(score);
+
+  return (
+    <div className="circular-progress-demo">
+      <h3>Test Score Progress</h3>
+      
+      <div className="circular-container">
+        <div className="circular-progress-wrapper">
+          <ProgressBar
+            value={score}
+            type="circular"
+            animation={{ duration: 500 }}
+            progressStyle={{ stroke: color, strokeWidth: 8 }}
+            emptyStyle={{ stroke: '#e0e0e0', strokeWidth: 8 }}
+            style={{ 
+              width: 150, 
+              height: 150,
+              position: 'relative'
+            }}
+            labelVisible={false}
+          />
+          
+          <div className="circular-content">
+            <div className="score-display">
+              <span className="score-number">{score}</span>
+              <span className="score-percent">%</span>
+            </div>
+            <div className="grade-display" style={{ color }}>
+              Grade {grade}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="score-controls">
+        <div className="score-buttons">
+          {[60, 75, 85, 95].map(targetScore => (
+            <Button
+              key={targetScore}
+              onClick={() => animateScore(targetScore)}
+              disabled={isAnimating}
+              fillMode={score === targetScore ? 'solid' : 'outline'}
+            >
+              {targetScore}%
+            </Button>
+          ))}
+        </div>
+        
+        <div className="score-info">
+          <h4>Performance Analysis</h4>
+          <p style={{ color }}>
+            Current Grade: <strong>{grade}</strong>
+          </p>
+          <p>
+            {score >= 90 ? 'Excellent performance! Outstanding work.' :
+             score >= 80 ? 'Good performance! Room for improvement.' :
+             score >= 70 ? 'Average performance. Consider additional study.' :
+             score >= 60 ? 'Below average. Significant improvement needed.' :
+             'Poor performance. Please review the material.'}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+```

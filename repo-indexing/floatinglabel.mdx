@@ -1,0 +1,909 @@
+# FloatingLabel Components
+
+## Overview
+
+### Purpose
+Use this component to generate floating label functionality
+
+### When to Use
+The FloatingLabel component is ideal for creating modern form inputs with animated labels that "float" above the input field when the user interacts with it. Use this component when you need to:
+
+- Create clean, modern form interfaces with minimal visual clutter
+- Provide better user experience by keeping label information visible while user types
+- Implement Material Design-style floating label patterns
+- Enhance form accessibility with proper label-input relationships
+- Save vertical space in forms while maintaining usability
+- Create consistent labeling across different input types (TextBox, ComboBox, DatePicker, etc.)
+- Build forms that work well on mobile devices with limited screen space
+
+### Architecture
+**No Coupling**: FloatingLabel is a standalone component that wraps form inputs to provide floating label functionality. It works independently and can be used with any compatible Kendo React input component.
+
+### Component Interdependencies
+FloatingLabel operates as a wrapper component with no coupling requirements:
+- Works with any Kendo React input component that supports standard form input props
+- Automatically detects input state through props rather than requiring specific component relationships
+- Maintains accessibility through proper ARIA relationships independent of the wrapped input type
+
+## Components
+
+### FloatingLabel {Standalone Component}
+A wrapper component that adds floating label functionality to form inputs.
+
+**Purpose:** Wraps form input components to provide animated floating labels that move above the input when the field has focus or contains a value, creating a modern and space-efficient form interface.
+
+**Interface:**
+```typescript
+interface FloatingLabelProps {
+  children: React.ReactNode; // Required - The input component to wrap
+  editorId?: string; // The ID of the input element for proper label association
+  editorValue?: any; // Current value of the input to determine label position
+  editorPlaceholder?: string; // Placeholder text to help determine if input appears empty
+  editorValid?: boolean; // Validation state to apply appropriate styling
+  editorDisabled?: boolean; // Disabled state to apply appropriate styling
+  label?: React.ReactNode; // The label text or content to display
+  labelClassName?: string; // CSS classes for the label element
+  className?: string; // CSS classes for the FloatingLabel container
+  style?: React.CSSProperties; // Inline styles for the container
+  dir?: string; // Text direction ('ltr' | 'rtl' | 'auto')
+  id?: string; // ID for the label element (for ARIA labelling)
+  optional?: boolean; // Mark the field as optional in the label
+}
+```
+
+**Usage Example:**
+```tsx
+import { FloatingLabel } from '@progress/kendo-react-labels';
+import { TextBox } from '@progress/kendo-react-inputs';
+import { DropDownList } from '@progress/kendo-react-dropdowns';
+
+// Basic floating label with TextBox
+function BasicFloatingLabel() {
+  const [value, setValue] = React.useState('');
+  const editorId = 'name-input';
+
+  return (
+    <FloatingLabel
+      label="Full Name"
+      editorId={editorId}
+      editorValue={value}
+    >
+      <TextBox
+        id={editorId}
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+      />
+    </FloatingLabel>
+  );
+}
+
+// Floating label with DropDownList
+function DropdownFloatingLabel() {
+  const [selectedSize, setSelectedSize] = React.useState(null);
+  const sizes = ["X-Small", "Small", "Medium", "Large", "X-Large"];
+  const editorId = 'size-select';
+
+  return (
+    <FloatingLabel
+      label="Shirt Size"
+      editorId={editorId}
+      editorValue={selectedSize}
+    >
+      <DropDownList
+        id={editorId}
+        value={selectedSize}
+        data={sizes}
+        onChange={(e) => setSelectedSize(e.target.value)}
+      />
+    </FloatingLabel>
+  );
+}
+
+// Floating label with validation states
+function ValidatedFloatingLabel() {
+  const [email, setEmail] = React.useState('');
+  const [isValid, setIsValid] = React.useState(true);
+  const editorId = 'email-input';
+
+  const handleChange = (e) => {
+    const value = e.target.value;
+    setEmail(value);
+    setIsValid(value === '' || value.includes('@'));
+  };
+
+  return (
+    <FloatingLabel
+      label="Email Address"
+      editorId={editorId}
+      editorValue={email}
+      editorValid={isValid}
+      optional={false}
+    >
+      <TextBox
+        id={editorId}
+        value={email}
+        onChange={handleChange}
+        validityStyles={!isValid}
+      />
+    </FloatingLabel>
+  );
+}
+```
+
+## Integration Patterns
+
+### Basic Form Integration
+```tsx
+import { FloatingLabel } from '@progress/kendo-react-labels';
+import { TextBox } from '@progress/kendo-react-inputs';
+import { Button } from '@progress/kendo-react-buttons';
+
+function ContactForm() {
+  const [formData, setFormData] = React.useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: ''
+  });
+
+  const handleInputChange = (field) => (event) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: event.target.value
+    }));
+  };
+
+  return (
+    <form>
+      <div style={{ display: 'grid', gap: '20px', maxWidth: '400px' }}>
+        <FloatingLabel
+          label="First Name"
+          editorId="firstName"
+          editorValue={formData.firstName}
+        >
+          <TextBox
+            id="firstName"
+            value={formData.firstName}
+            onChange={handleInputChange('firstName')}
+          />
+        </FloatingLabel>
+
+        <FloatingLabel
+          label="Last Name"
+          editorId="lastName"
+          editorValue={formData.lastName}
+        >
+          <TextBox
+            id="lastName"
+            value={formData.lastName}
+            onChange={handleInputChange('lastName')}
+          />
+        </FloatingLabel>
+
+        <FloatingLabel
+          label="Email"
+          editorId="email"
+          editorValue={formData.email}
+        >
+          <TextBox
+            id="email"
+            type="email"
+            value={formData.email}
+            onChange={handleInputChange('email')}
+          />
+        </FloatingLabel>
+
+        <FloatingLabel
+          label="Phone"
+          editorId="phone"
+          editorValue={formData.phone}
+          optional={true}
+        >
+          <TextBox
+            id="phone"
+            type="tel"
+            value={formData.phone}
+            onChange={handleInputChange('phone')}
+          />
+        </FloatingLabel>
+
+        <Button type="submit" primary>Submit</Button>
+      </div>
+    </form>
+  );
+}
+```
+
+### Advanced Integration with Multiple Input Types
+```tsx
+import { FloatingLabel } from '@progress/kendo-react-labels';
+import { 
+  TextBox, 
+  NumericTextBox,
+  TextArea 
+} from '@progress/kendo-react-inputs';
+import { 
+  DatePicker, 
+  TimePicker 
+} from '@progress/kendo-react-dateinputs';
+import { 
+  DropDownList,
+  ComboBox 
+} from '@progress/kendo-react-dropdowns';
+
+function AdvancedForm() {
+  const [formState, setFormState] = React.useState({
+    title: '',
+    description: '',
+    priority: null,
+    assignee: '',
+    dueDate: null,
+    estimatedHours: null,
+    startTime: null
+  });
+
+  const priorities = ['Low', 'Medium', 'High', 'Critical'];
+  const assignees = ['John Doe', 'Jane Smith', 'Bob Johnson', 'Alice Brown'];
+
+  const updateField = (field) => (event) => {
+    setFormState(prev => ({
+      ...prev,
+      [field]: event.target ? event.target.value : event.value
+    }));
+  };
+
+  return (
+    <div style={{ display: 'grid', gap: '24px', maxWidth: '600px' }}>
+      {/* Text Input */}
+      <FloatingLabel
+        label="Task Title"
+        editorId="title"
+        editorValue={formState.title}
+      >
+        <TextBox
+          id="title"
+          value={formState.title}
+          onChange={updateField('title')}
+        />
+      </FloatingLabel>
+
+      {/* TextArea */}
+      <FloatingLabel
+        label="Description"
+        editorId="description"
+        editorValue={formState.description}
+        optional={true}
+      >
+        <TextArea
+          id="description"
+          value={formState.description}
+          onChange={updateField('description')}
+          rows={4}
+        />
+      </FloatingLabel>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+        {/* DropDownList */}
+        <FloatingLabel
+          label="Priority"
+          editorId="priority"
+          editorValue={formState.priority}
+        >
+          <DropDownList
+            id="priority"
+            value={formState.priority}
+            data={priorities}
+            onChange={updateField('priority')}
+          />
+        </FloatingLabel>
+
+        {/* ComboBox */}
+        <FloatingLabel
+          label="Assignee"
+          editorId="assignee"
+          editorValue={formState.assignee}
+        >
+          <ComboBox
+            id="assignee"
+            value={formState.assignee}
+            data={assignees}
+            onChange={updateField('assignee')}
+            allowCustom={true}
+          />
+        </FloatingLabel>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
+        {/* DatePicker */}
+        <FloatingLabel
+          label="Due Date"
+          editorId="dueDate"
+          editorValue={formState.dueDate}
+        >
+          <DatePicker
+            id="dueDate"
+            value={formState.dueDate}
+            onChange={updateField('dueDate')}
+          />
+        </FloatingLabel>
+
+        {/* NumericTextBox */}
+        <FloatingLabel
+          label="Estimated Hours"
+          editorId="estimatedHours"
+          editorValue={formState.estimatedHours}
+          optional={true}
+        >
+          <NumericTextBox
+            id="estimatedHours"
+            value={formState.estimatedHours}
+            onChange={updateField('estimatedHours')}
+            min={0}
+            max={999}
+            format="n1"
+          />
+        </FloatingLabel>
+
+        {/* TimePicker */}
+        <FloatingLabel
+          label="Start Time"
+          editorId="startTime"
+          editorValue={formState.startTime}
+          optional={true}
+        >
+          <TimePicker
+            id="startTime"
+            value={formState.startTime}
+            onChange={updateField('startTime')}
+          />
+        </FloatingLabel>
+      </div>
+    </div>
+  );
+}
+```
+
+### Form Validation Integration
+```tsx
+import { FloatingLabel } from '@progress/kendo-react-labels';
+import { TextBox } from '@progress/kendo-react-inputs';
+import { Button } from '@progress/kendo-react-buttons';
+
+function ValidatedForm() {
+  const [formData, setFormData] = React.useState({
+    username: '',
+    password: '',
+    confirmPassword: ''
+  });
+
+  const [errors, setErrors] = React.useState({});
+
+  const validateField = (field, value) => {
+    const newErrors = { ...errors };
+
+    switch (field) {
+      case 'username':
+        if (!value) {
+          newErrors.username = 'Username is required';
+        } else if (value.length < 3) {
+          newErrors.username = 'Username must be at least 3 characters';
+        } else {
+          delete newErrors.username;
+        }
+        break;
+
+      case 'password':
+        if (!value) {
+          newErrors.password = 'Password is required';
+        } else if (value.length < 8) {
+          newErrors.password = 'Password must be at least 8 characters';
+        } else {
+          delete newErrors.password;
+        }
+        break;
+
+      case 'confirmPassword':
+        if (value !== formData.password) {
+          newErrors.confirmPassword = 'Passwords do not match';
+        } else {
+          delete newErrors.confirmPassword;
+        }
+        break;
+    }
+
+    setErrors(newErrors);
+  };
+
+  const handleChange = (field) => (event) => {
+    const value = event.target.value;
+    setFormData(prev => ({ ...prev, [field]: value }));
+    validateField(field, value);
+  };
+
+  return (
+    <form style={{ maxWidth: '400px' }}>
+      <div style={{ display: 'grid', gap: '20px' }}>
+        <div>
+          <FloatingLabel
+            label="Username"
+            editorId="username"
+            editorValue={formData.username}
+            editorValid={!errors.username}
+          >
+            <TextBox
+              id="username"
+              value={formData.username}
+              onChange={handleChange('username')}
+              validityStyles={!!errors.username}
+            />
+          </FloatingLabel>
+          {errors.username && (
+            <div style={{ color: 'red', fontSize: '12px', marginTop: '4px' }}>
+              {errors.username}
+            </div>
+          )}
+        </div>
+
+        <div>
+          <FloatingLabel
+            label="Password"
+            editorId="password"
+            editorValue={formData.password}
+            editorValid={!errors.password}
+          >
+            <TextBox
+              id="password"
+              type="password"
+              value={formData.password}
+              onChange={handleChange('password')}
+              validityStyles={!!errors.password}
+            />
+          </FloatingLabel>
+          {errors.password && (
+            <div style={{ color: 'red', fontSize: '12px', marginTop: '4px' }}>
+              {errors.password}
+            </div>
+          )}
+        </div>
+
+        <div>
+          <FloatingLabel
+            label="Confirm Password"
+            editorId="confirmPassword"
+            editorValue={formData.confirmPassword}
+            editorValid={!errors.confirmPassword}
+          >
+            <TextBox
+              id="confirmPassword"
+              type="password"
+              value={formData.confirmPassword}
+              onChange={handleChange('confirmPassword')}
+              validityStyles={!!errors.confirmPassword}
+            />
+          </FloatingLabel>
+          {errors.confirmPassword && (
+            <div style={{ color: 'red', fontSize: '12px', marginTop: '4px' }}>
+              {errors.confirmPassword}
+            </div>
+          )}
+        </div>
+
+        <Button 
+          type="submit" 
+          primary 
+          disabled={Object.keys(errors).length > 0}
+        >
+          Create Account
+        </Button>
+      </div>
+    </form>
+  );
+}
+```
+
+## Best Practices
+
+### Usage Guidelines
+- Always provide the `editorValue` prop to ensure the label animates correctly based on input state
+- Use consistent `editorId` values that match the wrapped input's `id` for proper accessibility
+- Mark optional fields using the `optional` prop to provide clear user guidance
+- Combine with form validation by using `editorValid` to provide visual validation feedback
+- Consider the input type when determining if `editorPlaceholder` should be provided for empty state detection
+
+### Accessibility
+- FloatingLabel automatically creates proper ARIA relationships between labels and inputs
+- The `editorId` prop ensures the label is correctly associated with the input element
+- Use the `id` prop when the input doesn't contain a native form element for additional ARIA labelling
+- Screen readers announce the floating label as the input's label regardless of its visual position
+- Keyboard navigation works normally with the wrapped input component
+
+### Performance
+- FloatingLabel is optimized for minimal re-renders and only updates when input state changes
+- The animation is CSS-based and performs well across different devices and screen sizes
+- Use React.memo on form components containing multiple FloatingLabels if the parent re-renders frequently
+- The component efficiently detects input state changes without requiring complex state management
+
+## Common Patterns
+
+### Pattern 1: Login Form
+```tsx
+// Clean, modern login form with floating labels
+function LoginForm() {
+  const [credentials, setCredentials] = React.useState({
+    email: '',
+    password: ''
+  });
+
+  const [isLoading, setIsLoading] = React.useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    // Handle login logic
+    setIsLoading(false);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} style={{ maxWidth: '360px', margin: '0 auto' }}>
+      <div style={{ display: 'grid', gap: '20px' }}>
+        <FloatingLabel
+          label="Email"
+          editorId="login-email"
+          editorValue={credentials.email}
+        >
+          <TextBox
+            id="login-email"
+            type="email"
+            value={credentials.email}
+            onChange={(e) => setCredentials(prev => ({ 
+              ...prev, 
+              email: e.target.value 
+            }))}
+            disabled={isLoading}
+          />
+        </FloatingLabel>
+
+        <FloatingLabel
+          label="Password"
+          editorId="login-password"
+          editorValue={credentials.password}
+        >
+          <TextBox
+            id="login-password"
+            type="password"
+            value={credentials.password}
+            onChange={(e) => setCredentials(prev => ({ 
+              ...prev, 
+              password: e.target.value 
+            }))}
+            disabled={isLoading}
+          />
+        </FloatingLabel>
+
+        <Button 
+          type="submit" 
+          primary 
+          loading={isLoading}
+          disabled={!credentials.email || !credentials.password}
+        >
+          Sign In
+        </Button>
+      </div>
+    </form>
+  );
+}
+```
+
+### Pattern 2: Multi-Step Form
+```tsx
+// Progressive form with floating labels across multiple steps
+function MultiStepRegistration() {
+  const [currentStep, setCurrentStep] = React.useState(1);
+  const [userData, setUserData] = React.useState({
+    // Step 1: Personal Info
+    firstName: '',
+    lastName: '',
+    email: '',
+    // Step 2: Account Info
+    username: '',
+    password: '',
+    confirmPassword: '',
+    // Step 3: Preferences
+    country: null,
+    timezone: null,
+    notifications: true
+  });
+
+  const countries = ['United States', 'Canada', 'United Kingdom', 'Australia'];
+  const timezones = ['UTC-8', 'UTC-5', 'UTC+0', 'UTC+1', 'UTC+10'];
+
+  const updateField = (field) => (event) => {
+    setUserData(prev => ({
+      ...prev,
+      [field]: event.target ? event.target.value : event.value
+    }));
+  };
+
+  const renderStep = () => {
+    switch (currentStep) {
+      case 1:
+        return (
+          <div style={{ display: 'grid', gap: '20px' }}>
+            <h3>Personal Information</h3>
+            
+            <FloatingLabel
+              label="First Name"
+              editorId="firstName"
+              editorValue={userData.firstName}
+            >
+              <TextBox
+                id="firstName"
+                value={userData.firstName}
+                onChange={updateField('firstName')}
+              />
+            </FloatingLabel>
+
+            <FloatingLabel
+              label="Last Name"
+              editorId="lastName"
+              editorValue={userData.lastName}
+            >
+              <TextBox
+                id="lastName"
+                value={userData.lastName}
+                onChange={updateField('lastName')}
+              />
+            </FloatingLabel>
+
+            <FloatingLabel
+              label="Email Address"
+              editorId="email"
+              editorValue={userData.email}
+            >
+              <TextBox
+                id="email"
+                type="email"
+                value={userData.email}
+                onChange={updateField('email')}
+              />
+            </FloatingLabel>
+          </div>
+        );
+
+      case 2:
+        return (
+          <div style={{ display: 'grid', gap: '20px' }}>
+            <h3>Account Setup</h3>
+            
+            <FloatingLabel
+              label="Username"
+              editorId="username"
+              editorValue={userData.username}
+            >
+              <TextBox
+                id="username"
+                value={userData.username}
+                onChange={updateField('username')}
+              />
+            </FloatingLabel>
+
+            <FloatingLabel
+              label="Password"
+              editorId="password"
+              editorValue={userData.password}
+            >
+              <TextBox
+                id="password"
+                type="password"
+                value={userData.password}
+                onChange={updateField('password')}
+              />
+            </FloatingLabel>
+
+            <FloatingLabel
+              label="Confirm Password"
+              editorId="confirmPassword"
+              editorValue={userData.confirmPassword}
+            >
+              <TextBox
+                id="confirmPassword"
+                type="password"
+                value={userData.confirmPassword}
+                onChange={updateField('confirmPassword')}
+              />
+            </FloatingLabel>
+          </div>
+        );
+
+      case 3:
+        return (
+          <div style={{ display: 'grid', gap: '20px' }}>
+            <h3>Preferences</h3>
+            
+            <FloatingLabel
+              label="Country"
+              editorId="country"
+              editorValue={userData.country}
+            >
+              <DropDownList
+                id="country"
+                value={userData.country}
+                data={countries}
+                onChange={updateField('country')}
+              />
+            </FloatingLabel>
+
+            <FloatingLabel
+              label="Timezone"
+              editorId="timezone"
+              editorValue={userData.timezone}
+              optional={true}
+            >
+              <DropDownList
+                id="timezone"
+                value={userData.timezone}
+                data={timezones}
+                onChange={updateField('timezone')}
+              />
+            </FloatingLabel>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div style={{ maxWidth: '480px', margin: '0 auto' }}>
+      {renderStep()}
+      
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        marginTop: '32px' 
+      }}>
+        <Button 
+          disabled={currentStep === 1}
+          onClick={() => setCurrentStep(prev => prev - 1)}
+        >
+          Previous
+        </Button>
+        
+        <Button 
+          primary
+          onClick={() => {
+            if (currentStep < 3) {
+              setCurrentStep(prev => prev + 1);
+            } else {
+              // Handle form submission
+              console.log('Form submitted:', userData);
+            }
+          }}
+        >
+          {currentStep === 3 ? 'Complete Registration' : 'Next'}
+        </Button>
+      </div>
+    </div>
+  );
+}
+```
+
+### Pattern 3: Dynamic Form Builder
+```tsx
+// Dynamic form with floating labels based on configuration
+function DynamicForm({ formConfig }) {
+  const [formData, setFormData] = React.useState({});
+
+  const updateField = (fieldName) => (event) => {
+    setFormData(prev => ({
+      ...prev,
+      [fieldName]: event.target ? event.target.value : event.value
+    }));
+  };
+
+  const renderField = (field) => {
+    const commonProps = {
+      id: field.name,
+      value: formData[field.name] || '',
+      onChange: updateField(field.name),
+      disabled: field.disabled
+    };
+
+    let inputComponent;
+    
+    switch (field.type) {
+      case 'text':
+      case 'email':
+      case 'tel':
+        inputComponent = (
+          <TextBox {...commonProps} type={field.type} />
+        );
+        break;
+        
+      case 'textarea':
+        inputComponent = (
+          <TextArea {...commonProps} rows={field.rows || 4} />
+        );
+        break;
+        
+      case 'number':
+        inputComponent = (
+          <NumericTextBox 
+            {...commonProps} 
+            min={field.min}
+            max={field.max}
+            format={field.format}
+          />
+        );
+        break;
+        
+      case 'select':
+        inputComponent = (
+          <DropDownList 
+            {...commonProps} 
+            data={field.options}
+          />
+        );
+        break;
+        
+      case 'date':
+        inputComponent = (
+          <DatePicker {...commonProps} />
+        );
+        break;
+        
+      default:
+        inputComponent = <TextBox {...commonProps} />;
+    }
+
+    return (
+      <FloatingLabel
+        key={field.name}
+        label={field.label}
+        editorId={field.name}
+        editorValue={formData[field.name]}
+        optional={field.optional}
+        editorDisabled={field.disabled}
+      >
+        {inputComponent}
+      </FloatingLabel>
+    );
+  };
+
+  return (
+    <form style={{ maxWidth: '600px' }}>
+      <div style={{ 
+        display: 'grid', 
+        gap: '20px',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))'
+      }}>
+        {formConfig.fields.map(renderField)}
+      </div>
+      
+      <Button 
+        type="submit" 
+        primary 
+        style={{ marginTop: '24px' }}
+      >
+        {formConfig.submitLabel || 'Submit'}
+      </Button>
+    </form>
+  );
+}
+
+// Example usage
+const exampleConfig = {
+  fields: [
+    { name: 'name', type: 'text', label: 'Full Name', optional: false },
+    { name: 'email', type: 'email', label: 'Email', optional: false },
+    { name: 'phone', type: 'tel', label: 'Phone', optional: true },
+    { name: 'company', type: 'text', label: 'Company', optional: true },
+    { name: 'role', type: 'select', label: 'Role', options: ['Developer', 'Designer', 'Manager'], optional: false },
+    { name: 'experience', type: 'number', label: 'Years of Experience', min: 0, max: 50, optional: true },
+    { name: 'startDate', type: 'date', label: 'Available Start Date', optional: true },
+    { name: 'notes', type: 'textarea', label: 'Additional Notes', rows: 3, optional: true }
+  ],
+  submitLabel: 'Submit Application'
+};
+```

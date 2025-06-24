@@ -1,0 +1,513 @@
+# RadioButton Components
+
+## Overview
+
+### Purpose
+Use this component to generate radio button input functionality
+
+### When to Use
+RadioButton components are essential for creating mutually exclusive selection interfaces where users need to choose exactly one option from a group. Common use cases include:
+
+- **Form selection groups** - Choose payment methods, shipping options, or subscription plans
+- **Configuration settings** - Select theme preferences, language options, or display modes
+- **Survey and polling interfaces** - Single-choice questions or rating scales
+- **Filter controls** - Choose sorting criteria, view modes, or category filters
+- **User preferences** - Privacy settings, notification preferences, or account types
+- **Product options** - Size selection, color variants, or service tiers
+- **Workflow steps** - Decision points in multi-step processes or approval workflows
+
+### Architecture
+**No Coupling**: RadioButton is a standalone component that functions independently. It manages its own state and integrates seamlessly with standard HTML form behavior through the `name` attribute to create mutually exclusive groups.
+
+### Component Interdependencies
+This is a self-contained component with no dependencies on other components:
+- No required parent-child relationships
+- No shared context dependencies
+- Uses standard HTML radio button behavior for grouping via the `name` attribute
+- Integrates with form libraries and state management through standard React patterns
+
+## Components
+
+### RadioButton
+
+**Purpose:** Provides a styled radio button input that enables single-choice selection within groups of options, with consistent theming and accessibility features built-in.
+
+**Interface:**
+```typescript
+interface RadioButtonProps {
+  checked?: boolean; // Controls the selected state of the radio button
+  className?: string; // Additional CSS classes for custom styling
+  dir?: string; // Text direction for RTL support ('ltr' | 'rtl')
+  disabled?: boolean; // Disables the radio button preventing user interaction
+  label?: string | React.ReactNode; // Text or content displayed next to the radio button
+  name?: string; // Groups radio buttons for mutual exclusivity
+  onChange?: (event: ChangeEvent<HTMLInputElement>) => void; // Callback when selection state changes
+  style?: React.CSSProperties; // Inline styles for customization
+  value?: any; // Value associated with this radio button option
+  id?: string; // Unique identifier for the input element
+  tabIndex?: number; // Tab order for keyboard navigation
+}
+```
+
+**Usage Example:**
+```tsx
+import { RadioButton } from '@progress/kendo-react-inputs';
+
+function PaymentOptions() {
+  const [selectedPayment, setSelectedPayment] = useState('credit');
+
+  const handlePaymentChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setSelectedPayment(event.target.value);
+  };
+
+  return (
+    <div>
+      <h3>Payment Method</h3>
+      <RadioButton
+        name="payment"
+        value="credit"
+        label="Credit Card"
+        checked={selectedPayment === 'credit'}
+        onChange={handlePaymentChange}
+      />
+      <RadioButton
+        name="payment"
+        value="paypal"
+        label="PayPal"
+        checked={selectedPayment === 'paypal'}
+        onChange={handlePaymentChange}
+      />
+      <RadioButton
+        name="payment"
+        value="bank"
+        label="Bank Transfer"
+        checked={selectedPayment === 'bank'}
+        onChange={handlePaymentChange}
+      />
+    </div>
+  );
+}
+```
+
+## Integration Patterns
+
+### Basic Usage
+```tsx
+import { RadioButton } from '@progress/kendo-react-inputs';
+
+// Simple radio button with basic props
+function BasicExample() {
+  const [value, setValue] = useState('option1');
+
+  return (
+    <RadioButton
+      name="basic-options"
+      value="option1"
+      label="Option 1"
+      checked={value === 'option1'}
+      onChange={(e) => setValue(e.target.value)}
+    />
+  );
+}
+```
+
+### Advanced Usage
+```tsx
+// Complex form with validation and dynamic options
+function AdvancedExample() {
+  const [formData, setFormData] = useState({
+    subscription: 'basic',
+    notifications: 'email'
+  });
+  const [errors, setErrors] = useState({});
+
+  const subscriptionOptions = [
+    { value: 'basic', label: 'Basic Plan - $9/month', disabled: false },
+    { value: 'premium', label: 'Premium Plan - $19/month', disabled: false },
+    { value: 'enterprise', label: 'Enterprise Plan - Contact us', disabled: true }
+  ];
+
+  const handleChange = (field: string) => (event: ChangeEvent<HTMLInputElement>) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: event.target.value
+    }));
+    // Clear validation errors
+    setErrors(prev => ({ ...prev, [field]: null }));
+  };
+
+  return (
+    <form>
+      <fieldset>
+        <legend>Subscription Plan</legend>
+        {subscriptionOptions.map(option => (
+          <RadioButton
+            key={option.value}
+            name="subscription"
+            value={option.value}
+            label={option.label}
+            checked={formData.subscription === option.value}
+            disabled={option.disabled}
+            onChange={handleChange('subscription')}
+            className={errors.subscription ? 'error' : ''}
+          />
+        ))}
+      </fieldset>
+      
+      <fieldset>
+        <legend>Notification Preferences</legend>
+        <RadioButton
+          name="notifications"
+          value="email"
+          label="Email notifications"
+          checked={formData.notifications === 'email'}
+          onChange={handleChange('notifications')}
+        />
+        <RadioButton
+          name="notifications"
+          value="sms"
+          label="SMS notifications"
+          checked={formData.notifications === 'sms'}
+          onChange={handleChange('notifications')}
+        />
+        <RadioButton
+          name="notifications"
+          value="none"
+          label="No notifications"
+          checked={formData.notifications === 'none'}
+          onChange={handleChange('notifications')}
+        />
+      </fieldset>
+    </form>
+  );
+}
+```
+
+### Common Variations
+
+#### Controlled Components
+```tsx
+function ControlledRadioGroup() {
+  const [selectedTheme, setSelectedTheme] = useState('light');
+
+  const themes = [
+    { value: 'light', label: 'Light theme' },
+    { value: 'dark', label: 'Dark theme' },
+    { value: 'auto', label: 'System default' }
+  ];
+
+  return (
+    <div role="radiogroup" aria-labelledby="theme-heading">
+      <h3 id="theme-heading">Theme Preference</h3>
+      {themes.map(theme => (
+        <RadioButton
+          key={theme.value}
+          name="theme"
+          value={theme.value}
+          label={theme.label}
+          checked={selectedTheme === theme.value}
+          onChange={(e) => setSelectedTheme(e.target.value)}
+        />
+      ))}
+    </div>
+  );
+}
+```
+
+#### With Custom Labels
+```tsx
+function CustomLabelExample() {
+  const [selectedSize, setSelectedSize] = useState('medium');
+
+  const sizeOptions = [
+    {
+      value: 'small',
+      label: (
+        <div className="size-option">
+          <strong>Small</strong>
+          <span className="description">Perfect for personal use</span>
+          <span className="price">$5/month</span>
+        </div>
+      )
+    },
+    {
+      value: 'medium',
+      label: (
+        <div className="size-option">
+          <strong>Medium</strong>
+          <span className="description">Great for small teams</span>
+          <span className="price">$15/month</span>
+        </div>
+      )
+    },
+    {
+      value: 'large',
+      label: (
+        <div className="size-option">
+          <strong>Large</strong>
+          <span className="description">Ideal for organizations</span>
+          <span className="price">$45/month</span>
+        </div>
+      )
+    }
+  ];
+
+  return (
+    <div className="pricing-options">
+      <h3>Choose your plan</h3>
+      {sizeOptions.map(option => (
+        <RadioButton
+          key={option.value}
+          name="plan-size"
+          value={option.value}
+          label={option.label}
+          checked={selectedSize === option.value}
+          onChange={(e) => setSelectedSize(e.target.value)}
+          className="plan-option"
+        />
+      ))}
+    </div>
+  );
+}
+```
+
+#### Dynamic Options
+```tsx
+function DynamicOptionsExample() {
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate API call
+    setTimeout(() => {
+      setCategories([
+        { id: 'tech', name: 'Technology', available: true },
+        { id: 'health', name: 'Healthcare', available: true },
+        { id: 'finance', name: 'Finance', available: false },
+        { id: 'education', name: 'Education', available: true }
+      ]);
+      setLoading(false);
+    }, 1000);
+  }, []);
+
+  if (loading) {
+    return <div>Loading categories...</div>;
+  }
+
+  return (
+    <div>
+      <h3>Select Category</h3>
+      {categories.map(category => (
+        <RadioButton
+          key={category.id}
+          name="category"
+          value={category.id}
+          label={`${category.name}${!category.available ? ' (Coming soon)' : ''}`}
+          checked={selectedCategory === category.id}
+          disabled={!category.available}
+          onChange={(e) => setSelectedCategory(e.target.value)}
+        />
+      ))}
+    </div>
+  );
+}
+```
+
+## Best Practices
+
+### Usage Guidelines
+- **Group related options with the `name` attribute**: Use the same `name` value for radio buttons that should be mutually exclusive
+- **Always provide meaningful labels**: Use clear, descriptive text that explains what each option represents
+- **Set initial checked state**: Pre-select the most common or recommended option to improve user experience
+- **Use controlled components**: Manage the checked state through React state for better form integration and validation
+
+### Accessibility
+- **Use fieldset and legend for groups**: Wrap related radio buttons in `<fieldset>` with a `<legend>` to provide context
+- **Provide unique id attributes**: Ensure each radio button has a unique identifier for proper label association
+- **Support keyboard navigation**: Radio buttons automatically support arrow key navigation within groups
+- **Screen reader compatibility**: The component includes proper ARIA attributes and semantic HTML structure
+
+### Performance
+- **Minimize re-renders**: Use React.memo or useMemo for complex label content that doesn't change frequently
+- **Optimize onChange handlers**: Use useCallback to prevent unnecessary function recreation on each render
+- **Batch state updates**: When updating multiple related values, batch them in a single state update
+
+## Common Patterns
+
+### Pattern 1: Form Integration
+```tsx
+// Integration with popular form libraries
+import { useForm, Controller } from 'react-hook-form';
+
+function FormIntegrationExample() {
+  const { control, handleSubmit, watch } = useForm({
+    defaultValues: {
+      deliveryMethod: 'standard'
+    }
+  });
+
+  const onSubmit = (data) => {
+    console.log('Form data:', data);
+  };
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <fieldset>
+        <legend>Delivery Method</legend>
+        <Controller
+          name="deliveryMethod"
+          control={control}
+          render={({ field }) => (
+            <>
+              <RadioButton
+                name="delivery"
+                value="standard"
+                label="Standard Delivery (3-5 days) - Free"
+                checked={field.value === 'standard'}
+                onChange={(e) => field.onChange(e.target.value)}
+              />
+              <RadioButton
+                name="delivery"
+                value="express"
+                label="Express Delivery (1-2 days) - $9.99"
+                checked={field.value === 'express'}
+                onChange={(e) => field.onChange(e.target.value)}
+              />
+              <RadioButton
+                name="delivery"
+                value="overnight"
+                label="Overnight Delivery - $19.99"
+                checked={field.value === 'overnight'}
+                onChange={(e) => field.onChange(e.target.value)}
+              />
+            </>
+          )}
+        />
+      </fieldset>
+      
+      <button type="submit">Continue</button>
+    </form>
+  );
+}
+```
+
+### Pattern 2: Conditional Rendering
+```tsx
+// Show/hide additional options based on radio button selection
+function ConditionalRenderingExample() {
+  const [accountType, setAccountType] = useState('personal');
+  const [businessInfo, setBusinessInfo] = useState({ companyName: '', taxId: '' });
+
+  return (
+    <div>
+      <fieldset>
+        <legend>Account Type</legend>
+        <RadioButton
+          name="account-type"
+          value="personal"
+          label="Personal Account"
+          checked={accountType === 'personal'}
+          onChange={(e) => setAccountType(e.target.value)}
+        />
+        <RadioButton
+          name="account-type"
+          value="business"
+          label="Business Account"
+          checked={accountType === 'business'}
+          onChange={(e) => setAccountType(e.target.value)}
+        />
+      </fieldset>
+
+      {accountType === 'business' && (
+        <div className="business-fields">
+          <h4>Business Information</h4>
+          <label>
+            Company Name:
+            <input
+              type="text"
+              value={businessInfo.companyName}
+              onChange={(e) => setBusinessInfo(prev => ({ 
+                ...prev, 
+                companyName: e.target.value 
+              }))}
+            />
+          </label>
+          <label>
+            Tax ID:
+            <input
+              type="text"
+              value={businessInfo.taxId}
+              onChange={(e) => setBusinessInfo(prev => ({ 
+                ...prev, 
+                taxId: e.target.value 
+              }))}
+            />
+          </label>
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+### Pattern 3: Validation and Error Handling
+```tsx
+// Radio button groups with validation feedback
+function ValidationExample() {
+  const [selectedOption, setSelectedOption] = useState('');
+  const [touched, setTouched] = useState(false);
+  const [error, setError] = useState('');
+
+  const options = [
+    { value: 'option1', label: 'Option 1' },
+    { value: 'option2', label: 'Option 2' },
+    { value: 'option3', label: 'Option 3' }
+  ];
+
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setSelectedOption(value);
+    setTouched(true);
+    
+    // Clear error when valid selection is made
+    if (value) {
+      setError('');
+    }
+  };
+
+  const handleBlur = () => {
+    setTouched(true);
+    if (!selectedOption) {
+      setError('Please select an option');
+    }
+  };
+
+  const hasError = touched && error;
+
+  return (
+    <div className={`radio-group ${hasError ? 'error' : ''}`}>
+      <fieldset>
+        <legend>Required Selection *</legend>
+        {options.map(option => (
+          <RadioButton
+            key={option.value}
+            name="required-option"
+            value={option.value}
+            label={option.label}
+            checked={selectedOption === option.value}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            className={hasError ? 'error' : ''}
+          />
+        ))}
+        {hasError && (
+          <div className="error-message" role="alert">
+            {error}
+          </div>
+        )}
+      </fieldset>
+    </div>
+  );
+}
+```

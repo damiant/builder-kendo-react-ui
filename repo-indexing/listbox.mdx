@@ -1,0 +1,478 @@
+# ListBox Components
+
+## Overview
+
+### Purpose
+Use this component group to generate list box functionality with integrated toolbar for item manipulation
+
+### When to Use
+The ListBox component group is ideal for scenarios where you need to:
+- Present selectable items in a scrollable list format
+- Enable drag-and-drop reordering of items within or between lists
+- Provide toolbar controls for item manipulation (move up/down, transfer between lists, remove items)
+- Create dual-list interfaces for transferring items between two collections
+- Build data selection interfaces with keyboard navigation support
+- Display structured data with custom item templates
+
+Common implementation contexts include:
+- User role and permission management interfaces
+- Available vs. selected items selection workflows
+- Data categorization and organization tools
+- Multi-step forms with item selection
+- Administrative interfaces for managing collections
+
+### Architecture
+**Moderate Coupling**: The ListBox and ListBoxToolbar components work together to provide enhanced functionality, where the toolbar provides optional but powerful manipulation capabilities for the list data.
+
+### Component Interdependencies
+- **ListBox**: The primary component that renders the list interface and handles item selection, navigation, and drag-and-drop
+- **ListBoxToolbar**: An optional enhancement component that provides pre-built tools for common list operations
+- **Shared Context**: The toolbar operates on the same data collections as the ListBox, with built-in tools for data manipulation
+- **Communication Pattern**: The toolbar communicates with ListBox through shared data state and event handlers
+
+## Components
+
+### ListBox {Primary Component}
+
+**Purpose:** Renders an interactive list of items with selection, drag-and-drop, and keyboard navigation capabilities
+
+**Interface:**
+```typescript
+interface ListBoxProps {
+  // Core Data Properties
+  data: Array<any>;                           // Required data collection for the list
+  textField: string;                          // Field name that represents item text
+  valueField?: string;                        // Field for form submission (defaults to textField)
+  selectedField?: string;                     // Field that determines item selection state
+  
+  // Appearance & Layout
+  className?: string;                         // Custom CSS class for container
+  id?: string;                               // HTML id for the container
+  size?: 'small' | 'medium' | 'large' | null; // Component size variant
+  style?: React.CSSProperties;               // Inline styles for container
+  
+  // Functionality
+  draggable?: boolean;                       // Enable drag-and-drop (default: true)
+  item?: React.ComponentType<any>;           // Custom item renderer component
+  
+  // Toolbar Integration
+  toolbar?: ComponentType<any> | null;       // Toolbar component (typically ListBoxToolbar)
+  toolbarPosition?: 'top' | 'bottom' | 'left' | 'right' | 'none'; // Toolbar placement
+  
+  // Event Handlers
+  onItemClick?: (event: ListBoxItemClickEvent) => void;      // Item click events
+  onItemSelect?: (event: ListBoxItemSelectEvent) => void;    // Item selection events
+  onKeyDown?: (event: ListBoxKeyDownEvent) => void;          // Keyboard events
+  onDragStart?: (event: ListBoxDragEvent) => void;           // Drag start events
+  onDragOver?: (event: ListBoxDragEvent) => void;            // Drag over events
+  onDrop?: (event: ListBoxDragEvent) => void;                // Drop events
+  onDragLeave?: (event: ListBoxDragLeaveEvent) => void;      // Drag leave events
+  onKeyboardNavigate?: (event: ListBoxItemNavigateEvent) => void; // Navigation events
+}
+```
+
+**Dependencies:** None (standalone component)
+**Provides:** Data context and event handling for optional ListBoxToolbar integration
+
+**Usage Example:**
+```tsx
+import { ListBox } from '@progress/kendo-react-listbox';
+
+function BasicListExample() {
+  const [data, setData] = useState([
+    { id: 1, name: 'Apple', selected: false },
+    { id: 2, name: 'Orange', selected: true },
+    { id: 3, name: 'Banana', selected: false }
+  ]);
+
+  const handleItemSelect = (event) => {
+    const updatedData = data.map(item => 
+      item.id === event.dataItem.id 
+        ? { ...item, selected: !item.selected }
+        : item
+    );
+    setData(updatedData);
+  };
+
+  return (
+    <ListBox
+      data={data}
+      textField="name"
+      valueField="id"
+      selectedField="selected"
+      onItemSelect={handleItemSelect}
+      style={{ width: '300px', height: '200px' }}
+    />
+  );
+}
+```
+
+### ListBoxToolbar {Enhancement Component}
+
+**Purpose:** Provides pre-built toolbar controls for common list manipulation operations like moving, transferring, and removing items
+
+**Interface:**
+```typescript
+interface ListBoxToolbarProps {
+  // Tool Configuration
+  tools?: Array<string>;                     // Array of tool names to display
+  size?: 'small' | 'medium' | 'large' | null; // Button size variant
+  
+  // Data Context
+  data: Array<any>;                          // Primary ListBox data
+  dataConnected: Array<any>;                 // Connected ListBox data (for transfers)
+  selectedField?: string;                    // Field that tracks selection state
+  
+  // Event Handling
+  onToolClick?: (event: ListBoxToolbarClickEvent) => void; // Tool click handler
+  
+  // Internal Props
+  dir?: string;                              // Text direction (hidden)
+}
+```
+
+**Built-in Tools:**
+- `moveUp` - Move selected items up in the list
+- `moveDown` - Move selected items down in the list  
+- `transferTo` - Transfer selected items to connected list
+- `transferFrom` - Transfer selected items from connected list
+- `transferAllTo` - Transfer all items to connected list
+- `transferAllFrom` - Transfer all items from connected list
+- `remove` - Remove selected items from the list
+
+**Context Dependencies:** Requires data props that match the associated ListBox configuration
+**Parent Requirements:** Works independently but designed to operate on ListBox data
+
+**Usage Example:**
+```tsx
+import { ListBoxToolbar } from '@progress/kendo-react-listbox';
+
+function ToolbarExample() {
+  const [leftData, setLeftData] = useState([
+    { id: 1, name: 'Item 1', selected: false },
+    { id: 2, name: 'Item 2', selected: true }
+  ]);
+  
+  const [rightData, setRightData] = useState([
+    { id: 3, name: 'Item 3', selected: false }
+  ]);
+
+  const handleToolClick = (event) => {
+    const result = processListBoxData(
+      leftData, 
+      rightData, 
+      event.toolName, 
+      'selected'
+    );
+    setLeftData(result.listBoxOneData);
+    setRightData(result.listBoxTwoData);
+  };
+
+  return (
+    <ListBoxToolbar
+      tools={['moveUp', 'moveDown', 'transferTo', 'transferFrom']}
+      data={leftData}
+      dataConnected={rightData}
+      selectedField="selected"
+      onToolClick={handleToolClick}
+    />
+  );
+}
+```
+
+## Integration Patterns
+
+### Basic ListBox Usage
+```tsx
+import { ListBox } from '@progress/kendo-react-listbox';
+
+// Simple list with selection
+function SimpleList() {
+  const [items] = useState([
+    { text: 'Design', selected: false },
+    { text: 'Development', selected: true },
+    { text: 'Testing', selected: false }
+  ]);
+
+  return (
+    <ListBox
+      data={items}
+      textField="text"
+      selectedField="selected"
+      style={{ width: '250px' }}
+    />
+  );
+}
+```
+
+### ListBox with Integrated Toolbar
+```tsx
+import { ListBox, ListBoxToolbar, processListBoxData } from '@progress/kendo-react-listbox';
+
+function ListWithToolbar() {
+  const [data, setData] = useState([
+    { id: 1, name: 'Task 1', selected: false },
+    { id: 2, name: 'Task 2', selected: true },
+    { id: 3, name: 'Task 3', selected: false }
+  ]);
+
+  const handleToolClick = (event) => {
+    const result = processListBoxData(data, [], event.toolName, 'selected');
+    setData(result.listBoxOneData);
+  };
+
+  return (
+    <div style={{ display: 'flex', gap: '10px' }}>
+      <ListBox
+        data={data}
+        textField="name"
+        valueField="id"
+        selectedField="selected"
+        style={{ width: '200px', height: '300px' }}
+      />
+      <ListBoxToolbar
+        tools={['moveUp', 'moveDown', 'remove']}
+        data={data}
+        dataConnected={[]}
+        selectedField="selected"
+        onToolClick={handleToolClick}
+      />
+    </div>
+  );
+}
+```
+
+### Dual ListBox with Transfer Functionality
+```tsx
+import { ListBox, ListBoxToolbar, processListBoxData } from '@progress/kendo-react-listbox';
+
+function DualListTransfer() {
+  const [availableItems, setAvailableItems] = useState([
+    { id: 1, name: 'Feature A', selected: false },
+    { id: 2, name: 'Feature B', selected: false },
+    { id: 3, name: 'Feature C', selected: false }
+  ]);
+  
+  const [selectedItems, setSelectedItems] = useState([
+    { id: 4, name: 'Feature D', selected: false }
+  ]);
+
+  const handleToolClick = (event) => {
+    const result = processListBoxData(
+      availableItems,
+      selectedItems, 
+      event.toolName,
+      'selected'
+    );
+    setAvailableItems(result.listBoxOneData);
+    setSelectedItems(result.listBoxTwoData);
+  };
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+      <div>
+        <h4>Available</h4>
+        <ListBox
+          data={availableItems}
+          textField="name"
+          selectedField="selected"
+          style={{ width: '200px', height: '300px' }}
+        />
+      </div>
+      
+      <ListBoxToolbar
+        tools={['transferTo', 'transferFrom', 'transferAllTo', 'transferAllFrom']}
+        data={availableItems}
+        dataConnected={selectedItems}
+        selectedField="selected"
+        onToolClick={handleToolClick}
+      />
+      
+      <div>
+        <h4>Selected</h4>
+        <ListBox
+          data={selectedItems}
+          textField="name"
+          selectedField="selected"
+          style={{ width: '200px', height: '300px' }}
+        />
+      </div>
+    </div>
+  );
+}
+```
+
+### Custom Item Templates
+```tsx
+import { ListBox } from '@progress/kendo-react-listbox';
+
+const CustomItem = (props) => (
+  <div style={{ 
+    display: 'flex', 
+    justifyContent: 'space-between', 
+    padding: '8px',
+    backgroundColor: props.selected ? '#e3f2fd' : 'transparent'
+  }}>
+    <span>{props.dataItem.name}</span>
+    <span style={{ color: '#666', fontSize: '0.85em' }}>
+      {props.dataItem.category}
+    </span>
+  </div>
+);
+
+function CustomItemList() {
+  const [data] = useState([
+    { id: 1, name: 'React Component', category: 'Frontend', selected: false },
+    { id: 2, name: 'API Endpoint', category: 'Backend', selected: false },
+    { id: 3, name: 'Database Schema', category: 'Data', selected: true }
+  ]);
+
+  return (
+    <ListBox
+      data={data}
+      textField="name"
+      selectedField="selected"
+      item={CustomItem}
+      style={{ width: '300px', height: '200px' }}
+    />
+  );
+}
+```
+
+## Component Relationships
+
+### Data Flow
+The ListBox maintains the primary data state, while the ListBoxToolbar operates on this data through:
+1. **Read Access**: Toolbar reads current data state to determine tool availability
+2. **Action Processing**: Toolbar generates data manipulation commands
+3. **State Updates**: Parent component applies toolbar actions to update ListBox data
+4. **Selection Tracking**: Both components use the same `selectedField` to track item selection
+
+### Event Handling
+- **ListBox Events**: Handle user interactions (clicks, keyboard, drag-and-drop)
+- **Toolbar Events**: Handle tool clicks that modify data state
+- **Parent Coordination**: Parent component manages data state and coordinates between components
+
+### Helper Functions
+The library provides utility functions for data processing:
+- `processListBoxData()` - Handles toolbar actions and returns updated data
+- `processListBoxDragAndDrop()` - Handles drag-and-drop data updates
+- `moveItem()` - Utility for moving items within arrays
+
+## Best Practices
+
+### Usage Guidelines
+- Always provide a `textField` to specify which property contains the display text
+- Use `selectedField` consistently across ListBox and ListBoxToolbar for proper state management
+- Implement proper event handlers to maintain data state synchronization
+- Consider using `processListBoxData()` helper function for standard toolbar operations
+- Set appropriate container dimensions using `style` prop for optimal user experience
+
+### Data Management
+- Maintain immutable data updates when processing toolbar actions
+- Use unique `valueField` values for proper item identification during operations
+- Implement controlled components pattern for predictable state management
+- Consider using React state management solutions for complex data flows
+
+### Accessibility
+- ListBox provides built-in keyboard navigation (Arrow keys, Space, Enter)
+- Screen readers can access item content through proper ARIA attributes
+- Focus management is handled automatically for keyboard users
+- Consider adding proper labels and descriptions for complex list interfaces
+
+### Performance
+- Use `React.memo()` or similar optimization techniques for custom item components
+- Consider virtualization for large data sets (though not built-in to this component)
+- Minimize unnecessary re-renders by optimizing event handlers and data updates
+- Use `valueField` for efficient item identification instead of array indices
+
+## Common Patterns
+
+### Pattern 1: Role Assignment Interface
+```tsx
+// Common pattern for assigning roles or permissions
+function RoleAssignment() {
+  const [availableRoles, setAvailableRoles] = useState([
+    { id: 'admin', name: 'Administrator', selected: false },
+    { id: 'editor', name: 'Editor', selected: false },
+    { id: 'viewer', name: 'Viewer', selected: false }
+  ]);
+  
+  const [assignedRoles, setAssignedRoles] = useState([]);
+
+  // Use dual-list pattern with transfer tools
+  return (
+    <div className="role-assignment">
+      {/* Implementation similar to dual list example above */}
+    </div>
+  );
+}
+```
+
+### Pattern 2: Reorderable Task List
+```tsx
+// Pattern for task prioritization with drag-and-drop
+function TaskPrioritization() {
+  const [tasks, setTasks] = useState([
+    { id: 1, title: 'High Priority Task', selected: false },
+    { id: 2, title: 'Medium Priority Task', selected: false },
+    { id: 3, title: 'Low Priority Task', selected: false }
+  ]);
+
+  const handleDrop = (event) => {
+    // Implement drag-and-drop reordering logic
+    const result = processListBoxDragAndDrop(
+      tasks, [], event.dragItem, event.dropItem, 'id'
+    );
+    setTasks(result.listBoxOneData);
+  };
+
+  return (
+    <ListBox
+      data={tasks}
+      textField="title"
+      selectedField="selected"
+      onDrop={handleDrop}
+      toolbar={ListBoxToolbar}
+      toolbarPosition="right"
+    />
+  );
+}
+```
+
+### Pattern 3: Multi-Select with Actions
+```tsx
+// Pattern for bulk operations on selected items
+function BulkItemManager() {
+  const [items, setItems] = useState([
+    { id: 1, name: 'Document 1.pdf', selected: false },
+    { id: 2, name: 'Image 1.jpg', selected: true },
+    { id: 3, name: 'Spreadsheet 1.xlsx', selected: false }
+  ]);
+
+  const handleBulkAction = (action) => {
+    const selectedItems = items.filter(item => item.selected);
+    // Process bulk action on selected items
+    console.log(`Performing ${action} on`, selectedItems);
+  };
+
+  return (
+    <div>
+      <ListBox
+        data={items}
+        textField="name"
+        selectedField="selected"
+        style={{ width: '300px', height: '200px' }}
+      />
+      <div style={{ marginTop: '10px' }}>
+        <button onClick={() => handleBulkAction('delete')}>
+          Delete Selected
+        </button>
+        <button onClick={() => handleBulkAction('archive')}>
+          Archive Selected
+        </button>
+      </div>
+    </div>
+  );
+}
+```

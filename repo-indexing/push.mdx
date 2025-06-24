@@ -1,0 +1,419 @@
+# Push Component
+
+## Overview
+
+### Purpose
+Use this component to generate push animation functionality
+
+### When to Use
+The Push component provides directional sliding animations that create smooth transitions for content appearing and disappearing. Common use cases include:
+
+- **Content transitions** - Animate content sliding in from specific directions during navigation or state changes
+- **Panel animations** - Create sliding effects for sidebars, drawers, or off-canvas panels
+- **Modal entrances** - Animate modals, dialogs, or overlays sliding in from screen edges
+- **Carousel transitions** - Implement sliding animations between carousel items or slides
+- **Page transitions** - Create smooth sliding effects between different views or pages
+- **Notification animations** - Slide notifications in from screen edges
+- **Menu animations** - Animate dropdown menus or navigation panels sliding in
+- **Card reveals** - Create engaging slide-in effects for card components or content blocks
+- **Form step transitions** - Animate between different steps in multi-step forms
+- **Mobile navigation** - Implement sliding transitions for mobile navigation patterns
+
+### Architecture
+**No Coupling**: Push is a standalone animation component that operates independently without requiring other specific components. It provides a complete directional sliding animation solution with customizable direction, timing, and container options.
+
+## Components
+
+### Push
+
+**Purpose:** Creates smooth directional sliding animations for content entering and exiting the viewport, with support for four different directions and customizable animation timing.
+
+**Interface:**
+```typescript
+interface PushProps extends AnimationInterface {
+  // Animation configuration
+  direction?: PushDirection; // Direction of the push animation (default: 'right')
+  
+  // Container customization
+  childFactory?: any; // Function for customizing child element rendering
+  className?: string; // CSS classes for the animation container
+  component?: React.ReactNode; // HTML tag for the animation container (default: 'div')
+  id?: string; // Unique identifier for the container
+  style?: any; // Inline styles for the animation container
+  
+  // Layout behavior
+  stackChildren?: boolean; // Whether child elements stack during animation (default: false)
+  
+  // Child content
+  children?: React.ReactNode; // Content to be animated
+}
+
+// Direction options for push animation
+type PushDirection = 'up' | 'down' | 'left' | 'right';
+
+// Inherited animation properties
+interface AnimationInterface {
+  // Animation behavior
+  appear?: boolean; // Whether to animate on first mount (default: false)
+  enter?: boolean; // Whether to animate entering elements (default: true)
+  exit?: boolean; // Whether to animate exiting elements (default: true)
+  
+  // Timing configuration
+  transitionEnterDuration?: number; // Duration for enter animation in ms (default: 300)
+  transitionExitDuration?: number; // Duration for exit animation in ms (default: 300)
+  
+  // Lifecycle hooks
+  onEnter?: (event: AnimationEventArguments) => void; // Called when element starts entering
+  onEntering?: (event: AnimationEventArguments) => void; // Called during enter animation
+  onEntered?: (event: AnimationEventArguments) => void; // Called when enter animation completes
+  onExit?: (event: AnimationEventArguments) => void; // Called when element starts exiting
+  onExiting?: (event: AnimationEventArguments) => void; // Called during exit animation
+  onExited?: (event: AnimationEventArguments) => void; // Called when exit animation completes
+  
+  // Advanced options
+  mountOnEnter?: boolean; // Whether to lazy-mount on first enter (default: false)
+  unmountOnExit?: boolean; // Whether to unmount after exit (default: false)
+}
+```
+
+**Usage Example:**
+```tsx
+import { Push } from '@progress/kendo-react-animation';
+
+function BasicPushExample() {
+  const [show, setShow] = useState(false);
+  
+  return (
+    <div>
+      <button onClick={() => setShow(!show)}>
+        Toggle Content
+      </button>
+      
+      <Push direction="right">
+        {show && (
+          <div className="animated-content">
+            <h3>Sliding Content</h3>
+            <p>This content slides in from the right side.</p>
+          </div>
+        )}
+      </Push>
+    </div>
+  );
+}
+```
+
+## Integration Patterns
+
+### Basic Directional Animations
+```tsx
+import { Push } from '@progress/kendo-react-animation';
+import { useState } from 'react';
+
+// Right-to-left sliding (default)
+function RightSlideExample() {
+  const [visible, setVisible] = useState(false);
+  
+  return (
+    <div>
+      <button onClick={() => setVisible(!visible)}>
+        Slide from Right
+      </button>
+      <Push direction="right">
+        {visible && <div className="content">Content slides from right</div>}
+      </Push>
+    </div>
+  );
+}
+
+// Top-to-bottom sliding
+function DownSlideExample() {
+  const [visible, setVisible] = useState(false);
+  
+  return (
+    <div>
+      <button onClick={() => setVisible(!visible)}>
+        Slide from Top
+      </button>
+      <Push direction="down">
+        {visible && <div className="content">Content slides from top</div>}
+      </Push>
+    </div>
+  );
+}
+
+// Left-to-right sliding
+function LeftSlideExample() {
+  const [visible, setVisible] = useState(false);
+  
+  return (
+    <div>
+      <button onClick={() => setVisible(!visible)}>
+        Slide from Left
+      </button>
+      <Push direction="left">
+        {visible && <div className="content">Content slides from left</div>}
+      </Push>
+    </div>
+  );
+}
+
+// Bottom-to-top sliding
+function UpSlideExample() {
+  const [visible, setVisible] = useState(false);
+  
+  return (
+    <div>
+      <button onClick={() => setVisible(!visible)}>
+        Slide from Bottom
+      </button>
+      <Push direction="up">
+        {visible && <div className="content">Content slides from bottom</div>}
+      </Push>
+    </div>
+  );
+}
+```
+
+### Advanced Configuration
+```tsx
+import { Push } from '@progress/kendo-react-animation';
+
+// Customized timing and container
+function AdvancedPushExample() {
+  const [show, setShow] = useState(false);
+  
+  return (
+    <div>
+      <button onClick={() => setShow(!show)}>
+        Advanced Animation
+      </button>
+      
+      <Push
+        direction="left"
+        transitionEnterDuration={500}
+        transitionExitDuration={300}
+        className="custom-animation-container"
+        component="section"
+        stackChildren={true}
+        onEntered={() => console.log('Animation completed')}
+        onExited={() => console.log('Exit animation completed')}
+      >
+        {show && (
+          <div className="animated-panel">
+            <h2>Advanced Push Animation</h2>
+            <p>Custom timing and container configuration.</p>
+          </div>
+        )}
+      </Push>
+    </div>
+  );
+}
+```
+
+### Conditional Rendering with Lists
+```tsx
+import { Push } from '@progress/kendo-react-animation';
+
+function AnimatedListExample() {
+  const [items, setItems] = useState([]);
+  
+  const addItem = () => {
+    const newItem = { id: Date.now(), text: `Item ${items.length + 1}` };
+    setItems([...items, newItem]);
+  };
+  
+  const removeItem = (id) => {
+    setItems(items.filter(item => item.id !== id));
+  };
+  
+  return (
+    <div>
+      <button onClick={addItem}>Add Item</button>
+      
+      <div className="item-list">
+        {items.map(item => (
+          <Push 
+            key={item.id} 
+            direction="right"
+            transitionEnterDuration={400}
+          >
+            <div className="list-item">
+              <span>{item.text}</span>
+              <button onClick={() => removeItem(item.id)}>Remove</button>
+            </div>
+          </Push>
+        ))}
+      </div>
+    </div>
+  );
+}
+```
+
+## Best Practices
+
+### Usage Guidelines
+- **Choose appropriate direction** - Select push directions that match the natural flow of your interface (e.g., left-to-right for next actions, right-to-left for back actions)
+- **Match animation timing** - Use consistent timing across your application for similar types of content transitions
+- **Consider mobile experiences** - Test push animations on mobile devices to ensure smooth performance and appropriate speed
+- **Provide fallbacks** - Always ensure content is accessible even if animations fail or are disabled
+- **Use semantic containers** - Leverage the `component` prop to use appropriate semantic HTML elements for your animated content
+
+### Accessibility
+- **Respect user preferences** - Honor `prefers-reduced-motion` settings by providing options to disable animations
+- **Maintain focus management** - Ensure keyboard focus is properly managed during animations, especially for interactive content
+- **Provide alternative indicators** - Consider providing alternative visual or text indicators for users who may not perceive animations
+- **Test with screen readers** - Verify that animated content is properly announced and navigable with assistive technologies
+
+### Performance
+- **Optimize animation content** - Keep animated content lightweight to ensure smooth performance
+- **Use hardware acceleration** - The Push component leverages CSS transforms for optimal performance
+- **Consider animation frequency** - Avoid triggering too many simultaneous push animations to maintain smooth performance
+- **Test on lower-end devices** - Verify animation performance on devices with limited processing power
+
+## Common Patterns
+
+### Pattern 1: Navigation Panel Slides
+```tsx
+import { Push } from '@progress/kendo-react-animation';
+
+function SlidingNavigationPanel() {
+  const [isOpen, setIsOpen] = useState(false);
+  
+  return (
+    <div className="app-layout">
+      <button 
+        className="menu-toggle"
+        onClick={() => setIsOpen(!isOpen)}
+        aria-expanded={isOpen}
+      >
+        {isOpen ? 'Close Menu' : 'Open Menu'}
+      </button>
+      
+      <Push 
+        direction="right"
+        transitionEnterDuration={250}
+        transitionExitDuration={200}
+        className="navigation-container"
+      >
+        {isOpen && (
+          <nav className="navigation-panel">
+            <ul>
+              <li><a href="/home">Home</a></li>
+              <li><a href="/products">Products</a></li>
+              <li><a href="/contact">Contact</a></li>
+            </ul>
+          </nav>
+        )}
+      </Push>
+      
+      <main className="main-content">
+        {/* Main application content */}
+      </main>
+    </div>
+  );
+}
+```
+
+### Pattern 2: Modal with Directional Entry
+```tsx
+import { Push } from '@progress/kendo-react-animation';
+
+function DirectionalModal() {
+  const [showModal, setShowModal] = useState(false);
+  
+  return (
+    <div>
+      <button onClick={() => setShowModal(true)}>
+        Show Modal
+      </button>
+      
+      {/* Overlay background */}
+      {showModal && (
+        <div 
+          className="modal-overlay"
+          onClick={() => setShowModal(false)}
+        />
+      )}
+      
+      {/* Animated modal content */}
+      <Push 
+        direction="down"
+        transitionEnterDuration={300}
+        className="modal-animation-container"
+      >
+        {showModal && (
+          <div 
+            className="modal-content"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2>Modal Title</h2>
+            <p>This modal slides in from the top.</p>
+            <button onClick={() => setShowModal(false)}>
+              Close Modal
+            </button>
+          </div>
+        )}
+      </Push>
+    </div>
+  );
+}
+```
+
+### Pattern 3: Notification Slide-ins
+```tsx
+import { Push } from '@progress/kendo-react-animation';
+
+function NotificationSystem() {
+  const [notifications, setNotifications] = useState([]);
+  
+  const addNotification = (message, type = 'info') => {
+    const notification = {
+      id: Date.now(),
+      message,
+      type
+    };
+    setNotifications(prev => [...prev, notification]);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+      removeNotification(notification.id);
+    }, 5000);
+  };
+  
+  const removeNotification = (id) => {
+    setNotifications(prev => prev.filter(n => n.id !== id));
+  };
+  
+  return (
+    <div>
+      <button onClick={() => addNotification('Success message!', 'success')}>
+        Show Success
+      </button>
+      <button onClick={() => addNotification('Error occurred!', 'error')}>
+        Show Error
+      </button>
+      
+      <div className="notification-container">
+        {notifications.map(notification => (
+          <Push 
+            key={notification.id}
+            direction="left"
+            transitionEnterDuration={300}
+            transitionExitDuration={200}
+          >
+            <div className={`notification notification-${notification.type}`}>
+              <span>{notification.message}</span>
+              <button 
+                onClick={() => removeNotification(notification.id)}
+                aria-label="Close notification"
+              >
+                ×
+              </button>
+            </div>
+          </Push>
+        ))}
+      </div>
+    </div>
+  );
+}
+```

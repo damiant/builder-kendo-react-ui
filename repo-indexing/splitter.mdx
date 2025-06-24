@@ -1,0 +1,1327 @@
+# Splitter Components
+
+## Overview
+
+### Purpose
+Use this component to generate splitter layout functionality
+
+### When to Use
+The Splitter component is ideal for creating resizable layout sections that allow users to dynamically control space allocation within applications. Use this component when you need to:
+
+- Divide a page or container into multiple resizable panes for flexible content organization
+- Create dashboard layouts with adjustable panels for data visualization and controls
+- Build code editor interfaces with resizable sidebar, main content, and tool panels
+- Implement master-detail views where users can resize list and detail sections
+- Design document readers with adjustable navigation and content panes
+- Create multi-column layouts where users can prioritize different content areas
+- Build responsive layouts that adapt to different screen sizes with user-controlled proportions
+- Provide collapsible panes that can be hidden to maximize other content areas
+- Support accessibility with keyboard navigation for layout adjustments
+- Enable persistent layout preferences that maintain user-configured proportions
+
+### Architecture
+**No Coupling**: This is a standalone component that can be used independently. The Splitter component encapsulates all its layout functionality within a single element, managing pane sizing, resizing interactions, and layout calculations internally.
+
+## Components
+
+### Splitter {Standalone Component}
+A comprehensive layout component that divides content into resizable sections with user-controlled proportions and collapsible panes.
+
+**Purpose:** Enables flexible layout management with multiple resizable panes that users can adjust through dragging splitter bars, with support for minimum/maximum sizes, collapsible sections, and both horizontal and vertical orientations.
+
+**Interface:**
+```typescript
+interface SplitterProps extends KendoReactComponentBaseProps {
+  // Pane Configuration
+  panes?: SplitterPaneProps[]; // Controlled pane configuration array
+  defaultPanes?: SplitterPaneProps[]; // Initial pane configuration for uncontrolled usage
+  
+  // Layout Configuration
+  orientation?: 'vertical' | 'horizontal'; // Layout direction (default: 'horizontal')
+  
+  // Event Handlers
+  onChange?: (event: SplitterOnChangeEvent) => void; // Fired when panes are resized or collapsed
+  
+  // Standard Props
+  className?: string; // Additional CSS classes
+  style?: React.CSSProperties; // Inline styles
+  id?: string; // Component identifier
+  dir?: string; // Text direction ('ltr' | 'rtl')
+  children?: React.ReactNode; // Pane content elements
+}
+
+// Pane configuration interface
+interface SplitterPaneProps extends KendoReactComponentBaseProps {
+  // Size Configuration
+  size?: string; // Pane size (percentage or pixel values like '50%' or '200px')
+  min?: string; // Minimum pane size to prevent over-shrinking
+  max?: string; // Maximum pane size to limit expansion
+  
+  // Interaction Behavior
+  resizable?: boolean; // Allow pane resizing through splitter bars (default: true)
+  collapsible?: boolean; // Enable pane collapse/expand functionality
+  collapsed?: boolean; // Current collapsed state of the pane
+  
+  // Content Management
+  scrollable?: boolean; // Enable scrolling for overflowing content (default: true)
+  keepMounted?: boolean; // Maintain DOM presence when collapsed
+  
+  // Standard Props
+  className?: string; // CSS classes for individual pane
+  style?: React.CSSProperties; // Inline styles for pane
+  id?: string; // Pane identifier
+}
+
+// Change event interface
+interface SplitterOnChangeEvent {
+  newState: SplitterPaneProps[]; // Updated pane configuration after resize/collapse
+  isLast: boolean; // Indicates final event in a drag sequence for performance optimization
+  nativeEvent: React.MouseEvent | React.KeyboardEvent | any; // Original DOM event
+}
+```
+
+**Usage Example:**
+```tsx
+import { Splitter } from '@progress/kendo-react-layout';
+
+// Basic splitter with two panes
+function BasicSplitter() {
+  return (
+    <Splitter
+      style={{ height: '400px' }}
+      orientation="horizontal"
+    >
+      <div style={{ padding: '20px', backgroundColor: '#f0f0f0' }}>
+        <h3>Left Pane</h3>
+        <p>This is the left content area that can be resized.</p>
+      </div>
+      <div style={{ padding: '20px', backgroundColor: '#e0e0e0' }}>
+        <h3>Right Pane</h3>
+        <p>This is the right content area that can be resized.</p>
+      </div>
+    </Splitter>
+  );
+}
+
+// Controlled splitter with pane configuration
+function ControlledSplitter() {
+  const [panes, setPanes] = React.useState([
+    { size: '30%', min: '20%', max: '50%', collapsible: true },
+    { size: '70%', min: '50%' }
+  ]);
+  
+  const handleChange = (event) => {
+    setPanes(event.newState);
+    console.log('Pane sizes changed:', event.newState);
+  };
+  
+  return (
+    <Splitter
+      style={{ height: '500px', border: '1px solid #ccc' }}
+      orientation="horizontal"
+      panes={panes}
+      onChange={handleChange}
+    >
+      <div style={{ padding: '15px' }}>
+        <h3>Sidebar</h3>
+        <p>Collapsible navigation panel with size constraints.</p>
+        <ul>
+          <li>Navigation Item 1</li>
+          <li>Navigation Item 2</li>
+          <li>Navigation Item 3</li>
+        </ul>
+      </div>
+      <div style={{ padding: '15px' }}>
+        <h3>Main Content</h3>
+        <p>Primary content area that maintains minimum size.</p>
+        <p>This area contains the main application content and cannot be resized below 50% of the total width.</p>
+      </div>
+    </Splitter>
+  );
+}
+
+// Vertical splitter with multiple panes
+function VerticalSplitter() {
+  const [panes, setPanes] = React.useState([
+    { size: '25%', collapsible: true, collapsed: false },
+    { size: '50%', min: '30%' },
+    { size: '25%', collapsible: true }
+  ]);
+  
+  return (
+    <Splitter
+      style={{ height: '600px', width: '100%' }}
+      orientation="vertical"
+      panes={panes}
+      onChange={(event) => setPanes(event.newState)}
+    >
+      <div style={{ padding: '10px', backgroundColor: '#f8f9fa' }}>
+        <h4>Header Section</h4>
+        <p>Collapsible top section for headers, toolbars, or navigation.</p>
+      </div>
+      <div style={{ padding: '10px', backgroundColor: '#ffffff' }}>
+        <h4>Main Content</h4>
+        <p>Primary content area with minimum height constraints.</p>
+        <div style={{ height: '200px', overflow: 'auto', border: '1px solid #ddd', padding: '10px' }}>
+          <p>Scrollable content within the main pane...</p>
+          {Array.from({ length: 20 }, (_, i) => (
+            <p key={i}>Content line {i + 1} with detailed information.</p>
+          ))}
+        </div>
+      </div>
+      <div style={{ padding: '10px', backgroundColor: '#f1f3f4' }}>
+        <h4>Footer Section</h4>
+        <p>Collapsible bottom section for status bars or additional tools.</p>
+      </div>
+    </Splitter>
+  );
+}
+
+// Complex nested splitter layout
+function NestedSplitter() {
+  return (
+    <Splitter
+      style={{ height: '500px' }}
+      orientation="horizontal"
+      defaultPanes={[
+        { size: '250px', min: '200px', max: '400px', collapsible: true },
+        { size: '70%' }
+      ]}
+    >
+      {/* Left sidebar */}
+      <div style={{ padding: '10px', backgroundColor: '#f5f5f5' }}>
+        <h3>Navigation</h3>
+        <nav>
+          <ul style={{ listStyle: 'none', padding: 0 }}>
+            <li style={{ padding: '5px 0' }}>Dashboard</li>
+            <li style={{ padding: '5px 0' }}>Projects</li>
+            <li style={{ padding: '5px 0' }}>Reports</li>
+            <li style={{ padding: '5px 0' }}>Settings</li>
+          </ul>
+        </nav>
+      </div>
+      
+      {/* Main content with vertical splitter */}
+      <Splitter
+        orientation="vertical"
+        defaultPanes={[
+          { size: '200px', collapsible: true },
+          { size: '60%' },
+          { size: '150px', collapsible: true }
+        ]}
+      >
+        {/* Top toolbar */}
+        <div style={{ padding: '10px', backgroundColor: '#e9ecef' }}>
+          <h4>Toolbar</h4>
+          <button>New</button>
+          <button>Save</button>
+          <button>Export</button>
+        </div>
+        
+        {/* Main workspace */}
+        <div style={{ padding: '20px', backgroundColor: '#ffffff' }}>
+          <h2>Workspace</h2>
+          <p>Main working area with nested splitter layout.</p>
+          <div style={{ height: '200px', border: '2px dashed #ccc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span>Content Area</span>
+          </div>
+        </div>
+        
+        {/* Bottom status */}
+        <div style={{ padding: '10px', backgroundColor: '#f8f9fa' }}>
+          <h5>Status Bar</h5>
+          <span>Ready | Line 1, Column 1 | 100%</span>
+        </div>
+      </Splitter>
+    </Splitter>
+  );
+}
+```
+
+## Integration Patterns
+
+### Dashboard Layout with Resizable Panels
+```tsx
+import { Splitter } from '@progress/kendo-react-layout';
+import { Grid, GridColumn } from '@progress/kendo-react-grid';
+import { Chart, ChartSeries } from '@progress/kendo-react-charts';
+
+function DashboardLayout() {
+  const [panes, setPanes] = React.useState([
+    { size: '300px', min: '250px', max: '500px', collapsible: true },
+    { size: '60%' },
+    { size: '25%', collapsible: true }
+  ]);
+  
+  const [data] = React.useState([
+    { category: 'Q1', value: 15000 },
+    { category: 'Q2', value: 18000 },
+    { category: 'Q3', value: 22000 },
+    { category: 'Q4', value: 19000 }
+  ]);
+  
+  return (
+    <div style={{ height: '100vh', padding: '20px' }}>
+      <h1>Analytics Dashboard</h1>
+      
+      <Splitter
+        style={{ height: 'calc(100vh - 100px)' }}
+        orientation="horizontal"
+        panes={panes}
+        onChange={(event) => setPanes(event.newState)}
+      >
+        {/* Control Panel */}
+        <div style={{ padding: '15px', backgroundColor: '#f8f9fa', overflow: 'auto' }}>
+          <h3>Filters & Controls</h3>
+          
+          <div style={{ marginBottom: '20px' }}>
+            <label>Date Range:</label>
+            <select style={{ width: '100%', margin: '5px 0' }}>
+              <option>Last 30 Days</option>
+              <option>Last Quarter</option>
+              <option>Last Year</option>
+            </select>
+          </div>
+          
+          <div style={{ marginBottom: '20px' }}>
+            <label>Region:</label>
+            <select style={{ width: '100%', margin: '5px 0' }}>
+              <option>All Regions</option>
+              <option>North America</option>
+              <option>Europe</option>
+              <option>Asia Pacific</option>
+            </select>
+          </div>
+          
+          <button style={{ width: '100%', padding: '10px' }}>
+            Apply Filters
+          </button>
+        </div>
+        
+        {/* Main Dashboard */}
+        <Splitter
+          orientation="vertical"
+          defaultPanes={[
+            { size: '50%' },
+            { size: '50%' }
+          ]}
+        >
+          {/* Charts Section */}
+          <div style={{ padding: '15px' }}>
+            <h3>Performance Overview</h3>
+            <div style={{ height: '300px', backgroundColor: '#fff', border: '1px solid #ddd', padding: '10px' }}>
+              <Chart style={{ height: '100%' }}>
+                <ChartSeries>
+                  <ChartSeries
+                    type="column"
+                    data={data}
+                    field="value"
+                    categoryField="category"
+                  />
+                </ChartSeries>
+              </Chart>
+            </div>
+          </div>
+          
+          {/* Data Grid Section */}
+          <div style={{ padding: '15px' }}>
+            <h3>Detailed Data</h3>
+            <div style={{ height: '250px' }}>
+              <Grid
+                data={data}
+                style={{ height: '100%' }}
+              >
+                <GridColumn field="category" title="Period" />
+                <GridColumn field="value" title="Revenue" format="{0:c}" />
+              </Grid>
+            </div>
+          </div>
+        </Splitter>
+        
+        {/* Summary Panel */}
+        <div style={{ padding: '15px', backgroundColor: '#f1f3f4' }}>
+          <h3>Summary</h3>
+          
+          <div style={{ marginBottom: '20px' }}>
+            <h4>Total Revenue</h4>
+            <span style={{ fontSize: '24px', fontWeight: 'bold', color: '#28a745' }}>
+              $74,000
+            </span>
+          </div>
+          
+          <div style={{ marginBottom: '20px' }}>
+            <h4>Growth Rate</h4>
+            <span style={{ fontSize: '18px', color: '#17a2b8' }}>
+              +12.5%
+            </span>
+          </div>
+          
+          <div style={{ marginBottom: '20px' }}>
+            <h4>Top Performer</h4>
+            <span>Q3 2024</span>
+          </div>
+          
+          <button style={{ width: '100%', padding: '10px', marginTop: '20px' }}>
+            Generate Report
+          </button>
+        </div>
+      </Splitter>
+    </div>
+  );
+}
+```
+
+### Code Editor Layout
+```tsx
+function CodeEditorLayout() {
+  const [leftPaneCollapsed, setLeftPaneCollapsed] = React.useState(false);
+  const [bottomPaneCollapsed, setBottomPaneCollapsed] = React.useState(false);
+  
+  const [panes, setPanes] = React.useState([
+    { 
+      size: '250px', 
+      min: '200px', 
+      max: '400px', 
+      collapsible: true,
+      collapsed: leftPaneCollapsed
+    },
+    { size: '75%' }
+  ]);
+  
+  React.useEffect(() => {
+    setPanes(prev => [
+      { ...prev[0], collapsed: leftPaneCollapsed },
+      prev[1]
+    ]);
+  }, [leftPaneCollapsed]);
+  
+  return (
+    <div style={{ height: '100vh', fontFamily: 'Monaco, monospace' }}>
+      {/* Header */}
+      <div style={{ height: '50px', backgroundColor: '#2d3748', color: 'white', padding: '10px', display: 'flex', alignItems: 'center' }}>
+        <h2 style={{ margin: 0 }}>Code Editor</h2>
+        <div style={{ marginLeft: 'auto' }}>
+          <button 
+            onClick={() => setLeftPaneCollapsed(!leftPaneCollapsed)}
+            style={{ marginRight: '10px' }}
+          >
+            {leftPaneCollapsed ? 'Show' : 'Hide'} Explorer
+          </button>
+          <button onClick={() => setBottomPaneCollapsed(!bottomPaneCollapsed)}>
+            {bottomPaneCollapsed ? 'Show' : 'Hide'} Terminal
+          </button>
+        </div>
+      </div>
+      
+      {/* Main Layout */}
+      <Splitter
+        style={{ height: 'calc(100vh - 50px)' }}
+        orientation="horizontal"
+        panes={panes}
+        onChange={(event) => setPanes(event.newState)}
+      >
+        {/* File Explorer */}
+        <div style={{ backgroundColor: '#1a202c', color: 'white', padding: '10px' }}>
+          <h4>Explorer</h4>
+          <div style={{ fontSize: '14px' }}>
+            <div style={{ padding: '5px 0', cursor: 'pointer' }}>📁 src/</div>
+            <div style={{ padding: '5px 0 5px 20px', cursor: 'pointer' }}>📄 App.tsx</div>
+            <div style={{ padding: '5px 0 5px 20px', cursor: 'pointer' }}>📄 index.tsx</div>
+            <div style={{ padding: '5px 0 5px 20px', cursor: 'pointer' }}>📄 App.css</div>
+            <div style={{ padding: '5px 0', cursor: 'pointer' }}>📁 components/</div>
+            <div style={{ padding: '5px 0 5px 20px', cursor: 'pointer' }}>📄 Header.tsx</div>
+            <div style={{ padding: '5px 0 5px 20px', cursor: 'pointer' }}>📄 Sidebar.tsx</div>
+            <div style={{ padding: '5px 0', cursor: 'pointer' }}>📄 package.json</div>
+          </div>
+        </div>
+        
+        {/* Editor and Terminal */}
+        <Splitter
+          orientation="vertical"
+          panes={[
+            { size: bottomPaneCollapsed ? '100%' : '70%' },
+            { 
+              size: bottomPaneCollapsed ? '0px' : '30%', 
+              min: '100px',
+              collapsible: true,
+              collapsed: bottomPaneCollapsed
+            }
+          ]}
+          onChange={(event) => {
+            const bottomPane = event.newState[1];
+            setBottomPaneCollapsed(bottomPane?.collapsed || false);
+          }}
+        >
+          {/* Code Editor */}
+          <div style={{ backgroundColor: '#2d3748', color: '#e2e8f0', padding: '10px' }}>
+            <div style={{ backgroundColor: '#4a5568', padding: '10px', marginBottom: '10px' }}>
+              <span>App.tsx</span>
+              <span style={{ marginLeft: '10px', color: '#a0aec0' }}>●</span>
+            </div>
+            <pre style={{ margin: 0, fontSize: '14px', lineHeight: '1.5' }}>
+{`import React from 'react';
+import { Splitter } from '@progress/kendo-react-layout';
+
+function App() {
+  return (
+    <div className="app">
+      <Splitter 
+        orientation="horizontal"
+        style={{ height: '100vh' }}
+      >
+        <div>Sidebar Content</div>
+        <div>Main Content</div>
+      </Splitter>
+    </div>
+  );
+}
+
+export default App;`}
+            </pre>
+          </div>
+          
+          {/* Terminal */}
+          {!bottomPaneCollapsed && (
+            <div style={{ backgroundColor: '#1a202c', color: '#e2e8f0', padding: '10px' }}>
+              <div style={{ backgroundColor: '#2d3748', padding: '5px 10px', marginBottom: '10px' }}>
+                <span>Terminal</span>
+              </div>
+              <div style={{ fontFamily: 'Monaco, Consolas, monospace', fontSize: '13px' }}>
+                <div>$ npm start</div>
+                <div style={{ color: '#68d391' }}>✓ Development server started on http://localhost:3000</div>
+                <div>$ npm run build</div>
+                <div style={{ color: '#63b3ed' }}>Building for production...</div>
+                <div style={{ color: '#68d391' }}>✓ Build completed successfully</div>
+                <div>$ <span style={{ backgroundColor: '#4a5568' }}>█</span></div>
+              </div>
+            </div>
+          )}
+        </Splitter>
+      </Splitter>
+    </div>
+  );
+}
+```
+
+### Document Viewer with Navigation
+```tsx
+function DocumentViewer() {
+  const [tableOfContents] = React.useState([
+    { id: 1, title: 'Introduction', level: 1 },
+    { id: 2, title: 'Getting Started', level: 1 },
+    { id: 3, title: 'Installation', level: 2 },
+    { id: 4, title: 'Configuration', level: 2 },
+    { id: 5, title: 'Advanced Topics', level: 1 },
+    { id: 6, title: 'Performance Optimization', level: 2 },
+    { id: 7, title: 'Troubleshooting', level: 2 }
+  ]);
+  
+  const [activeSectionId, setActiveSectionId] = React.useState(1);
+  const [tocCollapsed, setTocCollapsed] = React.useState(false);
+  
+  return (
+    <div style={{ height: '100vh' }}>
+      {/* Document Header */}
+      <div style={{ height: '60px', backgroundColor: '#f8f9fa', padding: '15px', borderBottom: '1px solid #dee2e6' }}>
+        <h1 style={{ margin: 0, fontSize: '20px' }}>React Component Documentation</h1>
+        <button 
+          onClick={() => setTocCollapsed(!tocCollapsed)}
+          style={{ position: 'absolute', right: '20px', top: '20px' }}
+        >
+          {tocCollapsed ? 'Show TOC' : 'Hide TOC'}
+        </button>
+      </div>
+      
+      <Splitter
+        style={{ height: 'calc(100vh - 60px)' }}
+        orientation="horizontal"
+        panes={[
+          { 
+            size: tocCollapsed ? '0px' : '300px',
+            min: '250px',
+            max: '500px',
+            collapsible: true,
+            collapsed: tocCollapsed
+          },
+          { size: '75%' }
+        ]}
+        onChange={(event) => {
+          const tocPane = event.newState[0];
+          setTocCollapsed(tocPane?.collapsed || false);
+        }}
+      >
+        {/* Table of Contents */}
+        {!tocCollapsed && (
+          <div style={{ padding: '20px', backgroundColor: '#f8f9fa', borderRight: '1px solid #dee2e6', overflow: 'auto' }}>
+            <h3>Table of Contents</h3>
+            <nav>
+              <ul style={{ listStyle: 'none', padding: 0 }}>
+                {tableOfContents.map(item => (
+                  <li
+                    key={item.id}
+                    style={{
+                      paddingLeft: `${(item.level - 1) * 20}px`,
+                      padding: '8px 0',
+                      cursor: 'pointer',
+                      backgroundColor: activeSectionId === item.id ? '#e9ecef' : 'transparent',
+                      borderRadius: '4px',
+                      paddingLeft: `${(item.level - 1) * 20 + 10}px`
+                    }}
+                    onClick={() => setActiveSectionId(item.id)}
+                  >
+                    {item.title}
+                  </li>
+                ))}
+              </ul>
+            </nav>
+            
+            <div style={{ marginTop: '30px', padding: '15px', backgroundColor: '#e9ecef', borderRadius: '4px' }}>
+              <h4>Document Info</h4>
+              <p style={{ fontSize: '14px', margin: '5px 0' }}>Version: 2.1.0</p>
+              <p style={{ fontSize: '14px', margin: '5px 0' }}>Last Updated: Dec 2024</p>
+              <p style={{ fontSize: '14px', margin: '5px 0' }}>Pages: 47</p>
+            </div>
+          </div>
+        )}
+        
+        {/* Document Content */}
+        <div style={{ padding: '30px', overflow: 'auto', backgroundColor: 'white' }}>
+          <article style={{ maxWidth: '800px', lineHeight: '1.6' }}>
+            <h1>Introduction</h1>
+            <p>
+              This comprehensive guide covers the implementation and usage of React components
+              in modern web applications. The content is organized to provide both beginners
+              and advanced developers with practical insights and best practices.
+            </p>
+            
+            <h2>Overview</h2>
+            <p>
+              React components are the building blocks of React applications. They encapsulate
+              logic, state, and presentation into reusable pieces that can be composed to
+              create complex user interfaces.
+            </p>
+            
+            <h3>Key Concepts</h3>
+            <ul>
+              <li>Component composition and reusability</li>
+              <li>Props and state management</li>
+              <li>Event handling and user interactions</li>
+              <li>Performance optimization techniques</li>
+              <li>Testing strategies and best practices</li>
+            </ul>
+            
+            <h2>Getting Started</h2>
+            <p>
+              To begin working with React components, you'll need to set up your development
+              environment and understand the fundamental concepts that drive component-based
+              architecture.
+            </p>
+            
+            <div style={{ backgroundColor: '#f8f9fa', padding: '20px', borderRadius: '4px', margin: '20px 0' }}>
+              <h4>Code Example</h4>
+              <pre style={{ backgroundColor: '#e9ecef', padding: '15px', borderRadius: '4px', overflow: 'auto' }}>
+{`import React from 'react';
+
+function WelcomeComponent({ name }) {
+  return (
+    <div className="welcome">
+      <h1>Hello, {name}!</h1>
+      <p>Welcome to React development.</p>
+    </div>
+  );
+}
+
+export default WelcomeComponent;`}
+              </pre>
+            </div>
+            
+            <h3>Installation</h3>
+            <p>
+              Follow these steps to install the necessary dependencies and configure your
+              development environment for optimal React component development.
+            </p>
+            
+            <h3>Configuration</h3>
+            <p>
+              Proper configuration ensures that your components work correctly across
+              different environments and build processes.
+            </p>
+            
+            <div style={{ height: '200px' }}></div> {/* Spacer for scrolling demo */}
+          </article>
+        </div>
+      </Splitter>
+    </div>
+  );
+}
+```
+
+### Master-Detail Layout
+```tsx
+function MasterDetailLayout() {
+  const [selectedItem, setSelectedItem] = React.useState(null);
+  const [items] = React.useState([
+    {
+      id: 1,
+      title: 'Project Alpha',
+      status: 'Active',
+      description: 'A comprehensive web application for customer management.',
+      details: {
+        startDate: '2024-01-15',
+        endDate: '2024-06-30',
+        team: ['John Doe', 'Jane Smith', 'Mike Johnson'],
+        progress: 65
+      }
+    },
+    {
+      id: 2,
+      title: 'Project Beta',
+      status: 'Planning',
+      description: 'Mobile application for inventory tracking.',
+      details: {
+        startDate: '2024-03-01',
+        endDate: '2024-09-15',
+        team: ['Sarah Wilson', 'Tom Brown'],
+        progress: 15
+      }
+    },
+    {
+      id: 3,
+      title: 'Project Gamma',
+      status: 'Completed',
+      description: 'E-commerce platform with advanced analytics.',
+      details: {
+        startDate: '2023-08-01',
+        endDate: '2024-01-31',
+        team: ['Lisa Chen', 'Robert Davis', 'Emily Taylor', 'James Wilson'],
+        progress: 100
+      }
+    }
+  ]);
+  
+  return (
+    <div style={{ height: '100vh', padding: '20px' }}>
+      <h1>Project Management</h1>
+      
+      <Splitter
+        style={{ height: 'calc(100vh - 100px)' }}
+        orientation="horizontal"
+        defaultPanes={[
+          { size: '40%', min: '300px', max: '60%' },
+          { size: '60%' }
+        ]}
+      >
+        {/* Master List */}
+        <div style={{ padding: '20px', backgroundColor: '#f8f9fa', overflow: 'auto' }}>
+          <h3>Projects ({items.length})</h3>
+          
+          <div style={{ marginBottom: '20px' }}>
+            <input
+              type="text"
+              placeholder="Search projects..."
+              style={{ width: '100%', padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}
+            />
+          </div>
+          
+          <div>
+            {items.map(item => (
+              <div
+                key={item.id}
+                style={{
+                  padding: '15px',
+                  marginBottom: '10px',
+                  backgroundColor: selectedItem?.id === item.id ? '#007bff' : 'white',
+                  color: selectedItem?.id === item.id ? 'white' : 'black',
+                  border: '1px solid #dee2e6',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s'
+                }}
+                onClick={() => setSelectedItem(item)}
+              >
+                <h4 style={{ margin: '0 0 5px 0' }}>{item.title}</h4>
+                <p style={{ margin: '0 0 5px 0', fontSize: '14px', opacity: 0.8 }}>
+                  {item.description}
+                </p>
+                <span
+                  style={{
+                    display: 'inline-block',
+                    padding: '2px 8px',
+                    fontSize: '12px',
+                    backgroundColor: 
+                      item.status === 'Active' ? '#28a745' :
+                      item.status === 'Planning' ? '#ffc107' : '#6c757d',
+                    color: 'white',
+                    borderRadius: '12px'
+                  }}
+                >
+                  {item.status}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+        
+        {/* Detail View */}
+        <div style={{ padding: '20px', overflow: 'auto' }}>
+          {selectedItem ? (
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
+                <h2 style={{ margin: 0, marginRight: '15px' }}>{selectedItem.title}</h2>
+                <span
+                  style={{
+                    padding: '4px 12px',
+                    fontSize: '14px',
+                    backgroundColor: 
+                      selectedItem.status === 'Active' ? '#28a745' :
+                      selectedItem.status === 'Planning' ? '#ffc107' : '#6c757d',
+                    color: 'white',
+                    borderRadius: '15px'
+                  }}
+                >
+                  {selectedItem.status}
+                </span>
+              </div>
+              
+              <p style={{ fontSize: '16px', marginBottom: '30px', color: '#6c757d' }}>
+                {selectedItem.description}
+              </p>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
+                <div>
+                  <h3>Project Details</h3>
+                  <div style={{ backgroundColor: '#f8f9fa', padding: '20px', borderRadius: '4px' }}>
+                    <div style={{ marginBottom: '15px' }}>
+                      <strong>Start Date:</strong> {selectedItem.details.startDate}
+                    </div>
+                    <div style={{ marginBottom: '15px' }}>
+                      <strong>End Date:</strong> {selectedItem.details.endDate}
+                    </div>
+                    <div style={{ marginBottom: '15px' }}>
+                      <strong>Progress:</strong>
+                      <div style={{ marginTop: '5px' }}>
+                        <div
+                          style={{
+                            width: '100%',
+                            height: '20px',
+                            backgroundColor: '#e9ecef',
+                            borderRadius: '10px',
+                            overflow: 'hidden'
+                          }}
+                        >
+                          <div
+                            style={{
+                              width: `${selectedItem.details.progress}%`,
+                              height: '100%',
+                              backgroundColor: '#007bff',
+                              transition: 'width 0.3s'
+                            }}
+                          />
+                        </div>
+                        <span style={{ fontSize: '14px', marginTop: '5px', display: 'block' }}>
+                          {selectedItem.details.progress}% complete
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div>
+                  <h3>Team Members</h3>
+                  <div style={{ backgroundColor: '#f8f9fa', padding: '20px', borderRadius: '4px' }}>
+                    {selectedItem.details.team.map((member, index) => (
+                      <div
+                        key={index}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          marginBottom: '10px'
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: '40px',
+                            height: '40px',
+                            borderRadius: '50%',
+                            backgroundColor: '#007bff',
+                            color: 'white',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            marginRight: '15px',
+                            fontSize: '14px',
+                            fontWeight: 'bold'
+                          }}
+                        >
+                          {member.split(' ').map(name => name[0]).join('')}
+                        </div>
+                        <span>{member}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              
+              <div style={{ marginTop: '30px' }}>
+                <button style={{ marginRight: '10px', padding: '10px 20px' }}>
+                  Edit Project
+                </button>
+                <button style={{ padding: '10px 20px' }}>
+                  View Timeline
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div style={{ textAlign: 'center', marginTop: '100px', color: '#6c757d' }}>
+              <h3>Select a project</h3>
+              <p>Choose a project from the list to view its details.</p>
+            </div>
+          )}
+        </div>
+      </Splitter>
+    </div>
+  );
+}
+```
+
+## Component Relationships
+
+### Data Flow
+The Splitter component manages layout proportions and pane states internally. When users drag splitter bars or collapse panes, the component calculates new dimensions and updates its internal state. For controlled usage, the `onChange` event provides the new pane configuration to parent components for external state management.
+
+### Event Handling
+- **onChange**: Primary event fired during resize operations and collapse/expand actions, providing the updated pane configuration and performance optimization flags
+- **Resize Events**: Triggered continuously during drag operations, with `isLast` flag indicating the final event for performance-sensitive operations
+- **Collapse Events**: Fired when panes are collapsed or expanded through splitter bar controls
+
+## Best Practices
+
+### Usage Guidelines
+- Set explicit heights on the Splitter container to ensure proper layout rendering and prevent content overflow
+- Use percentage-based sizing for responsive layouts and pixel-based sizing for fixed-width sidebars or toolbars
+- Implement minimum and maximum size constraints to prevent panes from becoming unusable when resized
+- Consider the `keepMounted` prop for panes with expensive content that should remain in the DOM when collapsed
+- Use the `isLast` flag in onChange events to optimize performance by deferring expensive operations until resize completion
+- Provide intuitive collapse/expand controls and keyboard navigation for better accessibility
+
+### Accessibility
+- Ensure splitter bars are keyboard accessible using Tab navigation and arrow keys for resizing
+- Provide appropriate ARIA labels for splitter bars to describe their function and current state
+- Test with screen readers to verify pane content remains accessible during layout changes
+- Maintain sufficient contrast for splitter bar visual indicators and resize handles
+- Consider providing alternative navigation methods for users who cannot use drag interactions
+- Implement focus management to ensure keyboard users can navigate between panes effectively
+
+### Performance
+- Use the `isLast` event flag to defer expensive layout calculations until resize operations complete
+- Implement debounced handlers for operations triggered by onChange events to prevent excessive API calls
+- Consider virtualizing content in large scrollable panes to improve rendering performance
+- Minimize inline styles and prefer CSS classes for better rendering optimization
+- Use React.memo for pane content components that don't need frequent re-rendering during resize operations
+- Profile layout performance with large datasets and implement lazy loading for off-screen content
+
+## Common Patterns
+
+### Responsive Layout with Breakpoint Handling
+```tsx
+function ResponsiveSplitterLayout() {
+  const [windowWidth, setWindowWidth] = React.useState(window.innerWidth);
+  const [isMobile, setIsMobile] = React.useState(window.innerWidth < 768);
+  
+  React.useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+      setWindowWidth(width);
+      setIsMobile(width < 768);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  
+  const [panes, setPanes] = React.useState([
+    { size: isMobile ? '100%' : '300px', min: '250px', collapsible: true },
+    { size: isMobile ? '0%' : '70%' }
+  ]);
+  
+  React.useEffect(() => {
+    if (isMobile) {
+      setPanes([
+        { size: '100%', collapsible: true, collapsed: false },
+        { size: '0px', collapsible: true, collapsed: true }
+      ]);
+    } else {
+      setPanes([
+        { size: '300px', min: '250px', collapsible: true, collapsed: false },
+        { size: '70%', collapsed: false }
+      ]);
+    }
+  }, [isMobile]);
+  
+  if (isMobile) {
+    // Mobile: Stack layout instead of splitter
+    return (
+      <div style={{ height: '100vh' }}>
+        <div style={{ height: '60px', backgroundColor: '#f8f9fa', padding: '15px' }}>
+          <h2>Mobile Navigation</h2>
+        </div>
+        <div style={{ height: 'calc(100vh - 60px)', overflow: 'auto', padding: '20px' }}>
+          <h3>Main Content</h3>
+          <p>Content optimized for mobile viewing.</p>
+        </div>
+      </div>
+    );
+  }
+  
+  return (
+    <Splitter
+      style={{ height: '100vh' }}
+      orientation="horizontal"
+      panes={panes}
+      onChange={(event) => setPanes(event.newState)}
+    >
+      <div style={{ padding: '20px', backgroundColor: '#f8f9fa' }}>
+        <h3>Sidebar</h3>
+        <p>Desktop navigation and controls.</p>
+      </div>
+      <div style={{ padding: '20px' }}>
+        <h3>Main Content</h3>
+        <p>Primary content area for desktop view.</p>
+      </div>
+    </Splitter>
+  );
+}
+```
+
+### Persistent Layout Preferences
+```tsx
+function PersistentSplitterLayout() {
+  const STORAGE_KEY = 'splitter-layout-preferences';
+  
+  const [panes, setPanes] = React.useState(() => {
+    // Load saved layout from localStorage
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (error) {
+        console.warn('Failed to parse saved layout preferences');
+      }
+    }
+    
+    // Default layout
+    return [
+      { size: '250px', min: '200px', max: '400px', collapsible: true },
+      { size: '50%' },
+      { size: '25%', collapsible: true }
+    ];
+  });
+  
+  // Debounced save function to prevent excessive localStorage writes
+  const debouncedSave = React.useMemo(() => {
+    let timeoutId;
+    return (panes) => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(panes));
+      }, 500);
+    };
+  }, []);
+  
+  const handleLayoutChange = (event) => {
+    const newPanes = event.newState;
+    setPanes(newPanes);
+    
+    // Save only on the last event of a drag sequence
+    if (event.isLast) {
+      debouncedSave(newPanes);
+    }
+  };
+  
+  const resetLayout = () => {
+    const defaultPanes = [
+      { size: '250px', min: '200px', max: '400px', collapsible: true },
+      { size: '50%' },
+      { size: '25%', collapsible: true }
+    ];
+    setPanes(defaultPanes);
+    localStorage.removeItem(STORAGE_KEY);
+  };
+  
+  return (
+    <div style={{ height: '100vh' }}>
+      <div style={{ height: '50px', padding: '10px', backgroundColor: '#f8f9fa', borderBottom: '1px solid #dee2e6' }}>
+        <h2 style={{ margin: 0, display: 'inline' }}>Layout Preferences Demo</h2>
+        <button
+          onClick={resetLayout}
+          style={{ float: 'right', marginTop: '5px' }}
+        >
+          Reset Layout
+        </button>
+      </div>
+      
+      <Splitter
+        style={{ height: 'calc(100vh - 50px)' }}
+        orientation="horizontal"
+        panes={panes}
+        onChange={handleLayoutChange}
+      >
+        <div style={{ padding: '20px', backgroundColor: '#f8f9fa' }}>
+          <h3>Left Panel</h3>
+          <p>Your layout preferences are automatically saved and restored when you reload the page.</p>
+          <div style={{ fontSize: '14px', color: '#6c757d', marginTop: '20px' }}>
+            <p><strong>Features:</strong></p>
+            <ul>
+              <li>Automatic save to localStorage</li>
+              <li>Debounced saving during drag</li>
+              <li>Layout restoration on page load</li>
+              <li>Reset to defaults option</li>
+            </ul>
+          </div>
+        </div>
+        
+        <div style={{ padding: '20px' }}>
+          <h3>Main Content</h3>
+          <p>This is the main content area. Try resizing the panels and refreshing the page to see your layout preferences persist.</p>
+          
+          <div style={{ marginTop: '30px', padding: '20px', backgroundColor: '#e9ecef', borderRadius: '4px' }}>
+            <h4>Current Layout:</h4>
+            <pre style={{ fontSize: '12px', overflow: 'auto' }}>
+              {JSON.stringify(panes, null, 2)}
+            </pre>
+          </div>
+        </div>
+        
+        <div style={{ padding: '20px', backgroundColor: '#f1f3f4' }}>
+          <h3>Right Panel</h3>
+          <p>This panel can be collapsed and expanded. Its state is also preserved across page reloads.</p>
+          
+          <div style={{ marginTop: '20px' }}>
+            <h4>Storage Info:</h4>
+            <p style={{ fontSize: '14px' }}>
+              Layout data is stored in your browser's localStorage under the key: <code>{STORAGE_KEY}</code>
+            </p>
+          </div>
+        </div>
+      </Splitter>
+    </div>
+  );
+}
+```
+
+### Dynamic Content Loading in Panes
+```tsx
+function DynamicContentSplitter() {
+  const [activeTab, setActiveTab] = React.useState('overview');
+  const [contentData, setContentData] = React.useState({});
+  const [loading, setLoading] = React.useState({});
+  
+  // Simulate content loading
+  const loadContent = async (tabKey) => {
+    if (contentData[tabKey]) return; // Already loaded
+    
+    setLoading(prev => ({ ...prev, [tabKey]: true }));
+    
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    const mockContent = {
+      overview: {
+        title: 'Project Overview',
+        data: 'Comprehensive project statistics and key metrics...'
+      },
+      analytics: {
+        title: 'Analytics Dashboard',
+        data: 'Detailed analytics charts and performance indicators...'
+      },
+      reports: {
+        title: 'Generated Reports',
+        data: 'Historical reports and automated analysis results...'
+      }
+    };
+    
+    setContentData(prev => ({ ...prev, [tabKey]: mockContent[tabKey] }));
+    setLoading(prev => ({ ...prev, [tabKey]: false }));
+  };
+  
+  React.useEffect(() => {
+    loadContent(activeTab);
+  }, [activeTab]);
+  
+  const [panes, setPanes] = React.useState([
+    { size: '200px', min: '150px', max: '300px' },
+    { size: '70%' },
+    { size: '25%', collapsible: true }
+  ]);
+  
+  return (
+    <div style={{ height: '100vh' }}>
+      <Splitter
+        style={{ height: '100%' }}
+        orientation="horizontal"
+        panes={panes}
+        onChange={(event) => setPanes(event.newState)}
+      >
+        {/* Navigation Pane */}
+        <div style={{ padding: '20px', backgroundColor: '#f8f9fa' }}>
+          <h3>Navigation</h3>
+          <nav>
+            <div
+              style={{
+                padding: '10px',
+                marginBottom: '5px',
+                backgroundColor: activeTab === 'overview' ? '#007bff' : 'transparent',
+                color: activeTab === 'overview' ? 'white' : 'black',
+                borderRadius: '4px',
+                cursor: 'pointer'
+              }}
+              onClick={() => setActiveTab('overview')}
+            >
+              Overview
+            </div>
+            <div
+              style={{
+                padding: '10px',
+                marginBottom: '5px',
+                backgroundColor: activeTab === 'analytics' ? '#007bff' : 'transparent',
+                color: activeTab === 'analytics' ? 'white' : 'black',
+                borderRadius: '4px',
+                cursor: 'pointer'
+              }}
+              onClick={() => setActiveTab('analytics')}
+            >
+              Analytics
+            </div>
+            <div
+              style={{
+                padding: '10px',
+                marginBottom: '5px',
+                backgroundColor: activeTab === 'reports' ? '#007bff' : 'transparent',
+                color: activeTab === 'reports' ? 'white' : 'black',
+                borderRadius: '4px',
+                cursor: 'pointer'
+              }}
+              onClick={() => setActiveTab('reports')}
+            >
+              Reports
+            </div>
+          </nav>
+        </div>
+        
+        {/* Main Content Pane */}
+        <div style={{ padding: '20px', overflow: 'auto' }}>
+          {loading[activeTab] ? (
+            <div style={{ textAlign: 'center', marginTop: '100px' }}>
+              <div style={{ fontSize: '18px', marginBottom: '20px' }}>Loading...</div>
+              <div
+                style={{
+                  width: '50px',
+                  height: '50px',
+                  border: '4px solid #f3f3f3',
+                  borderTop: '4px solid #007bff',
+                  borderRadius: '50%',
+                  animation: 'spin 1s linear infinite',
+                  margin: '0 auto'
+                }}
+              />
+            </div>
+          ) : contentData[activeTab] ? (
+            <div>
+              <h2>{contentData[activeTab].title}</h2>
+              <p>{contentData[activeTab].data}</p>
+              
+              {activeTab === 'overview' && (
+                <div style={{ marginTop: '30px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
+                    <div style={{ padding: '20px', backgroundColor: '#e9ecef', borderRadius: '4px' }}>
+                      <h4>Total Projects</h4>
+                      <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#007bff' }}>42</div>
+                    </div>
+                    <div style={{ padding: '20px', backgroundColor: '#e9ecef', borderRadius: '4px' }}>
+                      <h4>Active Users</h4>
+                      <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#28a745' }}>1,284</div>
+                    </div>
+                    <div style={{ padding: '20px', backgroundColor: '#e9ecef', borderRadius: '4px' }}>
+                      <h4>Completion Rate</h4>
+                      <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#ffc107' }}>87%</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {activeTab === 'analytics' && (
+                <div style={{ marginTop: '30px' }}>
+                  <div style={{ height: '300px', backgroundColor: '#f8f9fa', border: '2px dashed #ccc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span>Analytics Chart Placeholder</span>
+                  </div>
+                </div>
+              )}
+              
+              {activeTab === 'reports' && (
+                <div style={{ marginTop: '30px' }}>
+                  <div style={{ padding: '20px', backgroundColor: '#f8f9fa', borderRadius: '4px' }}>
+                    <h4>Available Reports</h4>
+                    <ul>
+                      <li>Monthly Performance Summary</li>
+                      <li>User Engagement Analysis</li>
+                      <li>Resource Utilization Report</li>
+                      <li>Financial Overview</li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div style={{ textAlign: 'center', marginTop: '100px', color: '#6c757d' }}>
+              <h3>Select a section</h3>
+              <p>Choose a navigation item to load content.</p>
+            </div>
+          )}
+        </div>
+        
+        {/* Properties/Tools Pane */}
+        <div style={{ padding: '20px', backgroundColor: '#f1f3f4' }}>
+          <h3>Properties</h3>
+          <div style={{ fontSize: '14px' }}>
+            <div style={{ marginBottom: '15px' }}>
+              <strong>Active Section:</strong> {activeTab}
+            </div>
+            <div style={{ marginBottom: '15px' }}>
+              <strong>Content Status:</strong> {
+                loading[activeTab] ? 'Loading...' : 
+                contentData[activeTab] ? 'Loaded' : 'Not loaded'
+              }
+            </div>
+            <div style={{ marginBottom: '15px' }}>
+              <strong>Pane Sizes:</strong>
+              <div style={{ fontSize: '12px', marginTop: '5px' }}>
+                {panes.map((pane, index) => (
+                  <div key={index}>Pane {index + 1}: {pane.size}</div>
+                ))}
+              </div>
+            </div>
+          </div>
+          
+          <div style={{ marginTop: '30px' }}>
+            <button
+              onClick={() => loadContent(activeTab)}
+              style={{ width: '100%', padding: '10px' }}
+            >
+              Refresh Content
+            </button>
+          </div>
+        </div>
+      </Splitter>
+      
+      <style>
+        {`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}
+      </style>
+    </div>
+  );
+}
+```

@@ -1,0 +1,623 @@
+# Stepper Component
+
+## Overview
+
+### Purpose
+Use this component to generate stepper navigation functionality
+
+### When to Use
+The Stepper component is ideal for creating step-by-step navigation interfaces that guide users through multi-step processes or workflows. Use Stepper when you need:
+
+- **Multi-step forms** - Breaking complex forms into manageable steps (registration, checkout, surveys)
+- **Guided workflows** - Leading users through sequential processes (setup wizards, onboarding flows)
+- **Progress indication** - Showing users their current position in a multi-step process
+- **Process validation** - Indicating completed, current, and upcoming steps with visual feedback
+- **Linear and non-linear navigation** - Supporting both enforced sequential flow and flexible step jumping
+- **Accessible step navigation** - Providing keyboard navigation and screen reader support for step-based interfaces
+- **Status visualization** - Displaying step completion status, errors, and validation states
+- **Responsive step displays** - Adapting step presentation for different screen sizes and orientations
+
+### Architecture
+**No Coupling**: Stepper is a standalone component that operates independently without requiring other components. It provides a complete step navigation solution with built-in state management, accessibility features, and customizable step rendering.
+
+## Components
+
+### Stepper
+
+**Purpose:** Provides a comprehensive step navigation control with progress tracking, validation states, and accessibility features for guiding users through multi-step processes.
+
+**Interface:**
+```typescript
+interface StepperProps {
+  // Core functionality
+  items: Array<StepProps>; // Required - Collection of steps to render
+  value: number; // Required - Index of the currently selected step
+  onChange?: (event: StepperChangeEvent) => void; // Callback when step selection changes
+  onFocus?: (event: StepperFocusEvent) => void; // Callback when a step receives focus
+  
+  // Navigation behavior
+  linear?: boolean; // Enforce linear step progression (default: false)
+  selectOnFocus?: boolean; // Change selection on focus vs requiring explicit action (default: false)
+  
+  // Display and layout
+  orientation?: 'horizontal' | 'vertical'; // Step arrangement (default: 'horizontal')
+  mode?: 'steps' | 'labels'; // Display mode - indicators with labels or labels only (default: 'steps')
+  
+  // Animation
+  animationDuration?: boolean | number; // Animation duration in milliseconds (default: 400)
+  
+  // Icons and validation
+  successIcon?: string; // Custom icon for valid/completed steps
+  successSVGIcon?: SVGIcon; // Custom SVG icon for valid/completed steps
+  errorIcon?: string; // Custom icon for invalid steps
+  errorSVGIcon?: SVGIcon; // Custom SVG icon for invalid steps
+  
+  // Custom rendering
+  item?: React.ComponentType<StepProps>; // Custom step renderer component
+  children?: React.ReactNode; // Child elements (alternative to items prop)
+  
+  // Accessibility and interaction
+  disabled?: boolean; // Disable the entire stepper
+  dir?: string; // Text direction for internationalization
+  
+  // Styling
+  className?: string; // Custom CSS classes
+  style?: React.CSSProperties; // Inline styles
+}
+
+interface StepProps {
+  // Content and labeling
+  label?: string; // Primary step label text
+  text?: string; // Text content for step indicator
+  children?: React.ReactNode; // Child content for the step
+  
+  // Visual indicators
+  icon?: string; // Custom icon for the step
+  svgIcon?: SVGIcon; // Custom SVG icon for the step
+  
+  // State and behavior
+  disabled?: boolean; // Disable this specific step
+  current?: boolean; // Mark as the current active step
+  isValid?: boolean; // Validation state of the step
+  optional?: boolean; // Mark step as optional (skips validation)
+  
+  // Accessibility
+  tabIndex?: number; // Tab order position (default: 0)
+  
+  // Styling and metadata
+  className?: string; // Custom CSS classes for the step
+  style?: React.CSSProperties; // Inline styles for the step
+  index?: number; // Step index (set automatically)
+  content?: any; // Additional content data
+  [customProp: string]: any; // Support for custom properties
+}
+
+interface StepperChangeEvent {
+  value: number; // Index of the newly selected step
+  target: StepperHandle; // Reference to the stepper component
+}
+
+interface StepperFocusEvent {
+  target: StepperHandle; // Reference to the stepper component
+}
+
+interface StepperHandle {
+  element: HTMLMenuElement | null; // The stepper's DOM element
+  focus: () => void; // Focus the stepper's first focusable child
+}
+```
+
+**Usage Example:**
+```tsx
+import { Stepper } from '@progress/kendo-react-layout';
+import { useState } from 'react';
+
+function BasicStepper() {
+  const [currentStep, setCurrentStep] = useState(0);
+  
+  const steps = [
+    { label: 'Personal Info', isValid: true },
+    { label: 'Address', isValid: false },
+    { label: 'Confirmation', optional: true }
+  ];
+
+  return (
+    <Stepper
+      items={steps}
+      value={currentStep}
+      onChange={(event) => setCurrentStep(event.value)}
+    />
+  );
+}
+```
+
+## Integration Patterns
+
+### Basic Usage
+```tsx
+import { Stepper } from '@progress/kendo-react-layout';
+
+// Simple horizontal stepper
+function SimpleExample() {
+  const [step, setStep] = useState(0);
+  
+  const steps = [
+    { label: 'Step 1' },
+    { label: 'Step 2' },
+    { label: 'Step 3' }
+  ];
+
+  return (
+    <Stepper
+      items={steps}
+      value={step}
+      onChange={(event) => setStep(event.value)}
+    />
+  );
+}
+
+// Vertical stepper with custom styling
+function VerticalExample() {
+  const [activeStep, setActiveStep] = useState(1);
+  
+  const steps = [
+    { label: 'Start', isValid: true },
+    { label: 'In Progress' },
+    { label: 'Complete' }
+  ];
+
+  return (
+    <Stepper
+      items={steps}
+      value={activeStep}
+      orientation="vertical"
+      onChange={(event) => setActiveStep(event.value)}
+      className="custom-stepper"
+    />
+  );
+}
+```
+
+### Advanced Usage with Validation
+```tsx
+import { Stepper } from '@progress/kendo-react-layout';
+import { useState } from 'react';
+
+function ValidationStepper() {
+  const [currentStep, setCurrentStep] = useState(0);
+  const [stepValidation, setStepValidation] = useState([false, false, false]);
+
+  const steps = [
+    { 
+      label: 'Account Setup', 
+      isValid: stepValidation[0],
+      icon: stepValidation[0] ? 'check' : 'user'
+    },
+    { 
+      label: 'Billing Information', 
+      isValid: stepValidation[1],
+      icon: stepValidation[1] ? 'check' : 'dollar'
+    },
+    { 
+      label: 'Confirmation', 
+      isValid: stepValidation[2],
+      optional: true,
+      icon: 'check-circle'
+    }
+  ];
+
+  const handleStepChange = (event: StepperChangeEvent) => {
+    const newStep = event.value;
+    
+    // In linear mode, prevent jumping ahead without validation
+    if (linear && newStep > currentStep && !stepValidation[currentStep]) {
+      return; // Block navigation if current step is invalid
+    }
+    
+    setCurrentStep(newStep);
+  };
+
+  const validateCurrentStep = () => {
+    const newValidation = [...stepValidation];
+    newValidation[currentStep] = true;
+    setStepValidation(newValidation);
+  };
+
+  return (
+    <div>
+      <Stepper
+        items={steps}
+        value={currentStep}
+        onChange={handleStepChange}
+        linear={true}
+        successIcon="check"
+        errorIcon="warning"
+        animationDuration={300}
+      />
+      
+      <div className="step-content">
+        {/* Step content goes here */}
+        <button onClick={validateCurrentStep}>
+          Mark Step as Complete
+        </button>
+      </div>
+    </div>
+  );
+}
+```
+
+### Common Variations
+
+#### Form Wizard Stepper
+```tsx
+// Multi-step form with progress tracking
+function FormWizardStepper() {
+  const [currentStep, setCurrentStep] = useState(0);
+  const [completedSteps, setCompletedSteps] = useState<boolean[]>([false, false, false, false]);
+
+  const wizardSteps = [
+    { label: 'Basic Info', text: '1', isValid: completedSteps[0] },
+    { label: 'Contact Details', text: '2', isValid: completedSteps[1] },
+    { label: 'Preferences', text: '3', isValid: completedSteps[2], optional: true },
+    { label: 'Review & Submit', text: '4', isValid: completedSteps[3] }
+  ];
+
+  return (
+    <Stepper
+      items={wizardSteps}
+      value={currentStep}
+      onChange={(event) => setCurrentStep(event.value)}
+      linear={true}
+      selectOnFocus={false}
+      orientation="horizontal"
+      className="form-wizard-stepper"
+    />
+  );
+}
+```
+
+#### Process Status Stepper
+```tsx
+// Read-only stepper for showing process status
+function ProcessStatusStepper() {
+  const processSteps = [
+    { label: 'Order Placed', isValid: true, icon: 'check' },
+    { label: 'Processing', isValid: true, icon: 'clock' },
+    { label: 'Shipped', isValid: false, icon: 'truck' },
+    { label: 'Delivered', isValid: false, icon: 'home' }
+  ];
+
+  return (
+    <Stepper
+      items={processSteps}
+      value={1} // Currently processing
+      disabled={true} // Read-only status display
+      orientation="horizontal"
+      mode="steps"
+      successIcon="check"
+      className="status-stepper"
+    />
+  );
+}
+```
+
+#### Compact Labels-Only Stepper
+```tsx
+// Minimal stepper with labels only for space-constrained layouts
+function CompactStepper() {
+  const [step, setStep] = useState(0);
+  
+  const steps = [
+    { label: 'Cart' },
+    { label: 'Shipping' },
+    { label: 'Payment' },
+    { label: 'Review' }
+  ];
+
+  return (
+    <Stepper
+      items={steps}
+      value={step}
+      onChange={(event) => setStep(event.value)}
+      mode="labels"
+      orientation="horizontal"
+      className="compact-stepper"
+    />
+  );
+}
+```
+
+#### Custom Step Renderer
+```tsx
+// Stepper with custom step component
+function CustomRendererStepper() {
+  const CustomStep = ({ label, isValid, current, index }: StepProps) => (
+    <div className={`custom-step ${current ? 'active' : ''} ${isValid ? 'completed' : ''}`}>
+      <div className="step-number">{index + 1}</div>
+      <div className="step-label">{label}</div>
+      {isValid && <div className="step-check">✓</div>}
+    </div>
+  );
+
+  const steps = [
+    { label: 'Setup', isValid: true },
+    { label: 'Configure', isValid: false },
+    { label: 'Deploy', isValid: false }
+  ];
+
+  return (
+    <Stepper
+      items={steps}
+      value={0}
+      item={CustomStep}
+      orientation="vertical"
+      className="custom-rendered-stepper"
+    />
+  );
+}
+```
+
+#### Responsive Mobile Stepper
+```tsx
+// Stepper that adapts to mobile screens
+function ResponsiveStepper() {
+  const [currentStep, setCurrentStep] = useState(0);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const steps = [
+    { label: 'Personal Info' },
+    { label: 'Address' },
+    { label: 'Payment' },
+    { label: 'Confirmation' }
+  ];
+
+  return (
+    <Stepper
+      items={steps}
+      value={currentStep}
+      onChange={(event) => setCurrentStep(event.value)}
+      orientation={isMobile ? 'vertical' : 'horizontal'}
+      mode={isMobile ? 'labels' : 'steps'}
+      className={`responsive-stepper ${isMobile ? 'mobile' : 'desktop'}`}
+    />
+  );
+}
+```
+
+## Best Practices
+
+### Usage Guidelines
+- Use descriptive and concise labels that clearly indicate the purpose of each step
+- Implement proper validation states to guide users through required vs optional steps
+- Consider using linear mode for processes where step order is critical and validation is required
+- Choose appropriate orientation (horizontal vs vertical) based on available space and number of steps
+- Provide clear visual feedback for completed, current, and upcoming steps using validation states and icons
+
+### Accessibility
+- Stepper automatically provides proper ARIA attributes for step navigation and screen reader support
+- Keyboard navigation supports arrow keys for moving between steps and Enter/Space for selection
+- Each step is properly labeled and announced by screen readers with its current state
+- Focus management is handled automatically when selectOnFocus is enabled
+- Use meaningful step labels that provide context when announced by assistive technologies
+
+### Performance
+- Stepper efficiently renders only visible steps and handles large step collections without performance issues
+- Animation duration can be customized or disabled for users who prefer reduced motion
+- Step validation states are managed efficiently without unnecessary re-renders
+- Custom step renderers should be memoized if they contain complex rendering logic
+
+## Common Patterns
+
+### Pattern 1: Multi-Step Form Wizard
+```tsx
+// Complete form wizard implementation with validation and navigation controls
+function FormWizard() {
+  const [currentStep, setCurrentStep] = useState(0);
+  const [formData, setFormData] = useState({});
+  const [stepValidation, setStepValidation] = useState([false, false, false]);
+
+  const steps = [
+    { 
+      label: 'Personal Information', 
+      isValid: stepValidation[0],
+      text: '1'
+    },
+    { 
+      label: 'Account Setup', 
+      isValid: stepValidation[1],
+      text: '2'
+    },
+    { 
+      label: 'Confirmation', 
+      isValid: stepValidation[2],
+      text: '3'
+    }
+  ];
+
+  const handleNext = () => {
+    if (currentStep < steps.length - 1) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const validateStep = (stepIndex: number, isValid: boolean) => {
+    const newValidation = [...stepValidation];
+    newValidation[stepIndex] = isValid;
+    setStepValidation(newValidation);
+  };
+
+  return (
+    <div className="form-wizard">
+      <Stepper
+        items={steps}
+        value={currentStep}
+        onChange={(event) => setCurrentStep(event.value)}
+        linear={true}
+        selectOnFocus={false}
+        animationDuration={400}
+      />
+      
+      <div className="wizard-content">
+        {/* Render step content based on currentStep */}
+        {currentStep === 0 && (
+          <PersonalInfoForm 
+            onValidate={(isValid) => validateStep(0, isValid)}
+            data={formData}
+            onChange={setFormData}
+          />
+        )}
+        {/* Additional step content... */}
+      </div>
+      
+      <div className="wizard-navigation">
+        <button 
+          onClick={handlePrevious} 
+          disabled={currentStep === 0}
+        >
+          Previous
+        </button>
+        <button 
+          onClick={handleNext}
+          disabled={currentStep === steps.length - 1 || !stepValidation[currentStep]}
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  );
+}
+```
+
+### Pattern 2: Progress Tracking Dashboard
+```tsx
+// Dashboard showing multi-process progress with different states
+function ProgressDashboard() {
+  const onboardingSteps = [
+    { label: 'Account Created', isValid: true },
+    { label: 'Profile Complete', isValid: true },
+    { label: 'Team Invited', isValid: false },
+    { label: 'First Project', isValid: false }
+  ];
+
+  const deploymentSteps = [
+    { label: 'Code Review', isValid: true },
+    { label: 'Testing', isValid: true },
+    { label: 'Staging', isValid: true },
+    { label: 'Production', isValid: false }
+  ];
+
+  return (
+    <div className="progress-dashboard">
+      <div className="progress-section">
+        <h3>Onboarding Progress</h3>
+        <Stepper
+          items={onboardingSteps}
+          value={1}
+          disabled={true}
+          orientation="horizontal"
+          successIcon="check"
+          className="onboarding-progress"
+        />
+      </div>
+      
+      <div className="progress-section">
+        <h3>Deployment Pipeline</h3>
+        <Stepper
+          items={deploymentSteps}
+          value={2}
+          disabled={true}
+          orientation="horizontal"
+          successIcon="check"
+          errorIcon="warning"
+          className="deployment-progress"
+        />
+      </div>
+    </div>
+  );
+}
+```
+
+### Pattern 3: E-commerce Checkout Flow
+```tsx
+// Checkout process with validation and cart integration
+function CheckoutStepper() {
+  const [checkoutStep, setCheckoutStep] = useState(0);
+  const [stepData, setStepData] = useState({
+    cart: null,
+    shipping: null,
+    payment: null,
+    confirmation: null
+  });
+
+  const checkoutSteps = [
+    { 
+      label: 'Cart Review', 
+      isValid: !!stepData.cart,
+      icon: 'cart'
+    },
+    { 
+      label: 'Shipping Info', 
+      isValid: !!stepData.shipping,
+      icon: 'truck'
+    },
+    { 
+      label: 'Payment', 
+      isValid: !!stepData.payment,
+      icon: 'dollar'
+    },
+    { 
+      label: 'Order Complete', 
+      isValid: !!stepData.confirmation,
+      icon: 'check-circle'
+    }
+  ];
+
+  const handleStepComplete = (step: number, data: any) => {
+    setStepData(prev => ({ ...prev, [Object.keys(stepData)[step]]: data }));
+    if (step < checkoutSteps.length - 1) {
+      setCheckoutStep(step + 1);
+    }
+  };
+
+  return (
+    <div className="checkout-flow">
+      <Stepper
+        items={checkoutSteps}
+        value={checkoutStep}
+        onChange={(event) => setCheckoutStep(event.value)}
+        linear={true}
+        orientation="horizontal"
+        successIcon="check"
+        animationDuration={300}
+      />
+      
+      <div className="checkout-content">
+        {checkoutStep === 0 && (
+          <CartReview onComplete={(data) => handleStepComplete(0, data)} />
+        )}
+        {checkoutStep === 1 && (
+          <ShippingForm onComplete={(data) => handleStepComplete(1, data)} />
+        )}
+        {checkoutStep === 2 && (
+          <PaymentForm onComplete={(data) => handleStepComplete(2, data)} />
+        )}
+        {checkoutStep === 3 && (
+          <OrderConfirmation data={stepData} />
+        )}
+      </div>
+    </div>
+  );
+}
+```

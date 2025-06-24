@@ -1,0 +1,558 @@
+---
+# Signature Component
+
+## Overview
+
+### Purpose
+Use this component to generate signature pad functionality for capturing handwritten signatures via mouse or touch input.
+
+### When to Use
+The Signature component is ideal for applications requiring digital signatures, such as:
+- **Financial documents** - Loan applications, contracts, banking forms
+- **Legal agreements** - Contracts, NDAs, terms of service acceptance
+- **Delivery receipts** - Package delivery confirmations, service completion forms
+- **Healthcare forms** - Patient consent forms, treatment authorizations
+- **Educational institutions** - Permission slips, enrollment forms
+- **E-commerce** - Purchase confirmations, returns processing
+- **HR applications** - Employment contracts, policy acknowledgments
+
+### Architecture
+**No Coupling**: The Signature component is a standalone component that operates independently without requiring other components for basic functionality. It can be enhanced with form validation components but doesn't depend on them.
+
+## Components
+
+### Signature
+
+**Purpose:** Provides a digital signature capture interface with customizable appearance, export capabilities, and popup maximization features.
+
+**Interface:**
+```typescript
+interface SignatureProps extends FormComponentProps {
+  // Basic Configuration
+  className?: string;                    // Custom CSS classes
+  value?: string;                        // Signature value as Data URL
+  width?: number;                        // Width in pixels
+  height?: number;                       // Height in pixels
+  name?: string;                         // Input name for forms
+  id?: string;                          // Element ID
+  
+  // Appearance
+  size?: null | 'small' | 'medium' | 'large';           // Component size
+  rounded?: null | 'small' | 'medium' | 'large';        // Border radius
+  fillMode?: null | 'solid' | 'flat' | 'outline';       // Background style
+  color?: string;                                        // Stroke color
+  backgroundColor?: string;                              // Background color
+  strokeWidth?: number;                                  // Line thickness
+  smooth?: boolean;                                      // Line smoothing
+  hideLine?: boolean;                                    // Hide dotted baseline
+  
+  // Accessibility
+  tabIndex?: number;                     // Tab order
+  ariaLabel?: string;                    // Accessible label
+  ariaLabelledBy?: string;              // Label element ID
+  ariaDescribedBy?: string;             // Description element ID
+  dir?: string;                         // Text direction (RTL/LTR)
+  
+  // Behavior
+  disabled?: boolean;                    // Disable interaction
+  readOnly?: boolean;                    // Read-only mode
+  maximizable?: boolean;                 // Enable popup maximization
+  open?: boolean;                        // Popup open state
+  popupScale?: number;                   // Popup scale factor (default: 3)
+  exportScale?: number;                  // Export scale factor (default: 2)
+  
+  // Styling
+  style?: React.CSSProperties;          // Component styles
+  inputStyle?: React.CSSProperties;     // Input element styles
+  
+  // Events
+  onChange?: (event: SignatureChangeEvent) => void;     // Value change
+  onFocus?: (event: SignatureFocusEvent) => void;       // Focus event
+  onBlur?: (event: SignatureBlurEvent) => void;         // Blur event
+  onOpen?: (event: SignatureOpenEvent) => void;         // Popup open
+  onClose?: (event: SignatureCloseEvent) => void;       // Popup close
+}
+
+interface SignatureChangeEvent extends BaseEvent<SignatureHandle> {
+  value: string;                         // Current signature as Data URL
+}
+
+interface SignatureHandle {
+  element: HTMLInputElement | null;      // DOM element reference
+  focus: () => void;                     // Focus method
+  name: string | undefined;              // Input name
+  value: number | null;                  // Current value
+}
+```
+
+**Usage Example:**
+```tsx
+import { Signature } from '@progress/kendo-react-inputs';
+
+function BasicSignature() {
+  return (
+    <div>
+      <label htmlFor="signature">Please sign here:</label>
+      <Signature
+        id="signature"
+        name="signature"
+        width={400}
+        height={200}
+        strokeWidth={2}
+        color="#000000"
+        backgroundColor="#ffffff"
+      />
+    </div>
+  );
+}
+```
+
+## Integration Patterns
+
+### Basic Usage
+```tsx
+import { Signature } from '@progress/kendo-react-inputs';
+
+// Simple signature capture
+function SimpleSignature() {
+  return (
+    <div className="signature-container">
+      <h3>Sign Here:</h3>
+      <Signature />
+    </div>
+  );
+}
+```
+
+### Controlled Signature
+```tsx
+import React, { useState } from 'react';
+import { Signature } from '@progress/kendo-react-inputs';
+
+function ControlledSignature() {
+  const [signatureValue, setSignatureValue] = useState<string>('');
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleSignatureChange = (event) => {
+    setSignatureValue(event.value);
+    console.log('Signature updated:', event.value);
+  };
+
+  const handleClearSignature = () => {
+    setSignatureValue('');
+  };
+
+  return (
+    <div className="controlled-signature">
+      <div className="signature-controls">
+        <button onClick={() => setIsOpen(true)}>
+          Open Signature Pad
+        </button>
+        <button onClick={handleClearSignature}>
+          Clear Signature
+        </button>
+      </div>
+      
+      <Signature
+        value={signatureValue}
+        onChange={handleSignatureChange}
+        open={isOpen}
+        onClose={() => setIsOpen(false)}
+        maximizable={true}
+        width={500}
+        height={300}
+      />
+      
+      {signatureValue && (
+        <div className="signature-preview">
+          <h4>Signature Preview:</h4>
+          <img src={signatureValue} alt="Signature" />
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+### Form Integration
+```tsx
+import React, { useState } from 'react';
+import { Signature } from '@progress/kendo-react-inputs';
+import { Button } from '@progress/kendo-react-buttons';
+
+function SignatureForm() {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    signature: ''
+  });
+
+  const handleSignatureChange = (event) => {
+    setFormData(prev => ({
+      ...prev,
+      signature: event.value
+    }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!formData.signature) {
+      alert('Please provide your signature');
+      return;
+    }
+    console.log('Form submitted:', formData);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="signature-form">
+      <div className="form-field">
+        <label htmlFor="name">Full Name:</label>
+        <input
+          id="name"
+          value={formData.name}
+          onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+          required
+        />
+      </div>
+      
+      <div className="form-field">
+        <label htmlFor="signature">Digital Signature:</label>
+        <Signature
+          id="signature"
+          name="signature"
+          value={formData.signature}
+          onChange={handleSignatureChange}
+          width={400}
+          height={150}
+          strokeWidth={2}
+          backgroundColor="#fafafa"
+          required
+        />
+      </div>
+      
+      <Button type="submit" primary={true}>
+        Submit Form
+      </Button>
+    </form>
+  );
+}
+```
+
+### Customized Appearance
+```tsx
+import { Signature } from '@progress/kendo-react-inputs';
+
+function CustomizedSignature() {
+  return (
+    <div className="custom-signature-container">
+      <Signature
+        width={600}
+        height={250}
+        strokeWidth={3}
+        color="#2E7D32"
+        backgroundColor="#E8F5E8"
+        size="large"
+        rounded="medium"
+        fillMode="outline"
+        smooth={true}
+        hideLine={false}
+        maximizable={true}
+        popupScale={2.5}
+        exportScale={3}
+        style={{
+          border: '2px solid #4CAF50',
+          borderRadius: '8px'
+        }}
+      />
+    </div>
+  );
+}
+```
+
+## Best Practices
+
+### Usage Guidelines
+- **Set appropriate dimensions** - Use `width` and `height` props to ensure the signature area is large enough for comfortable signing
+- **Configure stroke settings** - Adjust `strokeWidth` and `color` for optimal visibility and user experience
+- **Enable maximization for mobile** - Use `maximizable={true}` to provide a larger signing area on mobile devices
+- **Implement proper validation** - Check for signature presence before form submission
+- **Handle export scaling** - Set `exportScale` appropriately for high-quality signature images
+
+### Accessibility
+- **Provide clear labels** - Use `ariaLabel` or `ariaLabelledBy` to describe the signature purpose
+- **Support keyboard navigation** - Ensure proper `tabIndex` for keyboard users
+- **Include instructions** - Provide clear instructions for signature capture process
+- **Alternative input methods** - Consider providing alternative signature methods for users with disabilities
+
+### Performance
+- **Optimize export quality** - Balance `exportScale` between quality and file size
+- **Handle large signatures** - Implement compression for signatures with large data URLs
+- **Debounce onChange events** - For real-time processing, debounce the `onChange` handler to avoid excessive updates
+- **Memory management** - Clear signature values when no longer needed to prevent memory leaks
+
+## Common Patterns
+
+### Pattern 1: Document Signing Workflow
+```tsx
+import React, { useState } from 'react';
+import { Signature } from '@progress/kendo-react-inputs';
+import { Button } from '@progress/kendo-react-buttons';
+
+function DocumentSigningWorkflow() {
+  const [currentStep, setCurrentStep] = useState('review'); // 'review' | 'sign' | 'complete'
+  const [signature, setSignature] = useState('');
+  const [agreement, setAgreement] = useState(false);
+
+  const handleSignatureComplete = (event) => {
+    setSignature(event.value);
+  };
+
+  const handleSubmit = () => {
+    if (signature && agreement) {
+      setCurrentStep('complete');
+      // Submit to backend
+    }
+  };
+
+  return (
+    <div className="document-workflow">
+      {currentStep === 'review' && (
+        <div className="review-step">
+          <h2>Review Document</h2>
+          {/* Document content */}
+          <label>
+            <input
+              type="checkbox"
+              checked={agreement}
+              onChange={(e) => setAgreement(e.target.checked)}
+            />
+            I agree to the terms and conditions
+          </label>
+          <Button
+            onClick={() => setCurrentStep('sign')}
+            disabled={!agreement}
+            primary={true}
+          >
+            Proceed to Sign
+          </Button>
+        </div>
+      )}
+
+      {currentStep === 'sign' && (
+        <div className="signing-step">
+          <h2>Digital Signature Required</h2>
+          <p>Please sign below to complete the agreement:</p>
+          <Signature
+            onChange={handleSignatureComplete}
+            width={500}
+            height={200}
+            strokeWidth={2}
+            maximizable={true}
+            backgroundColor="#ffffff"
+          />
+          <div className="signing-actions">
+            <Button onClick={() => setCurrentStep('review')}>
+              Back to Review
+            </Button>
+            <Button
+              onClick={handleSubmit}
+              disabled={!signature}
+              primary={true}
+            >
+              Complete Signing
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {currentStep === 'complete' && (
+        <div className="completion-step">
+          <h2>Document Signed Successfully</h2>
+          <p>Your signature has been recorded and the document is now complete.</p>
+          <img src={signature} alt="Your signature" className="final-signature" />
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+### Pattern 2: Multi-Party Signature Collection
+```tsx
+import React, { useState } from 'react';
+import { Signature } from '@progress/kendo-react-inputs';
+
+interface SignatureData {
+  id: string;
+  name: string;
+  role: string;
+  signature: string;
+  timestamp: Date | null;
+}
+
+function MultiPartySignature() {
+  const [signatories] = useState<SignatureData[]>([
+    { id: '1', name: 'John Doe', role: 'Client', signature: '', timestamp: null },
+    { id: '2', name: 'Jane Smith', role: 'Witness', signature: '', timestamp: null },
+    { id: '3', name: 'Bob Johnson', role: 'Notary', signature: '', timestamp: null }
+  ]);
+
+  const [signatures, setSignatures] = useState<Record<string, string>>({});
+  const [currentSigner, setCurrentSigner] = useState<string>('1');
+
+  const handleSignatureChange = (id: string, value: string) => {
+    setSignatures(prev => ({ ...prev, [id]: value }));
+  };
+
+  const isAllSigned = signatories.every(s => signatures[s.id]);
+
+  return (
+    <div className="multi-party-signature">
+      <h2>Document Requires Multiple Signatures</h2>
+      
+      <div className="signer-tabs">
+        {signatories.map(signer => (
+          <button
+            key={signer.id}
+            onClick={() => setCurrentSigner(signer.id)}
+            className={`signer-tab ${currentSigner === signer.id ? 'active' : ''} ${signatures[signer.id] ? 'signed' : ''}`}
+          >
+            {signer.name} ({signer.role})
+            {signatures[signer.id] && ' ✓'}
+          </button>
+        ))}
+      </div>
+
+      {signatories.map(signer => (
+        <div
+          key={signer.id}
+          className={`signature-section ${currentSigner === signer.id ? 'active' : 'hidden'}`}
+        >
+          <h3>Signature for {signer.name} - {signer.role}</h3>
+          <Signature
+            value={signatures[signer.id] || ''}
+            onChange={(event) => handleSignatureChange(signer.id, event.value)}
+            width={450}
+            height={180}
+            strokeWidth={2}
+            maximizable={true}
+          />
+        </div>
+      ))}
+
+      <div className="completion-status">
+        <p>Progress: {Object.keys(signatures).length} of {signatories.length} signatures collected</p>
+        {isAllSigned && (
+          <div className="all-signed">
+            <h3>All Signatures Collected!</h3>
+            <p>Document is ready for finalization.</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+```
+
+### Pattern 3: Signature with Validation and Export
+```tsx
+import React, { useState, useRef } from 'react';
+import { Signature } from '@progress/kendo-react-inputs';
+import { Button } from '@progress/kendo-react-buttons';
+
+function ValidatedSignatureCapture() {
+  const [signature, setSignature] = useState('');
+  const [isValid, setIsValid] = useState(false);
+  const signatureRef = useRef<any>(null);
+
+  // Simple validation - check if signature has meaningful content
+  const validateSignature = (value: string) => {
+    // A basic check for signature complexity
+    const isNotEmpty = value && value.length > 100; // Data URL should be substantial
+    setIsValid(isNotEmpty);
+    return isNotEmpty;
+  };
+
+  const handleSignatureChange = (event) => {
+    const value = event.value;
+    setSignature(value);
+    validateSignature(value);
+  };
+
+  const handleClear = () => {
+    setSignature('');
+    setIsValid(false);
+    if (signatureRef.current) {
+      signatureRef.current.focus();
+    }
+  };
+
+  const handleExport = () => {
+    if (isValid && signature) {
+      // Create download link
+      const link = document.createElement('a');
+      link.href = signature;
+      link.download = `signature-${new Date().getTime()}.png`;
+      link.click();
+    }
+  };
+
+  return (
+    <div className="validated-signature">
+      <h3>Capture Your Signature</h3>
+      
+      <div className="signature-input-section">
+        <Signature
+          ref={signatureRef}
+          value={signature}
+          onChange={handleSignatureChange}
+          width={500}
+          height={200}
+          strokeWidth={2.5}
+          color="#1976D2"
+          backgroundColor="#F5F5F5"
+          maximizable={true}
+          smooth={true}
+          ariaLabel="Signature capture area"
+        />
+        
+        <div className={`validation-status ${isValid ? 'valid' : 'invalid'}`}>
+          {signature ? (
+            isValid ? (
+              <span className="status-valid">✓ Valid signature captured</span>
+            ) : (
+              <span className="status-invalid">⚠ Please provide a more complete signature</span>
+            )
+          ) : (
+            <span className="status-empty">Please sign in the area above</span>
+          )}
+        </div>
+      </div>
+
+      <div className="signature-actions">
+        <Button onClick={handleClear} fillMode="outline">
+          Clear Signature
+        </Button>
+        <Button
+          onClick={handleExport}
+          disabled={!isValid}
+          primary={true}
+        >
+          Export Signature
+        </Button>
+      </div>
+
+      {isValid && signature && (
+        <div className="signature-preview">
+          <h4>Preview:</h4>
+          <img
+            src={signature}
+            alt="Signature preview"
+            style={{ maxWidth: '300px', border: '1px solid #ddd' }}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+```

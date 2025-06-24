@@ -1,0 +1,1286 @@
+# TabStrip Component
+
+## Overview
+
+### Purpose
+Use this component to generate tab strip functionality
+
+### When to Use
+The TabStrip component is ideal for organizing content into multiple views within a single container, allowing users to switch between different sections seamlessly. Common use cases include:
+
+- **Content organization** - Group related information into logical sections like Profile, Settings, and Security
+- **Multi-step forms** - Break complex forms into manageable sections with tab-based navigation
+- **Dashboard panels** - Organize different views of data like Charts, Tables, and Reports
+- **Application sections** - Separate application features like Documents, Messages, and Calendar
+- **Preference panels** - Organize user settings into categories like General, Privacy, and Notifications
+- **Product information** - Display product details across tabs like Description, Specifications, and Reviews
+- **Interface layout** - Provide horizontal navigation for content areas in limited screen space
+- **Responsive design** - Offer space-efficient navigation on smaller screens and devices
+
+### Architecture
+**No Coupling**: TabStrip is a standalone component that operates independently without requiring other components. It provides a complete tabbed interface solution with built-in state management, keyboard navigation, accessibility features, and customizable positioning.
+
+## Components
+
+### TabStrip
+
+**Purpose:** Provides a container for organizing multiple Tab components with built-in navigation, state management, and accessibility features for seamless content switching.
+
+**Interface:**
+```typescript
+interface TabStripProps {
+  // State management
+  selected?: number; // Index of the currently selected tab (controlled component)
+  onSelect?: (event: TabStripSelectEvent) => void; // Callback when tab selection changes
+  
+  // Visual configuration
+  animation?: boolean; // Enable/disable animation transitions between tabs (default: true)
+  tabPosition?: 'top' | 'bottom' | 'left' | 'right'; // Position of the tab navigation (default: 'top')
+  
+  // Content structure
+  children?: React.ReactNode; // Tab components that define the tabbed content
+  
+  // Styling
+  className?: string; // Custom CSS classes for the TabStrip container
+  style?: React.CSSProperties; // Inline styles for the TabStrip container
+  dir?: 'ltr' | 'rtl'; // Text direction for internationalization
+  
+  // Form integration
+  name?: string; // Form field name for form submissions
+  
+  // Accessibility
+  id?: string; // Unique identifier for the TabStrip
+  tabIndex?: number; // Tab order position for keyboard navigation
+}
+
+interface TabStripSelectEvent {
+  selected: number; // Index of the newly selected tab
+  target: TabStrip; // Reference to the TabStrip component
+}
+
+interface TabProps {
+  // Content definition
+  title?: React.ReactNode; // Tab header text or React element
+  children?: React.ReactNode; // Content displayed when tab is active
+  
+  // Interaction control
+  disabled?: boolean; // Disable tab interaction and selection
+  
+  // Styling
+  contentClassName?: string; // CSS class applied to the tab content area
+}
+```
+
+**Usage Example:**
+```tsx
+import { TabStrip, Tab } from '@progress/kendo-react-layout';
+import { useState } from 'react';
+
+function BasicTabStrip() {
+  const [selectedTab, setSelectedTab] = useState(0);
+
+  return (
+    <TabStrip
+      selected={selectedTab}
+      onSelect={(event) => setSelectedTab(event.selected)}
+      animation={true}
+      tabPosition="top"
+    >
+      <Tab title="Overview">
+        <div>
+          <h3>Overview Content</h3>
+          <p>This is the overview section with general information.</p>
+        </div>
+      </Tab>
+      
+      <Tab title="Details">
+        <div>
+          <h3>Detailed Information</h3>
+          <p>Here you can find more detailed information about the topic.</p>
+        </div>
+      </Tab>
+      
+      <Tab title="Settings">
+        <div>
+          <h3>Configuration Settings</h3>
+          <p>Manage your preferences and configuration options here.</p>
+        </div>
+      </Tab>
+    </TabStrip>
+  );
+}
+```
+
+## Integration Patterns
+
+### Basic Usage
+```tsx
+import { TabStrip, Tab } from '@progress/kendo-react-layout';
+
+// Simple uncontrolled TabStrip
+function SimpleExample() {
+  return (
+    <TabStrip>
+      <Tab title="Home">
+        <h2>Welcome Home</h2>
+        <p>This is the home tab content.</p>
+      </Tab>
+      
+      <Tab title="About">
+        <h2>About Us</h2>
+        <p>Learn more about our company and mission.</p>
+      </Tab>
+      
+      <Tab title="Contact">
+        <h2>Contact Information</h2>
+        <p>Get in touch with our team.</p>
+      </Tab>
+    </TabStrip>
+  );
+}
+
+// Controlled TabStrip with state management
+function ControlledExample() {
+  const [activeTab, setActiveTab] = useState(0);
+
+  const handleTabChange = (event: TabStripSelectEvent) => {
+    console.log('Tab changed to:', event.selected);
+    setActiveTab(event.selected);
+  };
+
+  return (
+    <TabStrip
+      selected={activeTab}
+      onSelect={handleTabChange}
+    >
+      <Tab title="Tab 1">Content for tab 1</Tab>
+      <Tab title="Tab 2">Content for tab 2</Tab>
+      <Tab title="Tab 3">Content for tab 3</Tab>
+    </TabStrip>
+  );
+}
+```
+
+### Advanced Configuration
+```tsx
+import { TabStrip, Tab } from '@progress/kendo-react-layout';
+import { Button } from '@progress/kendo-react-buttons';
+import { useState } from 'react';
+
+function AdvancedTabStrip() {
+  const [currentTab, setCurrentTab] = useState(0);
+  const [isEditMode, setIsEditMode] = useState(false);
+
+  const handleTabSelect = (event: TabStripSelectEvent) => {
+    // Prevent switching away from edit mode without saving
+    if (isEditMode && currentTab === 1) {
+      const confirmLeave = confirm('You have unsaved changes. Continue anyway?');
+      if (!confirmLeave) {
+        return; // Prevent tab change
+      }
+      setIsEditMode(false);
+    }
+    setCurrentTab(event.selected);
+  };
+
+  return (
+    <TabStrip
+      selected={currentTab}
+      onSelect={handleTabSelect}
+      animation={true}
+      tabPosition="top"
+      className="advanced-tab-strip"
+    >
+      <Tab title="Profile Information">
+        <div className="profile-content">
+          <h3>User Profile</h3>
+          <div className="profile-details">
+            <p><strong>Name:</strong> John Doe</p>
+            <p><strong>Email:</strong> john.doe@example.com</p>
+            <p><strong>Role:</strong> Administrator</p>
+          </div>
+        </div>
+      </Tab>
+      
+      <Tab title="Edit Profile" disabled={!isEditMode}>
+        <div className="edit-content">
+          <h3>Edit Profile</h3>
+          <div className="edit-form">
+            <input type="text" placeholder="Full Name" />
+            <input type="email" placeholder="Email Address" />
+            <div className="form-actions">
+              <Button onClick={() => setIsEditMode(false)}>Cancel</Button>
+              <Button primary>Save Changes</Button>
+            </div>
+          </div>
+        </div>
+      </Tab>
+      
+      <Tab title="Security Settings">
+        <div className="security-content">
+          <h3>Security Settings</h3>
+          <div className="security-options">
+            <div className="setting-item">
+              <label>Two-Factor Authentication</label>
+              <Button>Enable</Button>
+            </div>
+            <div className="setting-item">
+              <label>Change Password</label>
+              <Button>Update</Button>
+            </div>
+          </div>
+        </div>
+      </Tab>
+      
+      <Tab title="Preferences" contentClassName="preferences-tab">
+        <div className="preferences-content">
+          <h3>Application Preferences</h3>
+          <div className="preference-groups">
+            <div className="group">
+              <h4>Display</h4>
+              <label>
+                <input type="checkbox" /> Dark Mode
+              </label>
+              <label>
+                <input type="checkbox" /> Compact Layout
+              </label>
+            </div>
+            <div className="group">
+              <h4>Notifications</h4>
+              <label>
+                <input type="checkbox" /> Email Notifications
+              </label>
+              <label>
+                <input type="checkbox" /> Push Notifications
+              </label>
+            </div>
+          </div>
+        </div>
+      </Tab>
+    </TabStrip>
+  );
+}
+```
+
+### Vertical Tab Layout
+```tsx
+function VerticalTabExample() {
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
+  return (
+    <div className="vertical-layout-container">
+      <TabStrip
+        selected={selectedIndex}
+        onSelect={(e) => setSelectedIndex(e.selected)}
+        tabPosition="left"
+        animation={false}
+        className="vertical-tabs"
+      >
+        <Tab title="Dashboard">
+          <div className="dashboard-content">
+            <h2>Dashboard Overview</h2>
+            <div className="dashboard-widgets">
+              <div className="widget">Sales: $12,450</div>
+              <div className="widget">Users: 1,234</div>
+              <div className="widget">Orders: 567</div>
+            </div>
+          </div>
+        </Tab>
+        
+        <Tab title="Analytics">
+          <div className="analytics-content">
+            <h2>Analytics Reports</h2>
+            <div className="chart-container">
+              <p>Charts and graphs would be displayed here</p>
+            </div>
+          </div>
+        </Tab>
+        
+        <Tab title="User Management">
+          <div className="users-content">
+            <h2>User Administration</h2>
+            <div className="user-actions">
+              <Button>Add User</Button>
+              <Button>Import Users</Button>
+              <Button>Export Data</Button>
+            </div>
+          </div>
+        </Tab>
+        
+        <Tab title="System Settings">
+          <div className="settings-content">
+            <h2>System Configuration</h2>
+            <div className="config-sections">
+              <div className="section">
+                <h4>General Settings</h4>
+                <p>Application-wide configuration options</p>
+              </div>
+              <div className="section">
+                <h4>Security Settings</h4>
+                <p>Authentication and access control</p>
+              </div>
+            </div>
+          </div>
+        </Tab>
+      </TabStrip>
+    </div>
+  );
+}
+```
+
+### Multi-Step Form with Tabs
+```tsx
+function MultiStepFormTabs() {
+  const [currentStep, setCurrentStep] = useState(0);
+  const [formData, setFormData] = useState({
+    personalInfo: {},
+    businessInfo: {},
+    preferences: {}
+  });
+
+  const [completedSteps, setCompletedSteps] = useState(new Set([0]));
+
+  const handleStepChange = (event: TabStripSelectEvent) => {
+    const newStep = event.selected;
+    
+    // Only allow moving to completed steps or the next step
+    if (completedSteps.has(newStep) || newStep <= Math.max(...completedSteps) + 1) {
+      setCurrentStep(newStep);
+    }
+  };
+
+  const completeCurrentStep = () => {
+    setCompletedSteps(prev => new Set([...prev, currentStep + 1]));
+    if (currentStep < 2) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  return (
+    <div className="multi-step-form">
+      <h2>Account Registration</h2>
+      
+      <TabStrip
+        selected={currentStep}
+        onSelect={handleStepChange}
+        tabPosition="top"
+        className="form-steps"
+      >
+        <Tab title="Personal Information">
+          <div className="step-content">
+            <h3>Step 1: Personal Information</h3>
+            <div className="form-fields">
+              <input type="text" placeholder="First Name" required />
+              <input type="text" placeholder="Last Name" required />
+              <input type="email" placeholder="Email Address" required />
+              <input type="tel" placeholder="Phone Number" />
+            </div>
+            <div className="step-actions">
+              <Button primary onClick={completeCurrentStep}>
+                Continue to Business Info
+              </Button>
+            </div>
+          </div>
+        </Tab>
+        
+        <Tab 
+          title="Business Information" 
+          disabled={!completedSteps.has(1)}
+        >
+          <div className="step-content">
+            <h3>Step 2: Business Information</h3>
+            <div className="form-fields">
+              <input type="text" placeholder="Company Name" required />
+              <input type="text" placeholder="Job Title" />
+              <input type="text" placeholder="Industry" />
+              <textarea placeholder="Company Description"></textarea>
+            </div>
+            <div className="step-actions">
+              <Button onClick={() => setCurrentStep(0)}>Back</Button>
+              <Button primary onClick={completeCurrentStep}>
+                Continue to Preferences
+              </Button>
+            </div>
+          </div>
+        </Tab>
+        
+        <Tab 
+          title="Preferences" 
+          disabled={!completedSteps.has(2)}
+        >
+          <div className="step-content">
+            <h3>Step 3: Preferences</h3>
+            <div className="form-fields">
+              <div className="checkbox-group">
+                <label>
+                  <input type="checkbox" /> Email Newsletter
+                </label>
+                <label>
+                  <input type="checkbox" /> SMS Notifications
+                </label>
+                <label>
+                  <input type="checkbox" /> Product Updates
+                </label>
+              </div>
+              <select>
+                <option>Select Time Zone</option>
+                <option>UTC-8 (Pacific)</option>
+                <option>UTC-5 (Eastern)</option>
+                <option>UTC+0 (GMT)</option>
+              </select>
+            </div>
+            <div className="step-actions">
+              <Button onClick={() => setCurrentStep(1)}>Back</Button>
+              <Button primary>Complete Registration</Button>
+            </div>
+          </div>
+        </Tab>
+      </TabStrip>
+    </div>
+  );
+}
+```
+
+### Dynamic Tab Management
+```tsx
+function DynamicTabManager() {
+  const [tabs, setTabs] = useState([
+    { id: 1, title: 'Home', content: 'Welcome to the home page', closable: false },
+    { id: 2, title: 'Profile', content: 'User profile information', closable: true },
+    { id: 3, title: 'Settings', content: 'Application settings', closable: true }
+  ]);
+  
+  const [selectedTab, setSelectedTab] = useState(0);
+  const [nextId, setNextId] = useState(4);
+
+  const addNewTab = () => {
+    const newTab = {
+      id: nextId,
+      title: `Tab ${nextId}`,
+      content: `Content for tab ${nextId}`,
+      closable: true
+    };
+    
+    setTabs(prev => [...prev, newTab]);
+    setSelectedTab(tabs.length); // Select the new tab
+    setNextId(prev => prev + 1);
+  };
+
+  const closeTab = (indexToClose: number) => {
+    if (tabs[indexToClose]?.closable) {
+      setTabs(prev => prev.filter((_, index) => index !== indexToClose));
+      
+      // Adjust selected tab index if necessary
+      if (indexToClose <= selectedTab) {
+        setSelectedTab(Math.max(0, selectedTab - 1));
+      }
+    }
+  };
+
+  const handleTabSelect = (event: TabStripSelectEvent) => {
+    setSelectedTab(event.selected);
+  };
+
+  return (
+    <div className="dynamic-tab-manager">
+      <div className="tab-controls">
+        <Button onClick={addNewTab} icon="plus">
+          Add New Tab
+        </Button>
+      </div>
+      
+      <TabStrip
+        selected={selectedTab}
+        onSelect={handleTabSelect}
+        className="dynamic-tabs"
+      >
+        {tabs.map((tab, index) => (
+          <Tab 
+            key={tab.id}
+            title={
+              <div className="tab-header">
+                <span>{tab.title}</span>
+                {tab.closable && (
+                  <button 
+                    className="close-tab-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      closeTab(index);
+                    }}
+                    aria-label={`Close ${tab.title} tab`}
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+            }
+          >
+            <div className="tab-content">
+              <h3>{tab.title}</h3>
+              <p>{tab.content}</p>
+              <div className="tab-info">
+                <small>Tab ID: {tab.id}</small>
+              </div>
+            </div>
+          </Tab>
+        ))}
+      </TabStrip>
+    </div>
+  );
+}
+```
+
+### Responsive TabStrip
+```tsx
+function ResponsiveTabStrip() {
+  const [tabPosition, setTabPosition] = useState<'top' | 'bottom' | 'left' | 'right'>('top');
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      
+      // Switch to bottom position on mobile for better accessibility
+      if (mobile) {
+        setTabPosition('bottom');
+      } else {
+        setTabPosition('top');
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    handleResize(); // Check initial size
+    
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const [currentTab, setCurrentTab] = useState(0);
+
+  return (
+    <div className="responsive-container">
+      {!isMobile && (
+        <div className="position-controls">
+          <h4>Tab Position:</h4>
+          {(['top', 'bottom', 'left', 'right'] as const).map(position => (
+            <label key={position}>
+              <input
+                type="radio"
+                name="tabPosition"
+                value={position}
+                checked={tabPosition === position}
+                onChange={(e) => setTabPosition(e.target.value as any)}
+              />
+              {position.charAt(0).toUpperCase() + position.slice(1)}
+            </label>
+          ))}
+        </div>
+      )}
+      
+      <TabStrip
+        selected={currentTab}
+        onSelect={(e) => setCurrentTab(e.selected)}
+        tabPosition={tabPosition}
+        animation={!isMobile} // Disable animation on mobile for performance
+        className={`responsive-tabs ${isMobile ? 'mobile' : 'desktop'}`}
+      >
+        <Tab title="Home">
+          <div className="responsive-content">
+            <h2>Home</h2>
+            <p>Welcome to our responsive application. This content adapts to different screen sizes.</p>
+            {isMobile && <p><strong>Mobile view detected</strong></p>}
+          </div>
+        </Tab>
+        
+        <Tab title="Products">
+          <div className="responsive-content">
+            <h2>Products</h2>
+            <div className={`product-grid ${isMobile ? 'mobile-grid' : 'desktop-grid'}`}>
+              <div className="product-item">Product 1</div>
+              <div className="product-item">Product 2</div>
+              <div className="product-item">Product 3</div>
+            </div>
+          </div>
+        </Tab>
+        
+        <Tab title="Services">
+          <div className="responsive-content">
+            <h2>Services</h2>
+            <ul className="services-list">
+              <li>Web Development</li>
+              <li>Mobile Applications</li>
+              <li>Consulting</li>
+              <li>Support</li>
+            </ul>
+          </div>
+        </Tab>
+        
+        <Tab title="Contact">
+          <div className="responsive-content">
+            <h2>Contact Us</h2>
+            <div className={`contact-form ${isMobile ? 'mobile-form' : 'desktop-form'}`}>
+              <input type="text" placeholder="Your Name" />
+              <input type="email" placeholder="Email Address" />
+              <textarea placeholder="Message" rows={isMobile ? 3 : 5}></textarea>
+              <Button primary>Send Message</Button>
+            </div>
+          </div>
+        </Tab>
+      </TabStrip>
+    </div>
+  );
+}
+```
+
+## Best Practices
+
+### Usage Guidelines
+- **Organize content logically** - Group related information into tabs that follow a natural progression or categorization
+- **Use descriptive tab titles** - Provide clear, concise titles that accurately describe the content within each tab
+- **Limit tab count** - Keep the number of tabs manageable (typically 5-7 tabs maximum) to avoid overwhelming users
+- **Consider tab order** - Place the most important or frequently accessed content in the first tabs
+- **Maintain consistent content structure** - Use similar layouts and patterns across different tabs for a cohesive experience
+
+### Accessibility
+- **Keyboard navigation** - TabStrip supports full keyboard accessibility with arrow keys for tab navigation and Tab key for content focus
+- **Screen reader support** - The component provides proper ARIA roles and announces tab states and content to assistive technologies
+- **Focus management** - Clear visual focus indicators help users navigate between tabs and tab content effectively
+- **Semantic structure** - Use proper heading hierarchies and semantic HTML within tab content for better screen reader navigation
+- **Tab state communication** - Disabled tabs are properly announced to screen readers with appropriate ARIA attributes
+
+### Performance
+- **Content lazy loading** - Consider lazy loading tab content that isn't immediately visible to improve initial page load performance
+- **Animation considerations** - Disable animations on mobile devices or slower connections to improve perceived performance
+- **State management** - Use controlled components for complex state scenarios, uncontrolled for simple implementations
+- **Event handler optimization** - Use useCallback hooks to prevent unnecessary re-renders when tab content is complex
+
+## Common Patterns
+
+### Pattern 1: Product Information Tabs
+```tsx
+function ProductInfoTabs({ product }) {
+  const [activeTab, setActiveTab] = useState(0);
+
+  return (
+    <div className="product-details">
+      <div className="product-header">
+        <h1>{product.name}</h1>
+        <div className="product-rating">★★★★☆ (4.2/5)</div>
+      </div>
+      
+      <TabStrip
+        selected={activeTab}
+        onSelect={(e) => setActiveTab(e.selected)}
+        className="product-tabs"
+      >
+        <Tab title="Description">
+          <div className="description-content">
+            <h3>Product Description</h3>
+            <p>{product.description}</p>
+            
+            <h4>Key Features</h4>
+            <ul>
+              {product.features?.map((feature, index) => (
+                <li key={index}>{feature}</li>
+              ))}
+            </ul>
+            
+            <div className="pricing-info">
+              <span className="price">${product.price}</span>
+              <Button primary>Add to Cart</Button>
+            </div>
+          </div>
+        </Tab>
+        
+        <Tab title="Specifications">
+          <div className="specifications-content">
+            <h3>Technical Specifications</h3>
+            <table className="specs-table">
+              <tbody>
+                {Object.entries(product.specifications || {}).map(([key, value]) => (
+                  <tr key={key}>
+                    <td className="spec-label">{key}:</td>
+                    <td className="spec-value">{value}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Tab>
+        
+        <Tab title="Reviews">
+          <div className="reviews-content">
+            <h3>Customer Reviews</h3>
+            <div className="review-summary">
+              <div className="rating-breakdown">
+                <div>5 stars: 45%</div>
+                <div>4 stars: 30%</div>
+                <div>3 stars: 15%</div>
+                <div>2 stars: 7%</div>
+                <div>1 star: 3%</div>
+              </div>
+            </div>
+            
+            <div className="reviews-list">
+              {product.reviews?.map((review, index) => (
+                <div key={index} className="review-item">
+                  <div className="review-header">
+                    <strong>{review.author}</strong>
+                    <span className="review-rating">{'★'.repeat(review.rating)}</span>
+                    <span className="review-date">{review.date}</span>
+                  </div>
+                  <p className="review-text">{review.text}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Tab>
+        
+        <Tab title="Shipping & Returns">
+          <div className="shipping-content">
+            <h3>Shipping Information</h3>
+            <div className="shipping-options">
+              <div className="shipping-option">
+                <strong>Standard Shipping</strong>
+                <span>5-7 business days - Free</span>
+              </div>
+              <div className="shipping-option">
+                <strong>Express Shipping</strong>
+                <span>2-3 business days - $9.99</span>
+              </div>
+              <div className="shipping-option">
+                <strong>Overnight Shipping</strong>
+                <span>Next business day - $19.99</span>
+              </div>
+            </div>
+            
+            <h4>Return Policy</h4>
+            <p>
+              We offer a 30-day return policy for all products. 
+              Items must be in original condition with tags attached.
+            </p>
+          </div>
+        </Tab>
+      </TabStrip>
+    </div>
+  );
+}
+```
+
+### Pattern 2: User Dashboard Tabs
+```tsx
+function UserDashboard({ user }) {
+  const [currentSection, setCurrentSection] = useState(0);
+  const [notifications, setNotifications] = useState([]);
+  const [tasks, setTasks] = useState([]);
+
+  useEffect(() => {
+    // Load user-specific data
+    loadNotifications();
+    loadTasks();
+  }, []);
+
+  const loadNotifications = async () => {
+    // Fetch notifications from API
+    const data = await fetch('/api/notifications').then(r => r.json());
+    setNotifications(data);
+  };
+
+  const loadTasks = async () => {
+    // Fetch tasks from API
+    const data = await fetch('/api/tasks').then(r => r.json());
+    setTasks(data);
+  };
+
+  return (
+    <div className="user-dashboard">
+      <div className="dashboard-header">
+        <h1>Welcome back, {user.name}!</h1>
+        <div className="user-stats">
+          <span>Last login: {user.lastLogin}</span>
+        </div>
+      </div>
+      
+      <TabStrip
+        selected={currentSection}
+        onSelect={(e) => setCurrentSection(e.selected)}
+        className="dashboard-tabs"
+        tabPosition="top"
+      >
+        <Tab title={`Overview ${notifications.length > 0 ? `(${notifications.length})` : ''}`}>
+          <div className="overview-content">
+            <h2>Dashboard Overview</h2>
+            
+            <div className="overview-cards">
+              <div className="overview-card">
+                <h4>Recent Activity</h4>
+                <ul>
+                  <li>Completed task: Update profile</li>
+                  <li>New message from John</li>
+                  <li>Project milestone reached</li>
+                </ul>
+              </div>
+              
+              <div className="overview-card">
+                <h4>Quick Stats</h4>
+                <div className="stats-grid">
+                  <div>Tasks: {tasks.length}</div>
+                  <div>Messages: {notifications.length}</div>
+                  <div>Projects: 3</div>
+                </div>
+              </div>
+              
+              <div className="overview-card">
+                <h4>Upcoming</h4>
+                <ul>
+                  <li>Team meeting - Tomorrow 2:00 PM</li>
+                  <li>Project deadline - Friday</li>
+                  <li>Review session - Next week</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </Tab>
+        
+        <Tab title="Tasks">
+          <div className="tasks-content">
+            <div className="tasks-header">
+              <h2>My Tasks</h2>
+              <Button primary icon="plus">Add Task</Button>
+            </div>
+            
+            <div className="task-filters">
+              <Button>All Tasks</Button>
+              <Button>Pending</Button>
+              <Button>In Progress</Button>
+              <Button>Completed</Button>
+            </div>
+            
+            <div className="tasks-list">
+              {tasks.map((task, index) => (
+                <div key={index} className={`task-item ${task.status}`}>
+                  <div className="task-content">
+                    <h4>{task.title}</h4>
+                    <p>{task.description}</p>
+                    <span className="task-due">Due: {task.dueDate}</span>
+                  </div>
+                  <div className="task-actions">
+                    <Button size="small">Edit</Button>
+                    <Button size="small">Complete</Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Tab>
+        
+        <Tab title="Messages">
+          <div className="messages-content">
+            <div className="messages-header">
+              <h2>Messages</h2>
+              <Button primary icon="edit">Compose</Button>
+            </div>
+            
+            <div className="messages-list">
+              {notifications.map((message, index) => (
+                <div key={index} className={`message-item ${message.read ? 'read' : 'unread'}`}>
+                  <div className="message-sender">{message.from}</div>
+                  <div className="message-subject">{message.subject}</div>
+                  <div className="message-preview">{message.preview}</div>
+                  <div className="message-date">{message.date}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Tab>
+        
+        <Tab title="Projects">
+          <div className="projects-content">
+            <div className="projects-header">
+              <h2>My Projects</h2>
+              <Button primary icon="folder-add">New Project</Button>
+            </div>
+            
+            <div className="projects-grid">
+              <div className="project-card">
+                <h4>Website Redesign</h4>
+                <div className="project-progress">
+                  <span>Progress: 75%</span>
+                  <div className="progress-bar">
+                    <div className="progress-fill" style={{ width: '75%' }}></div>
+                  </div>
+                </div>
+                <div className="project-team">
+                  <span>Team: 4 members</span>
+                </div>
+              </div>
+              
+              <div className="project-card">
+                <h4>Mobile App</h4>
+                <div className="project-progress">
+                  <span>Progress: 45%</span>
+                  <div className="progress-bar">
+                    <div className="progress-fill" style={{ width: '45%' }}></div>
+                  </div>
+                </div>
+                <div className="project-team">
+                  <span>Team: 6 members</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Tab>
+        
+        <Tab title="Settings">
+          <div className="settings-content">
+            <h2>Account Settings</h2>
+            
+            <div className="settings-sections">
+              <div className="settings-section">
+                <h4>Profile Information</h4>
+                <div className="form-group">
+                  <label>Display Name</label>
+                  <input type="text" defaultValue={user.name} />
+                </div>
+                <div className="form-group">
+                  <label>Email Address</label>
+                  <input type="email" defaultValue={user.email} />
+                </div>
+                <Button primary>Update Profile</Button>
+              </div>
+              
+              <div className="settings-section">
+                <h4>Notification Preferences</h4>
+                <div className="checkbox-group">
+                  <label>
+                    <input type="checkbox" defaultChecked />
+                    Email notifications
+                  </label>
+                  <label>
+                    <input type="checkbox" />
+                    SMS notifications
+                  </label>
+                  <label>
+                    <input type="checkbox" defaultChecked />
+                    Push notifications
+                  </label>
+                </div>
+                <Button primary>Save Preferences</Button>
+              </div>
+              
+              <div className="settings-section">
+                <h4>Security</h4>
+                <div className="security-actions">
+                  <Button>Change Password</Button>
+                  <Button>Two-Factor Authentication</Button>
+                  <Button>Download Data</Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Tab>
+      </TabStrip>
+    </div>
+  );
+}
+```
+
+### Pattern 3: Application Configuration Tabs
+```tsx
+function ApplicationConfig() {
+  const [config, setConfig] = useState({
+    general: {
+      appName: 'My Application',
+      language: 'en-US',
+      timezone: 'UTC-8',
+      theme: 'light'
+    },
+    database: {
+      host: 'localhost',
+      port: 5432,
+      name: 'myapp_db',
+      ssl: true
+    },
+    api: {
+      baseUrl: 'https://api.example.com',
+      timeout: 30000,
+      retries: 3,
+      apiKey: '***hidden***'
+    },
+    security: {
+      sessionTimeout: 3600,
+      maxLoginAttempts: 5,
+      passwordExpiry: 90,
+      twoFactor: false
+    }
+  });
+
+  const [currentTab, setCurrentTab] = useState(0);
+  const [hasChanges, setHasChanges] = useState(false);
+
+  const updateConfig = (section: string, field: string, value: any) => {
+    setConfig(prev => ({
+      ...prev,
+      [section]: {
+        ...prev[section],
+        [field]: value
+      }
+    }));
+    setHasChanges(true);
+  };
+
+  const saveConfiguration = async () => {
+    try {
+      await fetch('/api/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(config)
+      });
+      setHasChanges(false);
+      alert('Configuration saved successfully!');
+    } catch (error) {
+      alert('Failed to save configuration');
+    }
+  };
+
+  return (
+    <div className="app-config">
+      <div className="config-header">
+        <h1>Application Configuration</h1>
+        {hasChanges && (
+          <div className="unsaved-changes">
+            <span>You have unsaved changes</span>
+            <Button primary onClick={saveConfiguration}>
+              Save All Changes
+            </Button>
+          </div>
+        )}
+      </div>
+      
+      <TabStrip
+        selected={currentTab}
+        onSelect={(e) => setCurrentTab(e.selected)}
+        tabPosition="left"
+        className="config-tabs"
+      >
+        <Tab title="General Settings">
+          <div className="config-section">
+            <h3>General Application Settings</h3>
+            
+            <div className="config-form">
+              <div className="form-group">
+                <label>Application Name</label>
+                <input
+                  type="text"
+                  value={config.general.appName}
+                  onChange={(e) => updateConfig('general', 'appName', e.target.value)}
+                />
+              </div>
+              
+              <div className="form-group">
+                <label>Language</label>
+                <select
+                  value={config.general.language}
+                  onChange={(e) => updateConfig('general', 'language', e.target.value)}
+                >
+                  <option value="en-US">English (US)</option>
+                  <option value="en-GB">English (UK)</option>
+                  <option value="es-ES">Spanish</option>
+                  <option value="fr-FR">French</option>
+                  <option value="de-DE">German</option>
+                </select>
+              </div>
+              
+              <div className="form-group">
+                <label>Timezone</label>
+                <select
+                  value={config.general.timezone}
+                  onChange={(e) => updateConfig('general', 'timezone', e.target.value)}
+                >
+                  <option value="UTC-8">Pacific Time (UTC-8)</option>
+                  <option value="UTC-5">Eastern Time (UTC-5)</option>
+                  <option value="UTC+0">Greenwich Time (UTC+0)</option>
+                  <option value="UTC+1">Central European Time (UTC+1)</option>
+                </select>
+              </div>
+              
+              <div className="form-group">
+                <label>Theme</label>
+                <select
+                  value={config.general.theme}
+                  onChange={(e) => updateConfig('general', 'theme', e.target.value)}
+                >
+                  <option value="light">Light Theme</option>
+                  <option value="dark">Dark Theme</option>
+                  <option value="auto">Auto (System)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </Tab>
+        
+        <Tab title="Database">
+          <div className="config-section">
+            <h3>Database Configuration</h3>
+            
+            <div className="config-form">
+              <div className="form-group">
+                <label>Database Host</label>
+                <input
+                  type="text"
+                  value={config.database.host}
+                  onChange={(e) => updateConfig('database', 'host', e.target.value)}
+                />
+              </div>
+              
+              <div className="form-group">
+                <label>Port</label>
+                <input
+                  type="number"
+                  value={config.database.port}
+                  onChange={(e) => updateConfig('database', 'port', parseInt(e.target.value))}
+                />
+              </div>
+              
+              <div className="form-group">
+                <label>Database Name</label>
+                <input
+                  type="text"
+                  value={config.database.name}
+                  onChange={(e) => updateConfig('database', 'name', e.target.value)}
+                />
+              </div>
+              
+              <div className="form-group">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={config.database.ssl}
+                    onChange={(e) => updateConfig('database', 'ssl', e.target.checked)}
+                  />
+                  Enable SSL Connection
+                </label>
+              </div>
+              
+              <div className="form-actions">
+                <Button>Test Connection</Button>
+              </div>
+            </div>
+          </div>
+        </Tab>
+        
+        <Tab title="API Settings">
+          <div className="config-section">
+            <h3>API Configuration</h3>
+            
+            <div className="config-form">
+              <div className="form-group">
+                <label>Base URL</label>
+                <input
+                  type="url"
+                  value={config.api.baseUrl}
+                  onChange={(e) => updateConfig('api', 'baseUrl', e.target.value)}
+                />
+              </div>
+              
+              <div className="form-group">
+                <label>Request Timeout (ms)</label>
+                <input
+                  type="number"
+                  value={config.api.timeout}
+                  onChange={(e) => updateConfig('api', 'timeout', parseInt(e.target.value))}
+                />
+              </div>
+              
+              <div className="form-group">
+                <label>Max Retries</label>
+                <input
+                  type="number"
+                  min="0"
+                  max="10"
+                  value={config.api.retries}
+                  onChange={(e) => updateConfig('api', 'retries', parseInt(e.target.value))}
+                />
+              </div>
+              
+              <div className="form-group">
+                <label>API Key</label>
+                <div className="api-key-input">
+                  <input
+                    type="password"
+                    value={config.api.apiKey}
+                    onChange={(e) => updateConfig('api', 'apiKey', e.target.value)}
+                  />
+                  <Button size="small">Generate New</Button>
+                </div>
+              </div>
+              
+              <div className="form-actions">
+                <Button>Test API Connection</Button>
+              </div>
+            </div>
+          </div>
+        </Tab>
+        
+        <Tab title="Security">
+          <div className="config-section">
+            <h3>Security Configuration</h3>
+            
+            <div className="config-form">
+              <div className="form-group">
+                <label>Session Timeout (seconds)</label>
+                <input
+                  type="number"
+                  min="300"
+                  max="86400"
+                  value={config.security.sessionTimeout}
+                  onChange={(e) => updateConfig('security', 'sessionTimeout', parseInt(e.target.value))}
+                />
+                <small>Minimum: 5 minutes, Maximum: 24 hours</small>
+              </div>
+              
+              <div className="form-group">
+                <label>Max Login Attempts</label>
+                <input
+                  type="number"
+                  min="3"
+                  max="10"
+                  value={config.security.maxLoginAttempts}
+                  onChange={(e) => updateConfig('security', 'maxLoginAttempts', parseInt(e.target.value))}
+                />
+              </div>
+              
+              <div className="form-group">
+                <label>Password Expiry (days)</label>
+                <input
+                  type="number"
+                  min="30"
+                  max="365"
+                  value={config.security.passwordExpiry}
+                  onChange={(e) => updateConfig('security', 'passwordExpiry', parseInt(e.target.value))}
+                />
+              </div>
+              
+              <div className="form-group">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={config.security.twoFactor}
+                    onChange={(e) => updateConfig('security', 'twoFactor', e.target.checked)}
+                  />
+                  Require Two-Factor Authentication
+                </label>
+              </div>
+              
+              <div className="security-actions">
+                <Button>Generate Security Report</Button>
+                <Button>Export Security Log</Button>
+              </div>
+            </div>
+          </div>
+        </Tab>
+      </TabStrip>
+    </div>
+  );
+}
+```

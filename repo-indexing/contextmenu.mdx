@@ -1,0 +1,410 @@
+# ContextMenu Component
+
+## Overview
+
+### Purpose
+Use this component to generate context menu functionality that provides quick access to actions and commands through right-click interactions.
+
+### When to Use
+The ContextMenu component is ideal for:
+- Providing contextual actions for specific UI elements or areas
+- Offering shortcuts to common operations without cluttering the interface
+- Creating secondary navigation or action menus
+- Implementing right-click functionality in data grids, tree views, or other interactive components
+- Building hierarchical menu structures with nested items and submenus
+- Integrating with existing KendoReact components like Grid, TreeView, or custom content areas
+
+### Architecture
+**No Coupling**: This is a standalone component that can be used independently without requiring other components. The ContextMenu manages its own state and can be triggered by user interactions or programmatically controlled.
+
+## Components
+
+### ContextMenu
+
+**Purpose:** A contextual menu component that displays a list of actions when triggered, typically by right-clicking on an element or programmatically.
+
+**Interface:**
+```typescript
+interface ContextMenuProps {
+  children?: React.ReactNode; // Optional content that the context menu is attached to
+  className?: string; // CSS class name for styling
+  customCloseItemIds?: string[]; // Array of item IDs that should close the menu when selected
+  dir?: string; // Text direction (ltr/rtl)
+  hoverCloseDelay?: number; // Delay in milliseconds before closing on mouse leave
+  hoverOpenDelay?: number; // Delay in milliseconds before opening on mouse hover
+  id?: string; // Unique identifier for the component
+  itemRender?: (item: MenuItemModel) => React.ReactNode; // Custom renderer for menu items
+  items?: MenuItemModel[]; // Array of menu items to display
+  linkRender?: (item: MenuItemModel) => React.ReactNode; // Custom renderer for menu item links
+  onSelect?: (event: MenuSelectEvent) => void; // Callback fired when an item is selected
+  openOnClick?: boolean; // Whether to open the menu on click instead of right-click
+  style?: React.CSSProperties; // Inline styles
+  vertical?: boolean; // Whether to display the menu vertically
+}
+
+interface MenuItemModel {
+  contentRender?: (item: MenuItemModel) => React.ReactNode; // Custom content renderer
+  cssClass?: string; // CSS class for the menu item
+  cssStyle?: React.CSSProperties; // Inline styles for the menu item
+  data?: any; // Additional data associated with the item
+  disabled?: boolean; // Whether the item is disabled
+  icon?: string; // Icon class name to display
+  items?: MenuItemModel[]; // Sub-menu items
+  linkRender?: (item: MenuItemModel) => React.ReactNode; // Custom link renderer
+  render?: (item: MenuItemModel) => React.ReactNode; // Custom item renderer
+  svgIcon?: React.ReactNode; // SVG icon to display
+  text?: string; // Display text for the item
+  url?: string; // URL to navigate to when selected
+}
+
+interface MenuSelectEvent {
+  item: MenuItemModel; // The selected menu item
+  itemId: string; // Identifier of the selected item
+  nativeEvent: Event; // The native DOM event
+  syntheticEvent: React.SyntheticEvent; // The React synthetic event
+  target: ContextMenu; // The ContextMenu component instance
+}
+```
+
+**Usage Example:**
+```tsx
+import React, { useState } from 'react';
+import { ContextMenu } from '@progress/kendo-react-layout';
+
+function BasicContextMenuExample() {
+  const [show, setShow] = useState(false);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+
+  const menuItems = [
+    { text: 'Copy', icon: 'copy' },
+    { text: 'Paste', icon: 'paste' },
+    { text: 'Delete', icon: 'delete', disabled: false },
+    { text: 'More Options', items: [
+      { text: 'Rename', icon: 'edit' },
+      { text: 'Properties', icon: 'gear' }
+    ]}
+  ];
+
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setPosition({ x: e.clientX, y: e.clientY });
+    setShow(true);
+  };
+
+  const handleSelect = (event: MenuSelectEvent) => {
+    console.log('Selected:', event.item.text);
+    setShow(false);
+  };
+
+  return (
+    <div>
+      <div 
+        onContextMenu={handleContextMenu}
+        style={{ 
+          width: 300, 
+          height: 200, 
+          border: '1px solid #ccc',
+          padding: 20 
+        }}
+      >
+        Right-click me to show context menu
+      </div>
+      
+      {show && (
+        <ContextMenu
+          items={menuItems}
+          onSelect={handleSelect}
+          style={{
+            position: 'fixed',
+            left: position.x,
+            top: position.y,
+            zIndex: 1000
+          }}
+        />
+      )}
+    </div>
+  );
+}
+```
+
+## Integration Patterns
+
+### Basic Menu with Icons
+```tsx
+import { ContextMenu } from '@progress/kendo-react-layout';
+
+function IconMenuExample() {
+  const menuItems = [
+    { text: 'New File', icon: 'file-add' },
+    { text: 'Open', icon: 'folder-open' },
+    { text: 'Save', icon: 'save' },
+    { text: 'Print', icon: 'print' }
+  ];
+
+  const handleSelect = (event) => {
+    console.log('Action:', event.item.text);
+  };
+
+  return (
+    <ContextMenu
+      items={menuItems}
+      onSelect={handleSelect}
+    />
+  );
+}
+```
+
+### Hierarchical Menu Structure
+```tsx
+function NestedMenuExample() {
+  const complexMenuItems = [
+    { text: 'File', items: [
+      { text: 'New', items: [
+        { text: 'Document', icon: 'file' },
+        { text: 'Folder', icon: 'folder' }
+      ]},
+      { text: 'Open', icon: 'folder-open' },
+      { text: 'Recent Files', items: [
+        { text: 'document1.txt' },
+        { text: 'document2.txt' }
+      ]}
+    ]},
+    { text: 'Edit', items: [
+      { text: 'Undo', icon: 'undo' },
+      { text: 'Redo', icon: 'redo' },
+      { text: 'Cut', icon: 'cut' },
+      { text: 'Copy', icon: 'copy' }
+    ]},
+    { text: 'View', items: [
+      { text: 'Zoom In', icon: 'zoom-in' },
+      { text: 'Zoom Out', icon: 'zoom-out' },
+      { text: 'Full Screen', icon: 'window-maximize' }
+    ]}
+  ];
+
+  return (
+    <ContextMenu
+      items={complexMenuItems}
+      onSelect={(event) => {
+        if (event.item.text && !event.item.items) {
+          console.log('Executed:', event.item.text);
+        }
+      }}
+    />
+  );
+}
+```
+
+### Integration with Data Grid
+```tsx
+import { Grid, GridColumn } from '@progress/kendo-react-grid';
+import { ContextMenu } from '@progress/kendo-react-layout';
+
+function GridWithContextMenu() {
+  const [selectedRow, setSelectedRow] = useState(null);
+  const [showMenu, setShowMenu] = useState(false);
+  const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
+
+  const gridMenuItems = [
+    { text: 'Edit Row', icon: 'edit' },
+    { text: 'Delete Row', icon: 'delete' },
+    { text: 'Duplicate Row', icon: 'copy' },
+    { text: 'Export', items: [
+      { text: 'Export to PDF', icon: 'file-pdf' },
+      { text: 'Export to Excel', icon: 'file-excel' }
+    ]}
+  ];
+
+  const handleRowContextMenu = (e, dataItem) => {
+    e.preventDefault();
+    setSelectedRow(dataItem);
+    setMenuPosition({ x: e.clientX, y: e.clientY });
+    setShowMenu(true);
+  };
+
+  const handleMenuSelect = (event) => {
+    console.log(`${event.item.text} for row:`, selectedRow);
+    setShowMenu(false);
+  };
+
+  return (
+    <div>
+      <Grid data={gridData}>
+        <GridColumn 
+          field="name" 
+          title="Name"
+          cell={(props) => (
+            <td onContextMenu={(e) => handleRowContextMenu(e, props.dataItem)}>
+              {props.dataItem.name}
+            </td>
+          )}
+        />
+        <GridColumn field="email" title="Email" />
+      </Grid>
+
+      {showMenu && (
+        <ContextMenu
+          items={gridMenuItems}
+          onSelect={handleMenuSelect}
+          style={{
+            position: 'fixed',
+            left: menuPosition.x,
+            top: menuPosition.y,
+            zIndex: 1000
+          }}
+        />
+      )}
+    </div>
+  );
+}
+```
+
+### Programmatic Control
+```tsx
+function ProgrammaticContextMenu() {
+  const [menuVisible, setMenuVisible] = useState(false);
+
+  const toggleMenu = () => {
+    setMenuVisible(!menuVisible);
+  };
+
+  return (
+    <div>
+      <button onClick={toggleMenu}>
+        {menuVisible ? 'Hide Menu' : 'Show Menu'}
+      </button>
+      
+      {menuVisible && (
+        <ContextMenu
+          items={[
+            { text: 'Action 1' },
+            { text: 'Action 2' },
+            { text: 'Action 3' }
+          ]}
+          onSelect={(event) => {
+            console.log('Selected:', event.item.text);
+            setMenuVisible(false);
+          }}
+          openOnClick={true}
+        />
+      )}
+    </div>
+  );
+}
+```
+
+## Best Practices
+
+### Usage Guidelines
+- Position the context menu near the cursor or triggering element to maintain spatial relationship
+- Use clear, action-oriented text for menu items (e.g., "Delete Item" instead of just "Delete")
+- Group related actions together and use separators or sub-menus for organization
+- Disable menu items that are not currently applicable rather than hiding them completely
+- Provide keyboard shortcuts in menu item text when applicable (e.g., "Copy Ctrl+C")
+
+### Accessibility
+- The ContextMenu automatically provides ARIA attributes for screen readers
+- Ensure menu items have descriptive text that clearly indicates their purpose
+- Support keyboard navigation with arrow keys, Enter, and Escape
+- Use semantic icons that complement text labels rather than replacing them
+- Provide alternative ways to access context menu actions for users who cannot right-click
+
+### Performance
+- Use the `itemRender` prop for custom rendering only when necessary to avoid unnecessary re-renders
+- Consider lazy loading for complex nested menu structures
+- Implement proper event cleanup when components unmount to prevent memory leaks
+- Use `customCloseItemIds` to optimize menu closing behavior for specific items
+
+### Positioning and Display
+- Calculate menu position based on viewport boundaries to prevent clipping
+- Use appropriate z-index values to ensure the menu appears above other content
+- Consider mobile touch interactions where right-click is not available
+- Implement click-outside behavior to close the menu when users click elsewhere
+
+## Common Patterns
+
+### Pattern 1: Persistent Menu with Toggle
+```tsx
+function PersistentContextMenu() {
+  const [isOpen, setIsOpen] = useState(false);
+  
+  return (
+    <div>
+      <button onClick={() => setIsOpen(!isOpen)}>
+        Menu {isOpen ? '▲' : '▼'}
+      </button>
+      
+      {isOpen && (
+        <ContextMenu
+          items={menuItems}
+          onSelect={() => setIsOpen(false)}
+          openOnClick={true}
+        />
+      )}
+    </div>
+  );
+}
+```
+
+### Pattern 2: Dynamic Menu Items
+```tsx
+function DynamicContextMenu({ userRole, selectedItems }) {
+  const menuItems = useMemo(() => {
+    const baseItems = [
+      { text: 'View Details', icon: 'eye' }
+    ];
+    
+    if (userRole === 'admin') {
+      baseItems.push(
+        { text: 'Edit', icon: 'edit' },
+        { text: 'Delete', icon: 'delete' }
+      );
+    }
+    
+    if (selectedItems.length > 1) {
+      baseItems.push({
+        text: 'Bulk Actions',
+        items: [
+          { text: 'Export Selected', icon: 'download' },
+          { text: 'Delete Selected', icon: 'delete' }
+        ]
+      });
+    }
+    
+    return baseItems;
+  }, [userRole, selectedItems.length]);
+
+  return (
+    <ContextMenu
+      items={menuItems}
+      onSelect={handleContextAction}
+    />
+  );
+}
+```
+
+### Pattern 3: Custom Item Rendering
+```tsx
+function CustomRenderedMenu() {
+  const customItemRender = (item) => {
+    if (item.text === 'Status') {
+      return (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span className="status-indicator" />
+          {item.text}
+          <span className="badge">New</span>
+        </div>
+      );
+    }
+    return null; // Use default rendering for other items
+  };
+
+  return (
+    <ContextMenu
+      items={menuItems}
+      itemRender={customItemRender}
+      onSelect={handleSelect}
+    />
+  );
+}
+```

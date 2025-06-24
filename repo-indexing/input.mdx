@@ -1,0 +1,453 @@
+# Input Components
+
+## Overview
+
+### Purpose
+Use this component group to generate enhanced input functionality with prefix, suffix, and clear value components
+
+### When to Use
+The Input component group is ideal for creating sophisticated form inputs that require enhanced user experience through visual adornments and interactive elements. Common use cases include:
+
+- **Search inputs** - Add search icons as prefixes and clear buttons for easy value reset
+- **Currency/unit fields** - Display currency symbols, units, or measurement indicators as prefixes or suffixes
+- **Form validation displays** - Show validation status icons alongside input fields with clear separation
+- **Interactive filters** - Create filterable inputs with clear functionality for data tables or lists
+- **Formatted inputs** - Add contextual icons, symbols, or interactive elements to guide user input
+- **Contact forms** - Enhance email, phone, or address inputs with relevant icons and clear options
+- **Multi-step forms** - Provide visual cues and easy reset functionality for complex form workflows
+
+Perfect for modern applications that need accessible, user-friendly input fields with enhanced visual context and interaction patterns.
+
+### Architecture
+**Critical/Strong Coupling**: The Input component system follows a container-children pattern where Input serves as the root container, and InputPrefix, InputSeparator, and InputClearValue work together through prefix and suffix properties to create enhanced input experiences with visual adornments and interactive functionality.
+
+### Component Interdependencies
+- **Input** serves as the root container providing input functionality and layout context for adornments
+- **InputPrefix** provides visual context or icons at the beginning of the input field
+- **InputSeparator** creates visual separation between input content and suffix elements
+- **InputClearValue** adds interactive clear functionality to reset input values
+- Components work together through Input's prefix and suffix properties to create cohesive enhanced input experiences
+
+## Components
+
+### Input {Primary Component}
+
+**Purpose:** Root container that provides the main input functionality, value management, and context for prefix and suffix adornments
+
+**Interface:**
+```typescript
+interface InputProps {
+  children?: React.ReactNode; // Content to display inside the input
+  className?: string; // Additional CSS classes
+  style?: React.CSSProperties; // Additional CSS styles
+  value?: string; // Controlled input value
+  defaultValue?: string; // Initial value for uncontrolled inputs
+  onChange?: (event: InputChangeEvent) => void; // Value change handler
+  onFocus?: (event: React.FocusEvent) => void; // Focus event handler
+  onBlur?: (event: React.FocusEvent) => void; // Blur event handler
+  placeholder?: string; // Placeholder text
+  disabled?: boolean; // Disable the input (default: false)
+  readonly?: boolean; // Make input read-only (default: false)
+  required?: boolean; // Mark input as required (default: false)
+  autoFocus?: boolean; // Auto-focus on mount (default: false)
+  ariaLabel?: string; // Accessibility label
+  ariaLabelledBy?: string; // Reference to labeling element
+  ariaDescribedBy?: string; // Reference to description element
+  valid?: boolean; // Validation state
+  validationMessage?: string; // Validation message text
+  prefix?: React.ReactNode; // Prefix adornments (InputPrefix components)
+  suffix?: React.ReactNode; // Suffix adornments (InputSeparator, InputClearValue components)
+  name?: string; // Input name attribute
+  id?: string; // Input ID attribute
+  type?: string; // Input type (default: 'text')
+}
+```
+
+**Dependencies:** None - serves as the root component
+**Provides:** Input functionality and layout context for prefix/suffix adornments
+
+**Usage Example:**
+```tsx
+import { Input } from '@progress/kendo-react-inputs';
+
+function Example() {
+  const [value, setValue] = useState('');
+  
+  return (
+    <Input
+      value={value}
+      onChange={(e) => setValue(e.value)}
+      placeholder="Enter text"
+      prefix={/* InputPrefix components */}
+      suffix={/* InputSeparator and InputClearValue components */}
+    />
+  );
+}
+```
+
+### InputPrefix {Dependent Component}
+
+**Purpose:** Provides visual context, icons, or text at the beginning of the input field to enhance user understanding and provide contextual information
+
+**Interface:**
+```typescript
+interface InputPrefixProps {
+  children?: React.ReactNode; // Content to display as prefix (icons, text, etc.)
+  className?: string; // Additional CSS classes
+  style?: React.CSSProperties; // Additional CSS styles
+  orientation?: 'horizontal' | 'vertical'; // Layout alignment (default: 'horizontal')
+}
+```
+
+**Context Dependencies:** Must be used within Input's prefix property for proper styling and positioning
+**Parent Requirements:** Input component for proper functionality and layout
+
+**Usage Example:**
+```tsx
+// Must be used within Input prefix property
+<Input
+  prefix={
+    <InputPrefix orientation="horizontal">
+      <span className="k-icon k-i-search" />
+    </InputPrefix>
+  }
+>
+</Input>
+```
+
+### InputSeparator {Dependent Component}
+
+**Purpose:** Creates visual separation between input content and suffix elements, enhancing the visual hierarchy and organization of input adornments
+
+**Interface:**
+```typescript
+interface InputSeparatorProps {
+  className?: string; // Additional CSS classes
+  style?: React.CSSProperties; // Additional CSS styles
+  orientation?: 'horizontal' | 'vertical'; // Layout alignment (default: 'horizontal')
+}
+```
+
+**Context Dependencies:** Typically used within Input's suffix property alongside other suffix components
+**Parent Requirements:** Input component for proper functionality and visual integration
+
+**Usage Example:**
+```tsx
+// Used within Input suffix property for visual separation
+<Input
+  suffix={
+    <>
+      <InputSeparator orientation="vertical" />
+      <InputClearValue />
+    </>
+  }
+>
+</Input>
+```
+
+### InputClearValue {Dependent Component}
+
+**Purpose:** Adds interactive clear functionality to reset input values, providing users with a quick way to clear the input field
+
+**Interface:**
+```typescript
+interface InputClearValueProps {
+  children?: React.ReactNode; // Content to display (usually clear icon)
+  className?: string; // Additional CSS classes
+  style?: React.CSSProperties; // Additional CSS styles
+  onClick?: (event: React.MouseEvent) => void; // Click handler for clear action
+}
+```
+
+**Context Dependencies:** Used within Input's suffix property to provide clear functionality
+**Parent Requirements:** Input component for proper integration and value management
+
+**Usage Example:**
+```tsx
+// Used within Input suffix property for clear functionality
+<Input
+  value={value}
+  suffix={
+    <InputClearValue onClick={() => setValue('')}>
+      <span className="k-icon k-i-x" />
+    </InputClearValue>
+  }
+>
+</Input>
+```
+
+## Integration Patterns
+
+### Basic Usage
+```tsx
+import { Input, InputPrefix, InputSeparator, InputClearValue } from '@progress/kendo-react-inputs';
+
+// Minimal enhanced input with prefix
+function BasicExample() {
+  const [value, setValue] = useState('');
+  
+  return (
+    <Input
+      value={value}
+      onChange={(e) => setValue(e.value)}
+      placeholder="Search..."
+      prefix={
+        <InputPrefix>
+          <span className="k-icon k-i-search" />
+        </InputPrefix>
+      }
+    />
+  );
+}
+```
+
+### Advanced Usage
+```tsx
+// Complete input with all adornments
+function AdvancedExample() {
+  const [value, setValue] = useState('');
+  
+  const handleClear = () => {
+    setValue('');
+  };
+  
+  return (
+    <Input
+      value={value}
+      onChange={(e) => setValue(e.value)}
+      placeholder="Enter amount"
+      prefix={
+        <InputPrefix>
+          <span>$</span>
+        </InputPrefix>
+      }
+      suffix={
+        <>
+          <InputSeparator />
+          <InputClearValue onClick={handleClear}>
+            <span className="k-icon k-i-x" />
+          </InputClearValue>
+        </>
+      }
+    />
+  );
+}
+```
+
+### Common Variations
+```tsx
+// Search input pattern
+function SearchInput() {
+  const [searchValue, setSearchValue] = useState('');
+  
+  return (
+    <Input
+      value={searchValue}
+      onChange={(e) => setSearchValue(e.value)}
+      placeholder="Search products..."
+      prefix={
+        <InputPrefix>
+          <span className="k-icon k-i-search" />
+        </InputPrefix>
+      }
+      suffix={
+        searchValue && (
+          <InputClearValue onClick={() => setSearchValue('')}>
+            <span className="k-icon k-i-x" />
+          </InputClearValue>
+        )
+      }
+    />
+  );
+}
+
+// Currency input pattern
+function CurrencyInput() {
+  const [amount, setAmount] = useState('');
+  
+  return (
+    <Input
+      value={amount}
+      onChange={(e) => setAmount(e.value)}
+      placeholder="0.00"
+      prefix={
+        <InputPrefix>
+          <span>€</span>
+        </InputPrefix>
+      }
+      suffix={
+        <>
+          <InputSeparator />
+          <span>EUR</span>
+        </>
+      }
+    />
+  );
+}
+
+// Validation status input
+function ValidationInput() {
+  const [email, setEmail] = useState('');
+  const [isValid, setIsValid] = useState(true);
+  
+  return (
+    <Input
+      value={email}
+      onChange={(e) => {
+        setEmail(e.value);
+        setIsValid(e.value.includes('@'));
+      }}
+      placeholder="Enter email"
+      valid={isValid}
+      prefix={
+        <InputPrefix>
+          <span className="k-icon k-i-email" />
+        </InputPrefix>
+      }
+      suffix={
+        <>
+          <InputSeparator />
+          <span className={`k-icon ${isValid ? 'k-i-check' : 'k-i-warning'}`} />
+        </>
+      }
+    />
+  );
+}
+```
+
+## Component Relationships
+
+### Data Flow
+The Input component manages the central state and value, while prefix and suffix components provide enhanced visual context and interaction capabilities. InputClearValue communicates clear actions back to the parent component through click handlers.
+
+### Context Sharing
+Components share visual and layout context through the Input container. The Input component provides the styling context and positioning framework for all adornment components.
+
+### Event Handling
+- Input handles core value changes through onChange events
+- InputClearValue handles clear actions through onClick events that typically reset the Input's value
+- Prefix components are generally static but can include interactive elements with their own event handlers
+
+## Best Practices
+
+### Usage Guidelines
+- Always use InputPrefix and InputClearValue within Input's prefix and suffix properties respectively
+- Use InputSeparator to create visual hierarchy between different suffix elements
+- Provide meaningful icons or text in prefix elements to guide user understanding
+- Implement proper keyboard navigation and accessibility attributes
+- Use InputClearValue conditionally - only show when there's content to clear
+
+### Accessibility
+- Ensure InputPrefix icons have proper aria-labels or are purely decorative
+- InputClearValue should have accessible names indicating its clear functionality
+- Maintain proper focus management when using clear functionality
+- Use semantic markup and ensure screen readers can understand the input's enhanced context
+
+### Performance
+- Render InputClearValue conditionally to avoid unnecessary DOM elements when input is empty
+- Use React.memo for InputPrefix components when they contain static content
+- Optimize re-renders by memoizing event handlers and avoiding inline object creation
+- Consider virtualization for inputs within large lists or grids
+
+## Common Patterns
+
+### Pattern 1: Search with Clear
+```tsx
+// Optimized search input with conditional clear button
+function SearchWithClear() {
+  const [query, setQuery] = useState('');
+  
+  const handleClear = useCallback(() => {
+    setQuery('');
+  }, []);
+  
+  return (
+    <Input
+      value={query}
+      onChange={(e) => setQuery(e.value)}
+      placeholder="Search..."
+      prefix={
+        <InputPrefix>
+          <span className="k-icon k-i-search" aria-hidden="true" />
+        </InputPrefix>
+      }
+      suffix={
+        query && (
+          <InputClearValue onClick={handleClear} aria-label="Clear search">
+            <span className="k-icon k-i-x" aria-hidden="true" />
+          </InputClearValue>
+        )
+      }
+    />
+  );
+}
+```
+
+### Pattern 2: Formatted Input with Multiple Adornments
+```tsx
+// Complex input with multiple prefix and suffix elements
+function FormattedInput() {
+  const [value, setValue] = useState('');
+  
+  return (
+    <Input
+      value={value}
+      onChange={(e) => setValue(e.value)}
+      placeholder="Enter amount"
+      prefix={
+        <InputPrefix>
+          <span className="currency-symbol">$</span>
+        </InputPrefix>
+      }
+      suffix={
+        <>
+          <span className="currency-code">USD</span>
+          <InputSeparator orientation="vertical" />
+          <InputClearValue onClick={() => setValue('')}>
+            <span className="k-icon k-i-x" />
+          </InputClearValue>
+        </>
+      }
+    />
+  );
+}
+```
+
+### Pattern 3: Status Indicator Input
+```tsx
+// Input with dynamic status indicators in suffix
+function StatusInput() {
+  const [value, setValue] = useState('');
+  const [status, setStatus] = useState('neutral');
+  
+  const getStatusIcon = () => {
+    switch (status) {
+      case 'success': return 'k-i-check';
+      case 'error': return 'k-i-warning';
+      default: return 'k-i-info';
+    }
+  };
+  
+  return (
+    <Input
+      value={value}
+      onChange={(e) => {
+        setValue(e.value);
+        // Update status based on validation logic
+        setStatus(validateInput(e.value));
+      }}
+      prefix={
+        <InputPrefix>
+          <span className="k-icon k-i-user" />
+        </InputPrefix>
+      }
+      suffix={
+        <>
+          <InputSeparator />
+          <span className={`k-icon ${getStatusIcon()} status-${status}`} />
+        </>
+      }
+    />
+  );
+}
+```

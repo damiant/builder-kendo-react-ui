@@ -1,0 +1,832 @@
+# Reveal Component
+
+## Overview
+
+### Purpose
+Use this component to generate reveal animation functionality
+
+### When to Use
+The Reveal component provides smooth animation effects for revealing content by adjusting its width or height dimensions. Common use cases include:
+
+- **Progressive content disclosure** - Gradually reveal sections of content as users interact with navigation or scroll through pages
+- **Collapsible interface elements** - Animate the opening and closing of panels, sidebars, or content sections
+- **Dynamic UI transitions** - Smoothly reveal or hide content based on user actions, form states, or application logic
+- **Onboarding flows** - Create engaging step-by-step reveals for tutorials, feature introductions, or guided tours
+- **Search result reveals** - Animate the appearance of search results, filters, or dynamic content loading
+- **Responsive layout transitions** - Smooth transitions when showing/hiding content in mobile hamburger menus or responsive designs
+- **Modal and dialog animations** - Add entrance and exit animations for overlay content like modals, popovers, or tooltips
+- **Card interactions** - Reveal additional content or details within cards or list items on hover or click
+- **Form field animations** - Show/hide conditional form fields with smooth reveal transitions
+- **Dashboard widget reveals** - Animate the display of charts, metrics, or content widgets as they load or become relevant
+
+### Architecture
+**No Coupling**: Reveal is a standalone animation component that operates independently without requiring other components. It provides a complete animation solution with customizable direction, duration, and entrance/exit effects that can be applied to any content.
+
+## Components
+
+### Reveal
+
+**Purpose:** Provides smooth animation effects for revealing content by gradually adjusting its width or height dimensions, with configurable direction, timing, and entrance/exit effects.
+
+**Interface:**
+```typescript
+interface RevealProps {
+  // Animation direction
+  direction?: 'vertical' | 'horizontal'; // Direction of reveal animation (default: 'vertical')
+  
+  // Timing configuration
+  duration?: number; // Animation duration in milliseconds (default: 300)
+  
+  // Animation effects
+  enter?: AnimationStyles | boolean; // Entering animation styles or enable/disable (default: true)
+  exit?: AnimationStyles | boolean; // Exiting animation styles or enable/disable (default: true)
+  
+  // Content and lifecycle
+  children: React.ReactNode; // Content to be revealed with animation
+  onStart?: () => void; // Callback fired when animation starts
+  onEnd?: () => void; // Callback fired when animation completes
+  
+  // Visual control
+  appear?: boolean; // Whether to animate on initial mount (default: true)
+  
+  // Standard component props
+  className?: string; // Custom CSS classes for styling
+  style?: React.CSSProperties; // Inline styles for the wrapper element
+}
+
+interface AnimationStyles {
+  opacity?: number; // Opacity value (0-1)
+  transform?: string; // CSS transform property
+  [key: string]: any; // Additional CSS properties
+}
+```
+
+**Usage Example:**
+```tsx
+import { Reveal } from '@progress/kendo-react-animation';
+
+function BasicReveal() {
+  return (
+    <Reveal
+      direction="vertical"
+      duration={500}
+      onStart={() => console.log('Animation started')}
+      onEnd={() => console.log('Animation completed')}
+    >
+      <div className="content">
+        <h3>This content will be revealed</h3>
+        <p>The reveal animation adjusts the height or width to smoothly show this content.</p>
+      </div>
+    </Reveal>
+  );
+}
+```
+
+## Integration Patterns
+
+### Basic Usage
+```tsx
+import { Reveal } from '@progress/kendo-react-animation';
+
+// Simple vertical reveal
+function SimpleVerticalReveal() {
+  return (
+    <Reveal direction="vertical">
+      <div className="panel-content">
+        <h4>Panel Title</h4>
+        <p>This content will reveal by expanding its height.</p>
+      </div>
+    </Reveal>
+  );
+}
+
+// Horizontal reveal for sidebars
+function HorizontalSidebarReveal() {
+  return (
+    <Reveal direction="horizontal" duration={400}>
+      <nav className="sidebar">
+        <ul>
+          <li><a href="/home">Home</a></li>
+          <li><a href="/products">Products</a></li>
+          <li><a href="/contact">Contact</a></li>
+        </ul>
+      </nav>
+    </Reveal>
+  );
+}
+```
+
+### Conditional Content Reveal
+```tsx
+import { Reveal } from '@progress/kendo-react-animation';
+import { Button } from '@progress/kendo-react-buttons';
+import { useState } from 'react';
+
+function ConditionalReveal() {
+  const [isVisible, setIsVisible] = useState(false);
+
+  return (
+    <div className="conditional-reveal-demo">
+      <Button
+        primary
+        onClick={() => setIsVisible(!isVisible)}
+      >
+        {isVisible ? 'Hide' : 'Show'} Content
+      </Button>
+
+      {isVisible && (
+        <Reveal
+          direction="vertical"
+          duration={350}
+          enter={{ opacity: 0, transform: 'scale(0.95)' }}
+          exit={{ opacity: 0, transform: 'scale(0.95)' }}
+        >
+          <div className="revealed-content">
+            <h3>Revealed Content</h3>
+            <p>This content appears with a combined reveal and fade animation.</p>
+            <p>The scale transform adds a subtle zoom effect during the transition.</p>
+          </div>
+        </Reveal>
+      )}
+    </div>
+  );
+}
+```
+
+### Collapsible Sections
+```tsx
+import { Reveal } from '@progress/kendo-react-animation';
+import { useState } from 'react';
+
+function CollapsibleSection({ title, children, defaultExpanded = false }) {
+  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
+
+  return (
+    <div className="collapsible-section">
+      <button
+        className="section-header"
+        onClick={() => setIsExpanded(!isExpanded)}
+        aria-expanded={isExpanded}
+        aria-controls="section-content"
+      >
+        <span className="section-title">{title}</span>
+        <span className={`chevron ${isExpanded ? 'expanded' : ''}`}>▼</span>
+      </button>
+
+      {isExpanded && (
+        <Reveal direction="vertical" duration={300}>
+          <div id="section-content" className="section-content">
+            {children}
+          </div>
+        </Reveal>
+      )}
+    </div>
+  );
+}
+
+// Usage example
+function FAQSection() {
+  return (
+    <div className="faq-container">
+      <h2>Frequently Asked Questions</h2>
+      
+      <CollapsibleSection title="How do I install the component?">
+        <p>You can install the component using npm:</p>
+        <code>npm install @progress/kendo-react-animation</code>
+      </CollapsibleSection>
+
+      <CollapsibleSection title="What browsers are supported?">
+        <p>Kendo React components support all modern browsers including:</p>
+        <ul>
+          <li>Chrome (latest 2 versions)</li>
+          <li>Firefox (latest 2 versions)</li>
+          <li>Safari (latest 2 versions)</li>
+          <li>Edge (latest 2 versions)</li>
+        </ul>
+      </CollapsibleSection>
+
+      <CollapsibleSection title="Can I customize the animation?">
+        <p>Yes, you can customize duration, direction, and entrance/exit effects.</p>
+        <p>Refer to the component documentation for all available options.</p>
+      </CollapsibleSection>
+    </div>
+  );
+}
+```
+
+### Progressive Content Loading
+```tsx
+import { Reveal } from '@progress/kendo-react-animation';
+import { useState, useEffect } from 'react';
+
+function ProgressiveContentLoader() {
+  const [loadedSections, setLoadedSections] = useState([]);
+  
+  const sections = [
+    { id: 'intro', title: 'Introduction', delay: 0 },
+    { id: 'features', title: 'Key Features', delay: 500 },
+    { id: 'examples', title: 'Examples', delay: 1000 },
+    { id: 'pricing', title: 'Pricing', delay: 1500 }
+  ];
+
+  useEffect(() => {
+    sections.forEach(section => {
+      setTimeout(() => {
+        setLoadedSections(prev => [...prev, section.id]);
+      }, section.delay);
+    });
+  }, []);
+
+  const isSectionLoaded = (sectionId) => loadedSections.includes(sectionId);
+
+  return (
+    <div className="progressive-loader">
+      <h1>Welcome to Our Product</h1>
+
+      {isSectionLoaded('intro') && (
+        <Reveal direction="vertical" duration={400}>
+          <section className="intro-section">
+            <h2>Introduction</h2>
+            <p>Welcome to our innovative solution that transforms how you work.</p>
+          </section>
+        </Reveal>
+      )}
+
+      {isSectionLoaded('features') && (
+        <Reveal 
+          direction="vertical" 
+          duration={400}
+          enter={{ opacity: 0, transform: 'translateY(20px)' }}
+        >
+          <section className="features-section">
+            <h2>Key Features</h2>
+            <ul>
+              <li>Easy integration</li>
+              <li>Powerful customization</li>
+              <li>Responsive design</li>
+            </ul>
+          </section>
+        </Reveal>
+      )}
+
+      {isSectionLoaded('examples') && (
+        <Reveal direction="vertical" duration={400}>
+          <section className="examples-section">
+            <h2>Examples</h2>
+            <p>See how our solution works in real-world scenarios.</p>
+          </section>
+        </Reveal>
+      )}
+
+      {isSectionLoaded('pricing') && (
+        <Reveal 
+          direction="vertical" 
+          duration={400}
+          enter={{ opacity: 0, transform: 'scale(0.9)' }}
+        >
+          <section className="pricing-section">
+            <h2>Pricing</h2>
+            <p>Choose the plan that works best for your needs.</p>
+          </section>
+        </Reveal>
+      )}
+    </div>
+  );
+}
+```
+
+### Mobile Menu Animation
+```tsx
+import { Reveal } from '@progress/kendo-react-animation';
+import { Button } from '@progress/kendo-react-buttons';
+import { useState } from 'react';
+
+function MobileMenuWithReveal() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
+  return (
+    <div className="mobile-menu-container">
+      <header className="mobile-header">
+        <h1 className="logo">Your App</h1>
+        <Button
+          className="menu-toggle"
+          onClick={toggleMenu}
+          aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
+        >
+          {isMenuOpen ? '✕' : '☰'}
+        </Button>
+      </header>
+
+      {isMenuOpen && (
+        <Reveal 
+          direction="vertical" 
+          duration={250}
+          enter={{ opacity: 0, transform: 'translateY(-10px)' }}
+          exit={{ opacity: 0, transform: 'translateY(-10px)' }}
+        >
+          <nav className="mobile-menu" role="navigation">
+            <ul className="menu-items">
+              <li><a href="/dashboard" onClick={toggleMenu}>Dashboard</a></li>
+              <li><a href="/profile" onClick={toggleMenu}>Profile</a></li>
+              <li><a href="/settings" onClick={toggleMenu}>Settings</a></li>
+              <li><a href="/help" onClick={toggleMenu}>Help</a></li>
+              <li><a href="/logout" onClick={toggleMenu}>Logout</a></li>
+            </ul>
+          </nav>
+        </Reveal>
+      )}
+    </div>
+  );
+}
+```
+
+### Card Detail Reveals
+```tsx
+import { Reveal } from '@progress/kendo-react-animation';
+import { Button } from '@progress/kendo-react-buttons';
+import { useState } from 'react';
+
+function ProductCard({ product }) {
+  const [showDetails, setShowDetails] = useState(false);
+
+  return (
+    <div className="product-card">
+      <img src={product.image} alt={product.name} className="product-image" />
+      
+      <div className="product-info">
+        <h3>{product.name}</h3>
+        <p className="price">${product.price}</p>
+        
+        <Button
+          onClick={() => setShowDetails(!showDetails)}
+          className="details-toggle"
+        >
+          {showDetails ? 'Hide' : 'Show'} Details
+        </Button>
+
+        {showDetails && (
+          <Reveal 
+            direction="vertical" 
+            duration={300}
+            enter={{ opacity: 0 }}
+            exit={{ opacity: 0 }}
+          >
+            <div className="product-details">
+              <h4>Product Details</h4>
+              <p><strong>Description:</strong> {product.description}</p>
+              <p><strong>SKU:</strong> {product.sku}</p>
+              <p><strong>Availability:</strong> {product.inStock ? 'In Stock' : 'Out of Stock'}</p>
+              
+              <div className="product-specs">
+                <h5>Specifications</h5>
+                <ul>
+                  {product.specs.map((spec, index) => (
+                    <li key={index}>{spec}</li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="product-actions">
+                <Button primary>Add to Cart</Button>
+                <Button>Add to Wishlist</Button>
+              </div>
+            </div>
+          </Reveal>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// Usage with multiple products
+function ProductGrid() {
+  const products = [
+    {
+      id: 1,
+      name: 'Wireless Headphones',
+      price: 99.99,
+      image: '/images/headphones.jpg',
+      description: 'Premium wireless headphones with noise cancellation.',
+      sku: 'WH-001',
+      inStock: true,
+      specs: ['Bluetooth 5.0', '30-hour battery', 'Active noise cancellation']
+    },
+    {
+      id: 2,
+      name: 'Smart Watch',
+      price: 199.99,
+      image: '/images/smartwatch.jpg',
+      description: 'Advanced fitness tracking and smart notifications.',
+      sku: 'SW-002',
+      inStock: false,
+      specs: ['Heart rate monitor', 'GPS tracking', 'Water resistant']
+    }
+  ];
+
+  return (
+    <div className="product-grid">
+      {products.map(product => (
+        <ProductCard key={product.id} product={product} />
+      ))}
+    </div>
+  );
+}
+```
+
+### Search Results Animation
+```tsx
+import { Reveal } from '@progress/kendo-react-animation';
+import { TextBox } from '@progress/kendo-react-inputs';
+import { useState, useEffect } from 'react';
+
+function AnimatedSearchResults() {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [showResults, setShowResults] = useState(false);
+
+  useEffect(() => {
+    const performSearch = async () => {
+      if (!searchQuery.trim()) {
+        setShowResults(false);
+        return;
+      }
+
+      // Simulate API call
+      setTimeout(() => {
+        const mockResults = [
+          { id: 1, title: 'React Development Guide', type: 'Article' },
+          { id: 2, title: 'Advanced JavaScript Patterns', type: 'Tutorial' },
+          { id: 3, title: 'Component Animation Techniques', type: 'Video' }
+        ].filter(item => 
+          item.title.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+
+        setSearchResults(mockResults);
+        setShowResults(mockResults.length > 0);
+      }, 300);
+    };
+
+    const timeoutId = setTimeout(performSearch, 500);
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery]);
+
+  return (
+    <div className="animated-search">
+      <div className="search-input-container">
+        <TextBox
+          placeholder="Search articles, tutorials, and videos..."
+          value={searchQuery}
+          onChange={(event) => setSearchQuery(event.target.value)}
+        />
+      </div>
+
+      {showResults && (
+        <Reveal 
+          direction="vertical" 
+          duration={350}
+          enter={{ opacity: 0, transform: 'translateY(-5px)' }}
+          exit={{ opacity: 0, transform: 'translateY(-5px)' }}
+        >
+          <div className="search-results" role="region" aria-live="polite">
+            <h3>Search Results ({searchResults.length})</h3>
+            
+            <ul className="results-list">
+              {searchResults.map(result => (
+                <li key={result.id} className="result-item">
+                  <h4>{result.title}</h4>
+                  <span className="result-type">{result.type}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </Reveal>
+      )}
+
+      {searchQuery && !showResults && (
+        <div className="no-results">
+          <p>No results found for "{searchQuery}"</p>
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+## Best Practices
+
+### Usage Guidelines
+- **Choose appropriate direction** - Use vertical reveal for expanding content sections and horizontal reveal for sidebars or panel-style interfaces
+- **Set reasonable durations** - Keep animations between 200-500ms for optimal user experience; shorter for simple reveals, longer for complex content
+- **Combine with opacity effects** - Use enter/exit opacity animations alongside dimension changes for smoother visual transitions
+- **Maintain content accessibility** - Ensure revealed content is properly announced to screen readers and respects user motion preferences
+- **Consider performance impact** - For content with many nested elements, test animation performance and consider using CSS transforms for better optimization
+
+### Animation Guidelines
+- **Match animation to content type** - Use quick reveals (200-300ms) for UI controls and slower reveals (400-500ms) for content-heavy sections
+- **Coordinate multiple reveals** - When revealing multiple sections, stagger timing by 100-150ms intervals to create natural flow
+- **Provide immediate feedback** - Start animations immediately upon user interaction to maintain responsive feel
+- **Use consistent timing** - Establish standard duration values across your application for predictable user experience
+- **Consider entrance effects** - Combine reveal animations with subtle transform effects (scale, translate) for more engaging transitions
+
+### Performance Considerations
+- **Optimize for mobile devices** - Test reveal animations on lower-powered devices and adjust duration/complexity as needed
+- **Limit simultaneous animations** - Avoid running multiple reveal animations simultaneously to prevent performance issues
+- **Use CSS transforms wisely** - Prefer transform properties over changing layout properties for better rendering performance
+- **Consider content complexity** - Simpler content can use faster animations; complex layouts may need more time for smooth transitions
+- **Monitor memory usage** - For frequently toggled content, ensure proper cleanup of animation resources
+
+### Accessibility
+- **Respect motion preferences** - Honor `prefers-reduced-motion` CSS media query by disabling or reducing animations when requested
+- **Provide keyboard support** - Ensure all interactive elements that trigger reveals are keyboard accessible
+- **Use ARIA attributes** - Implement `aria-expanded`, `aria-controls`, and `aria-describedby` for collapsible content relationships
+- **Announce content changes** - Use `aria-live` regions to inform screen readers when content is revealed or hidden
+- **Maintain focus management** - Preserve logical focus flow when content is revealed, especially for keyboard navigation
+
+## Common Patterns
+
+### Pattern 1: Multi-Step Reveal Flow
+```tsx
+import { Reveal } from '@progress/kendo-react-animation';
+import { Button } from '@progress/kendo-react-buttons';
+import { useState } from 'react';
+
+// Sequential content revelation for onboarding or tutorials
+function MultiStepReveal() {
+  const [currentStep, setCurrentStep] = useState(0);
+  
+  const steps = [
+    {
+      title: 'Welcome',
+      content: 'Welcome to our platform! Let\'s get you started with a quick tour.'
+    },
+    {
+      title: 'Features Overview',
+      content: 'Our platform offers powerful tools to streamline your workflow and boost productivity.'
+    },
+    {
+      title: 'Getting Started',
+      content: 'You can begin by creating your first project or importing existing data.'
+    },
+    {
+      title: 'Ready to Go',
+      content: 'You\'re all set! Start exploring and make the most of your new tools.'
+    }
+  ];
+
+  const nextStep = () => {
+    if (currentStep < steps.length - 1) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const prevStep = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  return (
+    <div className="multi-step-reveal">
+      <div className="step-progress">
+        <span>Step {currentStep + 1} of {steps.length}</span>
+        <div className="progress-bar">
+          <div 
+            className="progress-fill"
+            style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
+          />
+        </div>
+      </div>
+
+      <Reveal 
+        direction="vertical" 
+        duration={400}
+        key={currentStep} // Force re-mount for each step
+        enter={{ opacity: 0, transform: 'translateX(20px)' }}
+        exit={{ opacity: 0, transform: 'translateX(-20px)' }}
+      >
+        <div className="step-content">
+          <h2>{steps[currentStep].title}</h2>
+          <p>{steps[currentStep].content}</p>
+        </div>
+      </Reveal>
+
+      <div className="step-navigation">
+        <Button 
+          onClick={prevStep} 
+          disabled={currentStep === 0}
+        >
+          Previous
+        </Button>
+        
+        <Button 
+          onClick={nextStep}
+          disabled={currentStep === steps.length - 1}
+          primary
+        >
+          {currentStep === steps.length - 1 ? 'Finish' : 'Next'}
+        </Button>
+      </div>
+    </div>
+  );
+}
+```
+
+### Pattern 2: Nested Collapsible Content
+```tsx
+import { Reveal } from '@progress/kendo-react-animation';
+import { useState } from 'react';
+
+// Hierarchical content with nested reveal animations
+function NestedCollapsibleMenu() {
+  const [expandedSections, setExpandedSections] = useState(new Set());
+
+  const toggleSection = (sectionId) => {
+    const newExpanded = new Set(expandedSections);
+    if (newExpanded.has(sectionId)) {
+      newExpanded.delete(sectionId);
+    } else {
+      newExpanded.add(sectionId);
+    }
+    setExpandedSections(newExpanded);
+  };
+
+  const menuData = [
+    {
+      id: 'products',
+      title: 'Products',
+      items: [
+        {
+          id: 'software',
+          title: 'Software Solutions',
+          subitems: ['Web Apps', 'Mobile Apps', 'Desktop Apps']
+        },
+        {
+          id: 'services',
+          title: 'Services',
+          subitems: ['Consulting', 'Training', 'Support']
+        }
+      ]
+    },
+    {
+      id: 'company',
+      title: 'Company',
+      items: [
+        {
+          id: 'about',
+          title: 'About Us',
+          subitems: ['History', 'Team', 'Mission']
+        },
+        {
+          id: 'careers',
+          title: 'Careers',
+          subitems: ['Open Positions', 'Benefits', 'Culture']
+        }
+      ]
+    }
+  ];
+
+  const isExpanded = (id) => expandedSections.has(id);
+
+  return (
+    <nav className="nested-menu" role="navigation">
+      {menuData.map(section => (
+        <div key={section.id} className="menu-section">
+          <button
+            className="section-header"
+            onClick={() => toggleSection(section.id)}
+            aria-expanded={isExpanded(section.id)}
+          >
+            <span>{section.title}</span>
+            <span className={`chevron ${isExpanded(section.id) ? 'expanded' : ''}`}>
+              ▼
+            </span>
+          </button>
+
+          {isExpanded(section.id) && (
+            <Reveal direction="vertical" duration={300}>
+              <div className="section-content">
+                {section.items.map(item => (
+                  <div key={item.id} className="menu-item">
+                    <button
+                      className="item-header"
+                      onClick={() => toggleSection(item.id)}
+                      aria-expanded={isExpanded(item.id)}
+                    >
+                      <span>{item.title}</span>
+                      <span className={`chevron ${isExpanded(item.id) ? 'expanded' : ''}`}>
+                        ▼
+                      </span>
+                    </button>
+
+                    {isExpanded(item.id) && (
+                      <Reveal direction="vertical" duration={250}>
+                        <ul className="submenu">
+                          {item.subitems.map((subitem, index) => (
+                            <li key={index}>
+                              <a href={`/${section.id}/${item.id}/${subitem.toLowerCase().replace(/\s+/g, '-')}`}>
+                                {subitem}
+                              </a>
+                            </li>
+                          ))}
+                        </ul>
+                      </Reveal>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </Reveal>
+          )}
+        </div>
+      ))}
+    </nav>
+  );
+}
+```
+
+### Pattern 3: Responsive Panel Reveal
+```tsx
+import { Reveal } from '@progress/kendo-react-animation';
+import { Button } from '@progress/kendo-react-buttons';
+import { useState, useEffect } from 'react';
+
+// Responsive panel that adapts reveal direction based on screen size
+function ResponsivePanel() {
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const [revealDirection, setRevealDirection] = useState('horizontal');
+
+  useEffect(() => {
+    const updateDirection = () => {
+      // Use horizontal reveal for desktop, vertical for mobile
+      setRevealDirection(window.innerWidth >= 768 ? 'horizontal' : 'vertical');
+    };
+
+    updateDirection();
+    window.addEventListener('resize', updateDirection);
+    return () => window.removeEventListener('resize', updateDirection);
+  }, []);
+
+  const togglePanel = () => {
+    setIsPanelOpen(!isPanelOpen);
+  };
+
+  return (
+    <div className="responsive-panel-container">
+      <header className="main-header">
+        <h1>Responsive App</h1>
+        <Button onClick={togglePanel} className="panel-toggle">
+          {isPanelOpen ? 'Close' : 'Open'} Panel
+        </Button>
+      </header>
+
+      <div className="content-area">
+        <main className="main-content">
+          <h2>Main Content</h2>
+          <p>This is the primary content area that adapts based on panel state.</p>
+          <p>The panel reveals horizontally on desktop and vertically on mobile.</p>
+        </main>
+
+        {isPanelOpen && (
+          <Reveal 
+            direction={revealDirection}
+            duration={revealDirection === 'horizontal' ? 400 : 300}
+            enter={{ opacity: 0 }}
+            exit={{ opacity: 0 }}
+          >
+            <aside className="side-panel" role="complementary">
+              <h3>Side Panel</h3>
+              
+              <nav className="panel-navigation">
+                <h4>Quick Links</h4>
+                <ul>
+                  <li><a href="/dashboard">Dashboard</a></li>
+                  <li><a href="/analytics">Analytics</a></li>
+                  <li><a href="/reports">Reports</a></li>
+                  <li><a href="/settings">Settings</a></li>
+                </ul>
+              </nav>
+
+              <div className="panel-widget">
+                <h4>Recent Activity</h4>
+                <ul className="activity-list">
+                  <li>New user registered</li>
+                  <li>Report generated</li>
+                  <li>Data synced</li>
+                </ul>
+              </div>
+
+              <div className="panel-actions">
+                <Button primary>Primary Action</Button>
+                <Button>Secondary Action</Button>
+              </div>
+            </aside>
+          </Reveal>
+        )}
+      </div>
+    </div>
+  );
+}
+```

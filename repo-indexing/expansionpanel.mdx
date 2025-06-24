@@ -1,0 +1,559 @@
+# ExpansionPanel Components
+
+## Overview
+
+### Purpose
+Use this component to generate expansion panel functionality
+
+### When to Use
+The ExpansionPanel component is ideal for organizing content into expandable and collapsible sections that enhance user experience by saving space and providing a clean, organized interface. Use this component when you need to:
+
+- Create accordion-style content sections that can be expanded or collapsed on demand
+- Organize large amounts of information into digestible, hierarchical sections
+- Implement FAQ sections where questions expand to reveal answers
+- Build configuration panels or settings sections that can be toggled for better organization
+- Display detailed information that should be hidden by default to reduce visual clutter
+- Create progressive disclosure patterns where users can access more information as needed
+- Implement dashboard widgets or cards that can be minimized to save screen space
+- Build step-by-step wizards where each step can be expanded independently
+
+### Architecture
+**No Coupling**: ExpansionPanel is a standalone component that operates independently without requiring other components. It manages its own expand/collapse state and can be used in isolation or combined with other ExpansionPanel instances to create accordion-like layouts.
+
+## Components
+
+### ExpansionPanel {Standalone Component}
+A self-contained component that provides expandable and collapsible content sections with customizable headers, animations, and interaction controls.
+
+**Purpose:** Creates an interactive content container that allows users to show or hide content sections, providing an organized way to present information with space-efficient progressive disclosure.
+
+**Interface:**
+```typescript
+interface ExpansionPanelProps {
+  children?: React.ReactNode; // Content to display when the panel is expanded
+  className?: string; // Additional CSS classes for custom styling
+  style?: React.CSSProperties; // Inline styles for the component
+  title?: React.ReactNode; // The header/title displayed in the panel header
+  subtitle?: React.ReactNode; // Optional subtitle text displayed below the title
+  expanded?: boolean; // Controls whether the panel is expanded (true) or collapsed (false)
+  disabled?: boolean; // When true, prevents user interaction with the panel
+  expandIcon?: string; // Icon name to display when panel is collapsed (uses Kendo icon font)
+  collapseIcon?: string; // Icon name to display when panel is expanded (uses Kendo icon font)
+  expandSVGIcon?: SVGIcon; // Custom SVG icon component for expand state
+  collapseSVGIcon?: SVGIcon; // Custom SVG icon component for collapse state
+  onAction?: (event: ExpansionPanelActionEvent) => void; // Callback fired when panel is expanded or collapsed
+  id?: string; // Unique identifier for the component
+  ariaControls?: string; // ARIA controls attribute for accessibility
+  tabIndex?: number; // Tab order for keyboard navigation
+  dir?: string; // Text direction ('ltr' | 'rtl' | 'auto')
+  animation?: {
+    expand?: AnimationSettings; // Animation configuration for expanding
+    collapse?: AnimationSettings; // Animation configuration for collapsing
+  };
+}
+
+interface ExpansionPanelActionEvent {
+  syntheticEvent: React.SyntheticEvent; // The original DOM event
+  expanded: boolean; // New expanded state of the panel
+  target: ExpansionPanel; // Reference to the ExpansionPanel component
+}
+
+interface AnimationSettings {
+  effects: string; // Animation effects (e.g., 'expandVertical fadeIn')
+  duration: number; // Animation duration in milliseconds
+}
+```
+
+**Usage Example:**
+```tsx
+import { ExpansionPanel } from '@progress/kendo-react-layout';
+
+function BasicExpansionPanel() {
+  const [expanded, setExpanded] = React.useState(false);
+
+  const handleAction = (event: ExpansionPanelActionEvent) => {
+    setExpanded(event.expanded);
+    console.log('Panel expanded:', event.expanded);
+  };
+
+  return (
+    <ExpansionPanel
+      title="Settings"
+      subtitle="Configure your preferences"
+      expanded={expanded}
+      onAction={handleAction}
+    >
+      <div style={{ padding: '16px' }}>
+        <p>Your settings content goes here.</p>
+        <button>Save Settings</button>
+      </div>
+    </ExpansionPanel>
+  );
+}
+```
+
+## Integration Patterns
+
+### Basic Usage
+```tsx
+import { ExpansionPanel } from '@progress/kendo-react-layout';
+
+// Simple uncontrolled panel
+function SimplePanel() {
+  return (
+    <ExpansionPanel title="Simple Panel">
+      <p>This is a basic expansion panel with default behavior.</p>
+    </ExpansionPanel>
+  );
+}
+```
+
+### Advanced Usage
+```tsx
+import { ExpansionPanel } from '@progress/kendo-react-layout';
+import { Slide } from '@progress/kendo-react-animation';
+
+// Advanced panel with custom animations and icons
+function AdvancedPanel() {
+  const [isExpanded, setIsExpanded] = React.useState(false);
+
+  return (
+    <ExpansionPanel
+      title="Advanced Configuration"
+      subtitle="Customize advanced settings"
+      expanded={isExpanded}
+      expandIcon="arrow-chevron-right"
+      collapseIcon="arrow-chevron-down"
+      animation={{
+        expand: { effects: 'expandVertical fadeIn', duration: 300 },
+        collapse: { effects: 'collapseVertical fadeOut', duration: 200 }
+      }}
+      onAction={(event) => setIsExpanded(event.expanded)}
+      className="custom-panel"
+    >
+      <Slide>
+        <div style={{ padding: '20px', backgroundColor: '#f5f5f5' }}>
+          <h4>Advanced Options</h4>
+          <label>
+            <input type="checkbox" /> Enable advanced mode
+          </label>
+          <br />
+          <label>
+            <input type="checkbox" /> Use custom settings
+          </label>
+          <div style={{ marginTop: '16px' }}>
+            <button>Apply Changes</button>
+            <button style={{ marginLeft: '8px' }}>Reset</button>
+          </div>
+        </div>
+      </Slide>
+    </ExpansionPanel>
+  );
+}
+```
+
+### Common Variations
+
+#### FAQ Section Pattern
+```tsx
+// Multiple panels working together to create an FAQ section
+function FAQSection() {
+  const faqs = [
+    {
+      id: 1,
+      question: "How do I reset my password?",
+      answer: "You can reset your password by clicking the 'Forgot Password' link on the login page and following the instructions sent to your email."
+    },
+    {
+      id: 2,
+      question: "How do I update my profile information?",
+      answer: "Navigate to your profile page and click the 'Edit' button. Make your changes and click 'Save' to update your information."
+    },
+    {
+      id: 3,
+      question: "How do I contact support?",
+      answer: "You can contact support through the help desk portal, email us at support@company.com, or call our support line at 1-800-SUPPORT."
+    }
+  ];
+
+  return (
+    <div className="faq-section">
+      <h2>Frequently Asked Questions</h2>
+      {faqs.map((faq) => (
+        <ExpansionPanel
+          key={faq.id}
+          title={faq.question}
+          style={{ marginBottom: '8px' }}
+        >
+          <div style={{ padding: '16px', borderTop: '1px solid #e0e0e0' }}>
+            <p>{faq.answer}</p>
+          </div>
+        </ExpansionPanel>
+      ))}
+    </div>
+  );
+}
+```
+
+#### Settings Panel with Validation
+```tsx
+// Panel with form validation and conditional content
+function SettingsPanel() {
+  const [expanded, setExpanded] = React.useState(false);
+  const [settings, setSettings] = React.useState({
+    notifications: true,
+    darkMode: false,
+    language: 'en'
+  });
+
+  const handleSettingChange = (key: string, value: any) => {
+    setSettings(prev => ({ ...prev, [key]: value }));
+  };
+
+  return (
+    <ExpansionPanel
+      title="User Preferences"
+      subtitle={`${Object.keys(settings).length} settings configured`}
+      expanded={expanded}
+      onAction={(event) => setExpanded(event.expanded)}
+      animation={{
+        expand: { effects: 'expandVertical', duration: 250 },
+        collapse: { effects: 'collapseVertical', duration: 250 }
+      }}
+    >
+      <div style={{ padding: '20px' }}>
+        <div style={{ marginBottom: '16px' }}>
+          <label style={{ display: 'block', marginBottom: '8px' }}>
+            <input
+              type="checkbox"
+              checked={settings.notifications}
+              onChange={(e) => handleSettingChange('notifications', e.target.checked)}
+            />
+            Enable Notifications
+          </label>
+          
+          <label style={{ display: 'block', marginBottom: '8px' }}>
+            <input
+              type="checkbox"
+              checked={settings.darkMode}
+              onChange={(e) => handleSettingChange('darkMode', e.target.checked)}
+            />
+            Dark Mode
+          </label>
+          
+          <label style={{ display: 'block', marginBottom: '16px' }}>
+            Language:
+            <select
+              value={settings.language}
+              onChange={(e) => handleSettingChange('language', e.target.value)}
+              style={{ marginLeft: '8px' }}
+            >
+              <option value="en">English</option>
+              <option value="es">Spanish</option>
+              <option value="fr">French</option>
+            </select>
+          </label>
+        </div>
+        
+        <button style={{ marginRight: '8px' }}>Save Changes</button>
+        <button>Reset to Defaults</button>
+      </div>
+    </ExpansionPanel>
+  );
+}
+```
+
+#### Dashboard Widget Pattern
+```tsx
+// Collapsible dashboard widget with status indicators
+function DashboardWidget() {
+  const [expanded, setExpanded] = React.useState(true);
+  const [data, setData] = React.useState({
+    status: 'healthy',
+    lastUpdate: new Date().toLocaleString(),
+    metrics: { cpu: 23, memory: 67, disk: 45 }
+  });
+
+  const getStatusColor = (status: string) => {
+    return status === 'healthy' ? '#4caf50' : '#f44336';
+  };
+
+  return (
+    <ExpansionPanel
+      title={
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span>System Metrics</span>
+          <span
+            style={{
+              width: '8px',
+              height: '8px',
+              borderRadius: '50%',
+              backgroundColor: getStatusColor(data.status)
+            }}
+          />
+        </div>
+      }
+      subtitle={`Last updated: ${data.lastUpdate}`}
+      expanded={expanded}
+      onAction={(event) => setExpanded(event.expanded)}
+      disabled={data.status === 'error'}
+    >
+      <div style={{ padding: '16px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
+          <div>
+            <strong>CPU Usage</strong>
+            <div>{data.metrics.cpu}%</div>
+          </div>
+          <div>
+            <strong>Memory</strong>
+            <div>{data.metrics.memory}%</div>
+          </div>
+          <div>
+            <strong>Disk Space</strong>
+            <div>{data.metrics.disk}%</div>
+          </div>
+        </div>
+        <button 
+          style={{ marginTop: '12px' }}
+          onClick={() => setData(prev => ({ ...prev, lastUpdate: new Date().toLocaleString() }))}
+        >
+          Refresh Metrics
+        </button>
+      </div>
+    </ExpansionPanel>
+  );
+}
+```
+
+## Best Practices
+
+### Usage Guidelines
+- Use clear, descriptive titles that indicate what content will be revealed when expanded
+- Consider providing subtle visual cues in the subtitle to indicate the type or amount of content
+- Implement controlled state management when you need to coordinate multiple panels or respond to external events
+- Leverage animations to provide smooth, polished user interactions that don't feel jarring
+- Group related ExpansionPanels together to create accordion-style interfaces for complex forms or settings
+
+### Accessibility
+- The component automatically provides appropriate ARIA attributes including aria-expanded and aria-controls
+- Keyboard navigation is built-in with Enter and Space keys toggling the expanded state
+- Screen readers announce the panel state changes and can navigate between panels using Tab navigation
+- Use descriptive title and subtitle props to provide context for assistive technologies
+- Consider providing aria-label or aria-describedby for panels with complex or non-text content
+
+### Performance
+- The component efficiently manages content rendering by conditionally displaying panel content only when expanded
+- Use React.memo for complex child content to prevent unnecessary re-renders when panel state changes
+- Consider lazy loading heavy content within panels that are collapsed by default
+- Implement virtualization for lists of many ExpansionPanels to maintain smooth scrolling performance
+
+## Common Patterns
+
+### Pattern 1: Progressive Disclosure Form
+```tsx
+// Multi-step form using expansion panels for progressive disclosure
+function ProgressiveForm() {
+  const [currentStep, setCurrentStep] = React.useState(0);
+  const [formData, setFormData] = React.useState({
+    personal: { name: '', email: '' },
+    preferences: { theme: 'light', notifications: true },
+    security: { twoFactor: false, backup: '' }
+  });
+
+  const steps = [
+    { id: 'personal', title: 'Personal Information', subtitle: 'Basic account details' },
+    { id: 'preferences', title: 'Preferences', subtitle: 'Customize your experience' },
+    { id: 'security', title: 'Security Settings', subtitle: 'Protect your account' }
+  ];
+
+  return (
+    <form>
+      {steps.map((step, index) => (
+        <ExpansionPanel
+          key={step.id}
+          title={step.title}
+          subtitle={step.subtitle}
+          expanded={currentStep === index}
+          onAction={() => setCurrentStep(currentStep === index ? -1 : index)}
+          style={{ marginBottom: '8px' }}
+        >
+          <div style={{ padding: '20px' }}>
+            {step.id === 'personal' && (
+              <>
+                <input placeholder="Full Name" style={{ marginBottom: '8px', width: '100%' }} />
+                <input placeholder="Email" type="email" style={{ width: '100%' }} />
+              </>
+            )}
+            {step.id === 'preferences' && (
+              <>
+                <label style={{ display: 'block', marginBottom: '8px' }}>
+                  Theme:
+                  <select style={{ marginLeft: '8px' }}>
+                    <option value="light">Light</option>
+                    <option value="dark">Dark</option>
+                  </select>
+                </label>
+                <label>
+                  <input type="checkbox" /> Enable notifications
+                </label>
+              </>
+            )}
+            {step.id === 'security' && (
+              <>
+                <label style={{ display: 'block', marginBottom: '8px' }}>
+                  <input type="checkbox" /> Enable two-factor authentication
+                </label>
+                <input placeholder="Backup email" style={{ width: '100%' }} />
+              </>
+            )}
+          </div>
+        </ExpansionPanel>
+      ))}
+      <button type="submit" style={{ marginTop: '16px' }}>Complete Setup</button>
+    </form>
+  );
+}
+```
+
+### Pattern 2: Content Management Interface
+```tsx
+// Administrative interface for managing different types of content
+function ContentManagementPanel() {
+  const [sections, setSections] = React.useState([
+    { id: 'posts', title: 'Blog Posts', count: 24, expanded: false },
+    { id: 'media', title: 'Media Library', count: 156, expanded: false },
+    { id: 'users', title: 'User Management', count: 89, expanded: false },
+    { id: 'settings', title: 'Site Settings', count: 12, expanded: false }
+  ]);
+
+  const toggleSection = (id: string) => {
+    setSections(prev => prev.map(section => 
+      section.id === id 
+        ? { ...section, expanded: !section.expanded }
+        : section
+    ));
+  };
+
+  return (
+    <div className="content-management">
+      <h2>Content Management Dashboard</h2>
+      {sections.map(section => (
+        <ExpansionPanel
+          key={section.id}
+          title={section.title}
+          subtitle={`${section.count} items`}
+          expanded={section.expanded}
+          onAction={() => toggleSection(section.id)}
+          style={{ marginBottom: '12px' }}
+          animation={{
+            expand: { effects: 'expandVertical fadeIn', duration: 200 },
+            collapse: { effects: 'collapseVertical fadeOut', duration: 150 }
+          }}
+        >
+          <div style={{ padding: '16px', backgroundColor: '#fafafa' }}>
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+              <button>Add New</button>
+              <button>Import</button>
+              <button>Export</button>
+            </div>
+            <div style={{ border: '1px solid #ddd', padding: '12px', borderRadius: '4px' }}>
+              <p>Content for {section.title} would be loaded here...</p>
+              <p>This could include tables, forms, or other management interfaces.</p>
+            </div>
+          </div>
+        </ExpansionPanel>
+      ))}
+    </div>
+  );
+}
+```
+
+### Pattern 3: Notification Center
+```tsx
+// Expandable notification center with different notification types
+function NotificationCenter() {
+  const [notifications, setNotifications] = React.useState([
+    {
+      id: 1,
+      type: 'info',
+      title: 'System Update Available',
+      preview: 'A new system update is ready to install...',
+      content: 'Version 2.1.0 includes new features, security improvements, and bug fixes. This update is recommended for all users.',
+      timestamp: '2 hours ago',
+      expanded: false
+    },
+    {
+      id: 2,
+      type: 'warning',
+      title: 'Storage Almost Full',
+      preview: 'Your storage is 85% full...',
+      content: 'Consider removing old files or upgrading your storage plan to avoid service interruption.',
+      timestamp: '1 day ago',
+      expanded: false
+    },
+    {
+      id: 3,
+      type: 'success',
+      title: 'Backup Completed',
+      preview: 'Your weekly backup was successful...',
+      content: 'All your data has been safely backed up to the cloud. Next backup scheduled for next week.',
+      timestamp: '3 days ago',
+      expanded: false
+    }
+  ]);
+
+  const getIconForType = (type: string) => {
+    switch (type) {
+      case 'info': return '🔵';
+      case 'warning': return '⚠️';
+      case 'success': return '✅';
+      default: return '📝';
+    }
+  };
+
+  const toggleNotification = (id: number) => {
+    setNotifications(prev => prev.map(notification =>
+      notification.id === id
+        ? { ...notification, expanded: !notification.expanded }
+        : notification
+    ));
+  };
+
+  return (
+    <div style={{ maxWidth: '500px', margin: '0 auto' }}>
+      <h3>Notifications</h3>
+      {notifications.map(notification => (
+        <ExpansionPanel
+          key={notification.id}
+          title={
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span>{getIconForType(notification.type)}</span>
+              <span>{notification.title}</span>
+            </div>
+          }
+          subtitle={`${notification.preview} • ${notification.timestamp}`}
+          expanded={notification.expanded}
+          onAction={() => toggleNotification(notification.id)}
+          style={{ 
+            marginBottom: '8px',
+            border: '1px solid #e0e0e0',
+            borderRadius: '4px'
+          }}
+        >
+          <div style={{ padding: '16px', borderTop: '1px solid #e0e0e0' }}>
+            <p>{notification.content}</p>
+            <div style={{ marginTop: '12px', display: 'flex', gap: '8px' }}>
+              <button style={{ fontSize: '12px', padding: '4px 8px' }}>
+                Mark as Read
+              </button>
+              <button style={{ fontSize: '12px', padding: '4px 8px' }}>
+                Dismiss
+              </button>
+            </div>
+          </div>
+        </ExpansionPanel>
+      ))}
+    </div>
+  );
+}
+```

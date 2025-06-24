@@ -1,0 +1,1260 @@
+# Slider Component
+
+## Overview
+
+### Purpose
+Use this component to generate slider input functionality
+
+### When to Use
+The Slider component is ideal for scenarios where users need to select numeric values from a continuous range through intuitive dragging interactions. Common use cases include:
+
+- **Settings and configurations** - Adjust volume, brightness, opacity, or other numeric properties
+- **Filters and searches** - Set price ranges, age limits, or distance parameters in search interfaces
+- **Media controls** - Progress bars for video/audio playback, volume controls, or playback speed
+- **Form inputs** - Collect numeric input for ratings, quantities, percentages, or measurements
+- **Data visualization controls** - Timeline scrubbing, zoom levels, or data range selection
+- **Gaming and interactive applications** - Difficulty levels, sensitivity settings, or game parameters
+- **Accessibility tools** - Font size adjustment, contrast levels, or interface scaling
+- **E-commerce** - Product quantity selection, budget setting, or comparison parameters
+
+### Architecture
+**No Coupling**: Slider is a standalone component that operates independently without requiring other components. It provides a complete range selection solution with built-in value management, accessibility features, and customizable appearance including labels and tick marks.
+
+## Components
+
+### Slider
+
+**Purpose:** Provides an interactive range control that allows users to select numeric values by dragging a handle along a track or using keyboard navigation and side arrow buttons.
+
+**Interface:**
+```typescript
+interface SliderProps {
+  // Value management
+  value?: number; // Current slider value (controlled component)
+  defaultValue?: number; // Initial value for uncontrolled usage
+  min?: number; // Minimum allowed value (default: 0)
+  max?: number; // Maximum allowed value (default: 10)
+  step?: number; // Increment between values (default: 1)
+  onChange?: (event: SliderChangeEvent) => void; // Callback when value changes
+  
+  // Orientation and layout
+  vertical?: boolean; // Display slider vertically (default: false - horizontal)
+  
+  // Interaction control
+  disabled?: boolean; // Disable user interaction with the slider
+  readonly?: boolean; // Make the slider read-only (visual display only)
+  
+  // Visual enhancements
+  labels?: SliderLabel[]; // Array of label objects to display at specific positions
+  ticks?: SliderTick[]; // Array of tick objects to display at specific positions
+  
+  // Form integration
+  name?: string; // Form field name for form submissions
+  
+  // Accessibility
+  id?: string; // Unique identifier for the slider
+  ariaLabel?: string; // Accessible label when no visible label exists
+  ariaLabelledBy?: string; // Reference to element that labels this slider
+  ariaDescribedBy?: string; // Reference to element that describes this slider
+  tabIndex?: number; // Tab order position
+  
+  // Styling
+  className?: string; // Custom CSS classes
+  style?: React.CSSProperties; // Inline styles
+  dir?: 'ltr' | 'rtl'; // Text direction for internationalization
+  
+  // Event handlers
+  onFocus?: (event: SliderFocusEvent) => void; // Callback when slider gains focus
+  onBlur?: (event: SliderBlurEvent) => void; // Callback when slider loses focus
+}
+
+interface SliderChangeEvent {
+  value: number; // The new slider value
+  target: Slider; // Reference to the slider component
+  syntheticEvent: React.MouseEvent | React.TouchEvent | React.KeyboardEvent; // Original event
+}
+
+interface SliderFocusEvent {
+  target: Slider; // Reference to the slider component
+}
+
+interface SliderBlurEvent {
+  target: Slider; // Reference to the slider component
+}
+
+interface SliderLabel {
+  position: number; // Value position where label should appear
+  text: string; // Label text to display
+}
+
+interface SliderTick {
+  position: number; // Value position where tick should appear
+  large?: boolean; // Whether to display as large tick mark (default: false)
+}
+```
+
+**Usage Example:**
+```tsx
+import { Slider } from '@progress/kendo-react-inputs';
+import { useState } from 'react';
+
+// Basic slider usage
+function BasicSlider() {
+  const [volume, setVolume] = useState(50);
+
+  return (
+    <div>
+      <label htmlFor="volume-slider">Volume: {volume}%</label>
+      <Slider
+        id="volume-slider"
+        value={volume}
+        onChange={(event) => setVolume(event.value)}
+        min={0}
+        max={100}
+        step={5}
+      />
+    </div>
+  );
+}
+
+// Advanced slider with labels and ticks
+function AdvancedSlider() {
+  const [rating, setRating] = useState(3);
+  
+  const labels = [
+    { position: 1, text: 'Poor' },
+    { position: 2, text: 'Fair' },
+    { position: 3, text: 'Good' },
+    { position: 4, text: 'Very Good' },
+    { position: 5, text: 'Excellent' }
+  ];
+  
+  const ticks = [
+    { position: 1, large: true },
+    { position: 2 },
+    { position: 3, large: true },
+    { position: 4 },
+    { position: 5, large: true }
+  ];
+
+  return (
+    <div className="rating-slider">
+      <h3>Rate Your Experience</h3>
+      <Slider
+        value={rating}
+        onChange={(event) => setRating(event.value)}
+        min={1}
+        max={5}
+        step={1}
+        labels={labels}
+        ticks={ticks}
+        ariaLabel="Experience rating from 1 to 5"
+      />
+      <p>Current rating: {labels[rating - 1]?.text}</p>
+    </div>
+  );
+}
+
+// Vertical slider example
+function VerticalSlider() {
+  const [temperature, setTemperature] = useState(72);
+
+  return (
+    <div className="temperature-control">
+      <label>Temperature: {temperature}°F</label>
+      <Slider
+        value={temperature}
+        onChange={(event) => setTemperature(event.value)}
+        min={60}
+        max={85}
+        step={1}
+        vertical={true}
+        style={{ height: '200px' }}
+      />
+    </div>
+  );
+}
+```
+
+## Integration Patterns
+
+### Settings Panel with Multiple Sliders
+```tsx
+import { Slider } from '@progress/kendo-react-inputs';
+import { Button } from '@progress/kendo-react-buttons';
+import { useState } from 'react';
+
+function AudioSettings() {
+  const [settings, setSettings] = useState({
+    volume: 75,
+    bass: 50,
+    treble: 50,
+    balance: 0
+  });
+
+  const updateSetting = (key, value) => {
+    setSettings(prev => ({ ...prev, [key]: value }));
+  };
+
+  const resetToDefaults = () => {
+    setSettings({
+      volume: 75,
+      bass: 50,
+      treble: 50,
+      balance: 0
+    });
+  };
+
+  return (
+    <div className="audio-settings">
+      <h3>Audio Settings</h3>
+      
+      <div className="setting-group">
+        <label>Volume: {settings.volume}%</label>
+        <Slider
+          value={settings.volume}
+          onChange={(event) => updateSetting('volume', event.value)}
+          min={0}
+          max={100}
+          step={5}
+          ticks={[
+            { position: 0, large: true },
+            { position: 25 },
+            { position: 50, large: true },
+            { position: 75 },
+            { position: 100, large: true }
+          ]}
+        />
+      </div>
+
+      <div className="setting-group">
+        <label>Bass: {settings.bass}%</label>
+        <Slider
+          value={settings.bass}
+          onChange={(event) => updateSetting('bass', event.value)}
+          min={0}
+          max={100}
+          step={1}
+        />
+      </div>
+
+      <div className="setting-group">
+        <label>Treble: {settings.treble}%</label>
+        <Slider
+          value={settings.treble}
+          onChange={(event) => updateSetting('treble', event.value)}
+          min={0}
+          max={100}
+          step={1}
+        />
+      </div>
+
+      <div className="setting-group">
+        <label>Balance: {settings.balance > 0 ? `R${settings.balance}` : settings.balance < 0 ? `L${Math.abs(settings.balance)}` : 'Center'}</label>
+        <Slider
+          value={settings.balance}
+          onChange={(event) => updateSetting('balance', event.value)}
+          min={-10}
+          max={10}
+          step={1}
+          labels={[
+            { position: -10, text: 'L' },
+            { position: 0, text: 'C' },
+            { position: 10, text: 'R' }
+          ]}
+        />
+      </div>
+
+      <Button onClick={resetToDefaults}>Reset to Defaults</Button>
+    </div>
+  );
+}
+```
+
+### Interactive Data Filter
+```tsx
+import { Slider } from '@progress/kendo-react-inputs';
+import { useState, useEffect } from 'react';
+
+function ProductFilter() {
+  const [filters, setFilters] = useState({
+    minPrice: 0,
+    maxPrice: 1000,
+    rating: 1,
+    availability: 0
+  });
+
+  const [filteredCount, setFilteredCount] = useState(0);
+
+  // Simulated effect to update filtered results count
+  useEffect(() => {
+    // In real app, this would trigger API call or filter local data
+    const mockCount = Math.floor(Math.random() * 200) + 10;
+    setFilteredCount(mockCount);
+  }, [filters]);
+
+  const updateFilter = (key, value) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+  };
+
+  const clearFilters = () => {
+    setFilters({
+      minPrice: 0,
+      maxPrice: 1000,
+      rating: 1,
+      availability: 0
+    });
+  };
+
+  const ratingLabels = [
+    { position: 1, text: '1★' },
+    { position: 2, text: '2★' },
+    { position: 3, text: '3★' },
+    { position: 4, text: '4★' },
+    { position: 5, text: '5★' }
+  ];
+
+  const availabilityLabels = [
+    { position: 0, text: 'Any' },
+    { position: 1, text: 'In Stock' },
+    { position: 2, text: 'Ships Today' }
+  ];
+
+  return (
+    <div className="product-filter">
+      <h3>Filter Products</h3>
+      <p>{filteredCount} products match your criteria</p>
+
+      <div className="filter-section">
+        <h4>Price Range</h4>
+        
+        <div className="price-inputs">
+          <div>
+            <label>Min: ${filters.minPrice}</label>
+            <Slider
+              value={filters.minPrice}
+              onChange={(event) => updateFilter('minPrice', event.value)}
+              min={0}
+              max={filters.maxPrice - 10}
+              step={10}
+              ticks={[
+                { position: 0, large: true },
+                { position: 250 },
+                { position: 500, large: true },
+                { position: 750 },
+                { position: 1000, large: true }
+              ]}
+            />
+          </div>
+          
+          <div>
+            <label>Max: ${filters.maxPrice}</label>
+            <Slider
+              value={filters.maxPrice}
+              onChange={(event) => updateFilter('maxPrice', event.value)}
+              min={filters.minPrice + 10}
+              max={1000}
+              step={10}
+              ticks={[
+                { position: 0, large: true },
+                { position: 250 },
+                { position: 500, large: true },
+                { position: 750 },
+                { position: 1000, large: true }
+              ]}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="filter-section">
+        <h4>Minimum Rating</h4>
+        <Slider
+          value={filters.rating}
+          onChange={(event) => updateFilter('rating', event.value)}
+          min={1}
+          max={5}
+          step={1}
+          labels={ratingLabels}
+          ticks={ratingLabels.map(label => ({ position: label.position, large: true }))}
+        />
+      </div>
+
+      <div className="filter-section">
+        <h4>Availability</h4>
+        <Slider
+          value={filters.availability}
+          onChange={(event) => updateFilter('availability', event.value)}
+          min={0}
+          max={2}
+          step={1}
+          labels={availabilityLabels}
+          ticks={availabilityLabels.map(label => ({ position: label.position, large: true }))}
+        />
+      </div>
+
+      <Button onClick={clearFilters}>Clear All Filters</Button>
+    </div>
+  );
+}
+```
+
+### Media Player Controls
+```tsx
+import { Slider } from '@progress/kendo-react-inputs';
+import { Button } from '@progress/kendo-react-buttons';
+import { useState, useEffect, useRef } from 'react';
+
+function MediaPlayer() {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(300); // 5 minutes
+  const [volume, setVolume] = useState(80);
+  const [playbackSpeed, setPlaybackSpeed] = useState(1);
+  
+  const intervalRef = useRef(null);
+
+  // Simulate playback progress
+  useEffect(() => {
+    if (isPlaying) {
+      intervalRef.current = setInterval(() => {
+        setCurrentTime(prev => {
+          const newTime = prev + playbackSpeed;
+          return newTime >= duration ? duration : newTime;
+        });
+      }, 1000);
+    } else {
+      clearInterval(intervalRef.current);
+    }
+
+    return () => clearInterval(intervalRef.current);
+  }, [isPlaying, playbackSpeed, duration]);
+
+  const togglePlayback = () => {
+    setIsPlaying(!isPlaying);
+  };
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const speedLabels = [
+    { position: 0.5, text: '0.5x' },
+    { position: 0.75, text: '0.75x' },
+    { position: 1, text: '1x' },
+    { position: 1.25, text: '1.25x' },
+    { position: 1.5, text: '1.5x' },
+    { position: 2, text: '2x' }
+  ];
+
+  return (
+    <div className="media-player">
+      <div className="player-header">
+        <h3>Sample Audio Track</h3>
+        <div className="time-display">
+          {formatTime(currentTime)} / {formatTime(duration)}
+        </div>
+      </div>
+
+      <div className="progress-section">
+        <label>Progress</label>
+        <Slider
+          value={currentTime}
+          onChange={(event) => setCurrentTime(event.value)}
+          min={0}
+          max={duration}
+          step={1}
+          ariaLabel="Audio playback progress"
+        />
+      </div>
+
+      <div className="controls-row">
+        <Button 
+          onClick={togglePlayback}
+          icon={isPlaying ? 'pause' : 'play'}
+        >
+          {isPlaying ? 'Pause' : 'Play'}
+        </Button>
+
+        <div className="volume-control">
+          <label>Volume: {volume}%</label>
+          <Slider
+            value={volume}
+            onChange={(event) => setVolume(event.value)}
+            min={0}
+            max={100}
+            step={5}
+            style={{ width: '120px' }}
+            ticks={[
+              { position: 0, large: true },
+              { position: 50, large: true },
+              { position: 100, large: true }
+            ]}
+          />
+        </div>
+
+        <div className="speed-control">
+          <label>Speed: {playbackSpeed}x</label>
+          <Slider
+            value={playbackSpeed}
+            onChange={(event) => setPlaybackSpeed(event.value)}
+            min={0.5}
+            max={2}
+            step={0.25}
+            labels={speedLabels}
+            ticks={speedLabels.map(label => ({ position: label.position }))}
+            style={{ width: '150px' }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+
+### Gaming Configuration Panel
+```tsx
+import { Slider } from '@progress/kendo-react-inputs';
+import { Button } from '@progress/kendo-react-buttons';
+import { useState } from 'react';
+
+function GameSettings() {
+  const [settings, setSettings] = useState({
+    difficulty: 2,
+    mouseSensitivity: 50,
+    masterVolume: 75,
+    musicVolume: 60,
+    sfxVolume: 85,
+    brightness: 80,
+    fieldOfView: 90
+  });
+
+  const [presetName, setPresetName] = useState('Custom');
+
+  const updateSetting = (key, value) => {
+    setSettings(prev => ({ ...prev, [key]: value }));
+    setPresetName('Custom');
+  };
+
+  const applyPreset = (preset) => {
+    const presets = {
+      casual: {
+        difficulty: 1,
+        mouseSensitivity: 30,
+        masterVolume: 80,
+        musicVolume: 70,
+        sfxVolume: 90,
+        brightness: 85,
+        fieldOfView: 85
+      },
+      normal: {
+        difficulty: 2,
+        mouseSensitivity: 50,
+        masterVolume: 75,
+        musicVolume: 60,
+        sfxVolume: 85,
+        brightness: 80,
+        fieldOfView: 90
+      },
+      hardcore: {
+        difficulty: 4,
+        mouseSensitivity: 80,
+        masterVolume: 60,
+        musicVolume: 40,
+        sfxVolume: 90,
+        brightness: 70,
+        fieldOfView: 95
+      }
+    };
+    
+    setSettings(presets[preset]);
+    setPresetName(preset.charAt(0).toUpperCase() + preset.slice(1));
+  };
+
+  const difficultyLabels = [
+    { position: 1, text: 'Easy' },
+    { position: 2, text: 'Normal' },
+    { position: 3, text: 'Hard' },
+    { position: 4, text: 'Expert' },
+    { position: 5, text: 'Insane' }
+  ];
+
+  return (
+    <div className="game-settings">
+      <div className="settings-header">
+        <h3>Game Settings</h3>
+        <div className="preset-controls">
+          <span>Preset: {presetName}</span>
+          <Button onClick={() => applyPreset('casual')}>Casual</Button>
+          <Button onClick={() => applyPreset('normal')}>Normal</Button>
+          <Button onClick={() => applyPreset('hardcore')}>Hardcore</Button>
+        </div>
+      </div>
+
+      <div className="settings-grid">
+        <div className="setting-group">
+          <h4>Gameplay</h4>
+          
+          <div className="setting-item">
+            <label>Difficulty</label>
+            <Slider
+              value={settings.difficulty}
+              onChange={(event) => updateSetting('difficulty', event.value)}
+              min={1}
+              max={5}
+              step={1}
+              labels={difficultyLabels}
+              ticks={difficultyLabels.map(label => ({ 
+                position: label.position, 
+                large: true 
+              }))}
+            />
+          </div>
+
+          <div className="setting-item">
+            <label>Mouse Sensitivity: {settings.mouseSensitivity}%</label>
+            <Slider
+              value={settings.mouseSensitivity}
+              onChange={(event) => updateSetting('mouseSensitivity', event.value)}
+              min={10}
+              max={100}
+              step={5}
+            />
+          </div>
+
+          <div className="setting-item">
+            <label>Field of View: {settings.fieldOfView}°</label>
+            <Slider
+              value={settings.fieldOfView}
+              onChange={(event) => updateSetting('fieldOfView', event.value)}
+              min={70}
+              max={120}
+              step={5}
+              ticks={[
+                { position: 70, large: true },
+                { position: 90, large: true },
+                { position: 110, large: true },
+                { position: 120, large: true }
+              ]}
+            />
+          </div>
+        </div>
+
+        <div className="setting-group">
+          <h4>Audio</h4>
+          
+          <div className="setting-item">
+            <label>Master Volume: {settings.masterVolume}%</label>
+            <Slider
+              value={settings.masterVolume}
+              onChange={(event) => updateSetting('masterVolume', event.value)}
+              min={0}
+              max={100}
+              step={5}
+            />
+          </div>
+
+          <div className="setting-item">
+            <label>Music Volume: {settings.musicVolume}%</label>
+            <Slider
+              value={settings.musicVolume}
+              onChange={(event) => updateSetting('musicVolume', event.value)}
+              min={0}
+              max={100}
+              step={5}
+            />
+          </div>
+
+          <div className="setting-item">
+            <label>Sound Effects: {settings.sfxVolume}%</label>
+            <Slider
+              value={settings.sfxVolume}
+              onChange={(event) => updateSetting('sfxVolume', event.value)}
+              min={0}
+              max={100}
+              step={5}
+            />
+          </div>
+        </div>
+
+        <div className="setting-group">
+          <h4>Display</h4>
+          
+          <div className="setting-item">
+            <label>Brightness: {settings.brightness}%</label>
+            <Slider
+              value={settings.brightness}
+              onChange={(event) => updateSetting('brightness', event.value)}
+              min={30}
+              max={100}
+              step={5}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+
+### Form Integration with Validation
+```tsx
+import { Slider } from '@progress/kendo-react-inputs';
+import { Button } from '@progress/kendo-react-buttons';
+import { useState } from 'react';
+
+function SurveyForm() {
+  const [responses, setResponses] = useState({
+    satisfaction: 5,
+    likelihood: 5,
+    budget: 500,
+    experience: 3
+  });
+
+  const [errors, setErrors] = useState({});
+  const [submitted, setSubmitted] = useState(false);
+
+  const updateResponse = (key, value) => {
+    setResponses(prev => ({ ...prev, [key]: value }));
+    
+    // Clear error when user updates value
+    if (errors[key]) {
+      setErrors(prev => ({ ...prev, [key]: '' }));
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    
+    if (responses.satisfaction < 3) {
+      newErrors.satisfaction = 'Please provide a rating of 3 or higher';
+    }
+    
+    if (responses.budget < 100) {
+      newErrors.budget = 'Minimum budget must be at least $100';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setSubmitted(true);
+    
+    if (validateForm()) {
+      console.log('Survey responses:', responses);
+      alert('Thank you for your feedback!');
+    }
+  };
+
+  const satisfactionLabels = [
+    { position: 1, text: 'Very Poor' },
+    { position: 3, text: 'Average' },
+    { position: 5, text: 'Excellent' }
+  ];
+
+  const likelihoodLabels = [
+    { position: 0, text: 'Never' },
+    { position: 5, text: 'Maybe' },
+    { position: 10, text: 'Definitely' }
+  ];
+
+  const experienceLabels = [
+    { position: 1, text: 'Beginner' },
+    { position: 2, text: 'Some' },
+    { position: 3, text: 'Experienced' },
+    { position: 4, text: 'Expert' }
+  ];
+
+  return (
+    <form onSubmit={handleSubmit} className="survey-form">
+      <h2>Customer Feedback Survey</h2>
+
+      <div className="form-section">
+        <label>
+          Overall Satisfaction
+          {errors.satisfaction && <span className="error"> - {errors.satisfaction}</span>}
+        </label>
+        <Slider
+          value={responses.satisfaction}
+          onChange={(event) => updateResponse('satisfaction', event.value)}
+          min={1}
+          max={5}
+          step={1}
+          labels={satisfactionLabels}
+          ticks={[1, 2, 3, 4, 5].map(pos => ({ 
+            position: pos, 
+            large: pos % 2 === 1 
+          }))}
+          className={errors.satisfaction ? 'k-invalid' : ''}
+          ariaDescribedBy={errors.satisfaction ? 'satisfaction-error' : undefined}
+        />
+        <div className="slider-value">Current: {responses.satisfaction}/5</div>
+      </div>
+
+      <div className="form-section">
+        <label>Likelihood to Recommend (0-10)</label>
+        <Slider
+          value={responses.likelihood}
+          onChange={(event) => updateResponse('likelihood', event.value)}
+          min={0}
+          max={10}
+          step={1}
+          labels={likelihoodLabels}
+          ticks={[0, 2, 4, 6, 8, 10].map(pos => ({ 
+            position: pos, 
+            large: true 
+          }))}
+        />
+        <div className="slider-value">Score: {responses.likelihood}/10</div>
+      </div>
+
+      <div className="form-section">
+        <label>
+          Annual Budget Range
+          {errors.budget && <span className="error"> - {errors.budget}</span>}
+        </label>
+        <Slider
+          value={responses.budget}
+          onChange={(event) => updateResponse('budget', event.value)}
+          min={0}
+          max={2000}
+          step={50}
+          labels={[
+            { position: 0, text: '$0' },
+            { position: 500, text: '$500' },
+            { position: 1000, text: '$1K' },
+            { position: 1500, text: '$1.5K' },
+            { position: 2000, text: '$2K+' }
+          ]}
+          className={errors.budget ? 'k-invalid' : ''}
+          ariaDescribedBy={errors.budget ? 'budget-error' : undefined}
+        />
+        <div className="slider-value">Budget: ${responses.budget}</div>
+      </div>
+
+      <div className="form-section">
+        <label>Experience Level</label>
+        <Slider
+          value={responses.experience}
+          onChange={(event) => updateResponse('experience', event.value)}
+          min={1}
+          max={4}
+          step={1}
+          labels={experienceLabels}
+          ticks={experienceLabels.map(label => ({ 
+            position: label.position, 
+            large: true 
+          }))}
+        />
+        <div className="slider-value">Level: {experienceLabels[responses.experience - 1]?.text}</div>
+      </div>
+
+      <div className="form-actions">
+        <Button type="submit" primary>Submit Survey</Button>
+        <Button 
+          type="button" 
+          onClick={() => {
+            setResponses({
+              satisfaction: 5,
+              likelihood: 5,
+              budget: 500,
+              experience: 3
+            });
+            setErrors({});
+            setSubmitted(false);
+          }}
+        >
+          Reset Form
+        </Button>
+      </div>
+
+      {submitted && Object.keys(errors).length > 0 && (
+        <div className="form-errors">
+          <p>Please correct the errors above before submitting.</p>
+        </div>
+      )}
+    </form>
+  );
+}
+```
+
+## Best Practices
+
+### Usage Guidelines
+- Always provide clear labeling for the slider's purpose and current value for accessibility
+- Use appropriate `min`, `max`, and `step` values that make sense for your use case
+- Consider adding visual indicators like labels and ticks for important value points
+- Implement proper form validation when sliders are used for critical input values
+- Use controlled components (`value` prop) for form libraries and complex state management
+- Provide immediate visual feedback showing the current value, especially for ranges that aren't immediately obvious
+
+### Accessibility
+- Ensure proper labeling with `ariaLabel` or associate with visible labels using `ariaLabelledBy`
+- Use `ariaDescribedBy` to reference help text or value displays for additional context
+- Test keyboard navigation (Arrow keys to adjust value, Home/End for min/max values)
+- Verify screen reader announcements include current value and range information
+- Maintain sufficient color contrast for slider tracks and handles, especially in custom themes
+- Consider providing alternative input methods (text input) for users who have difficulty with drag interactions
+
+### Performance
+- Use controlled components for form libraries and when the slider value affects multiple other components
+- Implement debounced handlers for sliders that trigger expensive operations like API calls or complex calculations
+- Consider throttling onChange events for smooth animations when multiple sliders interact
+- Use React.memo for slider components in lists that don't change frequently to prevent unnecessary re-renders
+- Avoid creating new objects (like labels and ticks arrays) on every render - define them outside the component or use useMemo
+
+## Common Patterns
+
+### Volume Control with Mute Toggle
+```tsx
+function VolumeControl() {
+  const [volume, setVolume] = useState(75);
+  const [isMuted, setIsMuted] = useState(false);
+  const [previousVolume, setPreviousVolume] = useState(75);
+
+  const handleVolumeChange = (event) => {
+    const newVolume = event.value;
+    setVolume(newVolume);
+    
+    if (newVolume > 0 && isMuted) {
+      setIsMuted(false);
+    }
+  };
+
+  const toggleMute = () => {
+    if (isMuted) {
+      setVolume(previousVolume);
+      setIsMuted(false);
+    } else {
+      setPreviousVolume(volume);
+      setVolume(0);
+      setIsMuted(true);
+    }
+  };
+
+  return (
+    <div className="volume-control">
+      <Button 
+        onClick={toggleMute}
+        icon={isMuted || volume === 0 ? 'volume-off' : volume < 50 ? 'volume-down' : 'volume-up'}
+        fillMode="flat"
+      />
+      <Slider
+        value={volume}
+        onChange={handleVolumeChange}
+        min={0}
+        max={100}
+        step={1}
+        style={{ flex: 1, marginLeft: '10px' }}
+        disabled={isMuted}
+      />
+      <span className="volume-display">{isMuted ? 'Muted' : `${volume}%`}</span>
+    </div>
+  );
+}
+```
+
+### Progressive Disclosure Settings
+```tsx
+function AdvancedSettings() {
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [settings, setSettings] = useState({
+    basic: {
+      quality: 3,
+      autoSave: true
+    },
+    advanced: {
+      compression: 75,
+      cacheSize: 256,
+      timeout: 30,
+      retryAttempts: 3
+    }
+  });
+
+  const updateBasicSetting = (key, value) => {
+    setSettings(prev => ({
+      ...prev,
+      basic: { ...prev.basic, [key]: value }
+    }));
+  };
+
+  const updateAdvancedSetting = (key, value) => {
+    setSettings(prev => ({
+      ...prev,
+      advanced: { ...prev.advanced, [key]: value }
+    }));
+  };
+
+  const qualityLabels = [
+    { position: 1, text: 'Low' },
+    { position: 2, text: 'Medium' },
+    { position: 3, text: 'High' },
+    { position: 4, text: 'Ultra' }
+  ];
+
+  return (
+    <div className="progressive-settings">
+      <h3>Application Settings</h3>
+
+      <div className="basic-settings">
+        <h4>Basic Settings</h4>
+        
+        <div className="setting-item">
+          <label>Quality Level</label>
+          <Slider
+            value={settings.basic.quality}
+            onChange={(event) => updateBasicSetting('quality', event.value)}
+            min={1}
+            max={4}
+            step={1}
+            labels={qualityLabels}
+            ticks={qualityLabels.map(label => ({ 
+              position: label.position, 
+              large: true 
+            }))}
+          />
+        </div>
+      </div>
+
+      <div className="advanced-toggle">
+        <Button 
+          onClick={() => setShowAdvanced(!showAdvanced)}
+          fillMode="flat"
+        >
+          {showAdvanced ? 'Hide' : 'Show'} Advanced Settings
+        </Button>
+      </div>
+
+      {showAdvanced && (
+        <div className="advanced-settings">
+          <h4>Advanced Settings</h4>
+          
+          <div className="setting-item">
+            <label>Compression Level: {settings.advanced.compression}%</label>
+            <Slider
+              value={settings.advanced.compression}
+              onChange={(event) => updateAdvancedSetting('compression', event.value)}
+              min={0}
+              max={100}
+              step={5}
+              labels={[
+                { position: 0, text: 'None' },
+                { position: 50, text: 'Balanced' },
+                { position: 100, text: 'Maximum' }
+              ]}
+            />
+          </div>
+
+          <div className="setting-item">
+            <label>Cache Size: {settings.advanced.cacheSize}MB</label>
+            <Slider
+              value={settings.advanced.cacheSize}
+              onChange={(event) => updateAdvancedSetting('cacheSize', event.value)}
+              min={64}
+              max={1024}
+              step={64}
+              ticks={[64, 128, 256, 512, 1024].map(pos => ({ 
+                position: pos, 
+                large: pos === 256 || pos === 512 
+              }))}
+            />
+          </div>
+
+          <div className="setting-item">
+            <label>Request Timeout: {settings.advanced.timeout}s</label>
+            <Slider
+              value={settings.advanced.timeout}
+              onChange={(event) => updateAdvancedSetting('timeout', event.value)}
+              min={5}
+              max={120}
+              step={5}
+            />
+          </div>
+
+          <div className="setting-item">
+            <label>Retry Attempts: {settings.advanced.retryAttempts}</label>
+            <Slider
+              value={settings.advanced.retryAttempts}
+              onChange={(event) => updateAdvancedSetting('retryAttempts', event.value)}
+              min={0}
+              max={10}
+              step={1}
+              labels={[
+                { position: 0, text: 'None' },
+                { position: 3, text: 'Default' },
+                { position: 10, text: 'Max' }
+              ]}
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+### Multi-Slider Synchronized Controls
+```tsx
+function ColorPicker() {
+  const [rgb, setRgb] = useState({ r: 128, g: 128, b: 128 });
+  const [hsv, setHsv] = useState({ h: 0, s: 50, v: 50 });
+
+  // Convert RGB to HSV
+  const rgbToHsv = (r, g, b) => {
+    r /= 255; g /= 255; b /= 255;
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const diff = max - min;
+    
+    let h = 0;
+    if (diff !== 0) {
+      if (max === r) h = ((g - b) / diff) % 6;
+      else if (max === g) h = (b - r) / diff + 2;
+      else h = (r - g) / diff + 4;
+    }
+    h = Math.round(h * 60);
+    if (h < 0) h += 360;
+    
+    const s = max === 0 ? 0 : Math.round((diff / max) * 100);
+    const v = Math.round(max * 100);
+    
+    return { h, s, v };
+  };
+
+  // Convert HSV to RGB
+  const hsvToRgb = (h, s, v) => {
+    s /= 100; v /= 100;
+    const c = v * s;
+    const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+    const m = v - c;
+    
+    let r, g, b;
+    if (h >= 0 && h < 60) [r, g, b] = [c, x, 0];
+    else if (h >= 60 && h < 120) [r, g, b] = [x, c, 0];
+    else if (h >= 120 && h < 180) [r, g, b] = [0, c, x];
+    else if (h >= 180 && h < 240) [r, g, b] = [0, x, c];
+    else if (h >= 240 && h < 300) [r, g, b] = [x, 0, c];
+    else [r, g, b] = [c, 0, x];
+    
+    return {
+      r: Math.round((r + m) * 255),
+      g: Math.round((g + m) * 255),
+      b: Math.round((b + m) * 255)
+    };
+  };
+
+  const updateRgb = (component, value) => {
+    const newRgb = { ...rgb, [component]: value };
+    setRgb(newRgb);
+    setHsv(rgbToHsv(newRgb.r, newRgb.g, newRgb.b));
+  };
+
+  const updateHsv = (component, value) => {
+    const newHsv = { ...hsv, [component]: value };
+    setHsv(newHsv);
+    setRgb(hsvToRgb(newHsv.h, newHsv.s, newHsv.v));
+  };
+
+  const colorStyle = {
+    backgroundColor: `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`,
+    width: '100px',
+    height: '100px',
+    border: '2px solid #ccc',
+    borderRadius: '8px'
+  };
+
+  return (
+    <div className="color-picker">
+      <h3>Color Picker</h3>
+      
+      <div className="color-preview" style={colorStyle}></div>
+      <div className="color-values">
+        RGB: ({rgb.r}, {rgb.g}, {rgb.b})<br />
+        HSV: ({hsv.h}°, {hsv.s}%, {hsv.v}%)
+      </div>
+
+      <div className="rgb-controls">
+        <h4>RGB Controls</h4>
+        
+        <div className="slider-group">
+          <label>Red: {rgb.r}</label>
+          <Slider
+            value={rgb.r}
+            onChange={(event) => updateRgb('r', event.value)}
+            min={0}
+            max={255}
+            step={1}
+            style={{ '--kendo-slider-track-bg': `linear-gradient(to right, #000, #f00)` }}
+          />
+        </div>
+
+        <div className="slider-group">
+          <label>Green: {rgb.g}</label>
+          <Slider
+            value={rgb.g}
+            onChange={(event) => updateRgb('g', event.value)}
+            min={0}
+            max={255}
+            step={1}
+            style={{ '--kendo-slider-track-bg': `linear-gradient(to right, #000, #0f0)` }}
+          />
+        </div>
+
+        <div className="slider-group">
+          <label>Blue: {rgb.b}</label>
+          <Slider
+            value={rgb.b}
+            onChange={(event) => updateRgb('b', event.value)}
+            min={0}
+            max={255}
+            step={1}
+            style={{ '--kendo-slider-track-bg': `linear-gradient(to right, #000, #00f)` }}
+          />
+        </div>
+      </div>
+
+      <div className="hsv-controls">
+        <h4>HSV Controls</h4>
+        
+        <div className="slider-group">
+          <label>Hue: {hsv.h}°</label>
+          <Slider
+            value={hsv.h}
+            onChange={(event) => updateHsv('h', event.value)}
+            min={0}
+            max={360}
+            step={1}
+            style={{ '--kendo-slider-track-bg': `linear-gradient(to right, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00)` }}
+          />
+        </div>
+
+        <div className="slider-group">
+          <label>Saturation: {hsv.s}%</label>
+          <Slider
+            value={hsv.s}
+            onChange={(event) => updateHsv('s', event.value)}
+            min={0}
+            max={100}
+            step={1}
+          />
+        </div>
+
+        <div className="slider-group">
+          <label>Value: {hsv.v}%</label>
+          <Slider
+            value={hsv.v}
+            onChange={(event) => updateHsv('v', event.value)}
+            min={0}
+            max={100}
+            step={1}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+```

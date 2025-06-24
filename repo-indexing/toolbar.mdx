@@ -1,0 +1,540 @@
+# Toolbar Components
+
+## Overview
+
+### Purpose
+Use this component group to generate toolbar functionality with items, separators and spacers that work together as a cohesive unit
+
+### When to Use
+The Toolbar component group is ideal for creating application toolbars that organize and display various tools, such as buttons, button groups, dropdowns, and other interactive elements in a structured, horizontal layout. Use this component group when you need to:
+
+- Create editor toolbars with formatting options (bold, italic, underline, etc.)
+- Build application command bars with action buttons and controls
+- Organize multiple related tools in a consistent, accessible interface
+- Provide users with quick access to frequently used functions
+- Create responsive toolbars that can handle overflow scenarios
+- Implement keyboard navigation between toolbar items
+
+### Architecture
+**Critical/Strong Coupling**: The Toolbar component group follows a strict compositional hierarchy where the primary Toolbar component acts as a container and provider, while ToolbarItem, ToolbarSeparator, and ToolbarSpacer components function as specialized children that must be used within the Toolbar context.
+
+### Component Interdependencies
+The Toolbar component group has the following required relationships:
+
+- **Toolbar** (Primary): Acts as the root container that provides the toolbar context, keyboard navigation, overflow handling, and accessibility features
+- **ToolbarItem** (Dependent): Must be used within Toolbar to wrap individual tools and controls
+- **ToolbarSeparator** (Dependent): Must be used within Toolbar to provide visual separation between groups of items
+- **ToolbarSpacer** (Dependent): Must be used within Toolbar to create flexible spacing and alignment
+
+**Data Flow**: Toolbar manages keyboard navigation state and passes focus management to its children
+**Context Sharing**: Toolbar provides accessibility context and keyboard navigation coordination
+**Event Handling**: Toolbar handles resize events and coordinates focus management between items
+
+## Components
+
+### Toolbar {Primary Component}
+The main container component that provides toolbar functionality, keyboard navigation, and overflow management.
+
+**Purpose:** Serves as the root container for organizing and managing toolbar items with built-in accessibility, keyboard navigation, and responsive overflow handling.
+
+**Interface:**
+```typescript
+interface ToolbarProps {
+  children?: React.ReactNode; // Required - ToolbarItem, ToolbarSeparator, ToolbarSpacer components
+  className?: string; // Additional CSS classes
+  dir?: string; // Text direction ('ltr' | 'rtl' | 'auto')
+  style?: React.CSSProperties; // Inline styles
+  ariaLabel?: string; // Accessible label for screen readers
+  tabIndex?: number; // Tab order for keyboard navigation
+  keyboardNavigation?: boolean; // Enable/disable built-in keyboard navigation (default: true)
+  size?: null | 'small' | 'medium' | 'large'; // Component size (default: 'medium')
+  fillMode?: null | 'solid' | 'flat' | 'outline'; // Visual styling mode (default: 'solid')
+  overflow?: 'none' | 'section' | 'scroll'; // Overflow behavior (default: 'none')
+  scrollButtons?: 'hidden' | 'visible' | 'auto'; // Scroll button visibility (default: 'auto')
+  scrollButtonsPosition?: 'start' | 'end' | 'split'; // Scroll button placement (default: 'split')
+  buttonScrollSpeed?: number; // Scroll speed in pixels (default: 100)
+  prevButton?: React.ComponentType; // Custom previous button component
+  nextButton?: React.ComponentType; // Custom next button component
+  onResize?: (event: ToolbarResizeEvent) => void; // Resize event handler
+}
+```
+
+**Provides:** 
+- Toolbar context for child components
+- Keyboard navigation coordination
+- Accessibility attributes and focus management
+- Overflow handling and scrolling capabilities
+- Resize event monitoring
+
+**Usage Example:**
+```tsx
+import { Toolbar, ToolbarItem, Button } from '@progress/kendo-react-buttons';
+
+function BasicToolbar() {
+  return (
+    <Toolbar
+      ariaLabel="Document formatting toolbar"
+      size="medium"
+      fillMode="solid"
+      onResize={(event) => console.log('Toolbar resized:', event.offsetWidth)}
+    >
+      <ToolbarItem>
+        <Button icon="bold">Bold</Button>
+      </ToolbarItem>
+      <ToolbarItem>
+        <Button icon="italic">Italic</Button>
+      </ToolbarItem>
+    </Toolbar>
+  );
+}
+```
+
+### ToolbarItem {Dependent Component}
+A wrapper component that must be used within Toolbar to properly contain and manage individual toolbar tools.
+
+**Purpose:** Wraps individual tools and controls within the toolbar, providing proper spacing, layout, and accessibility context for each toolbar element.
+
+**Interface:**
+```typescript
+interface ToolbarItemProps {
+  children?: React.ReactNode; // The tool/control to wrap (Button, ButtonGroup, etc.)
+  className?: string; // Additional CSS classes
+  style?: React.CSSProperties; // Inline styles
+}
+```
+
+**Context Dependencies:** 
+- Must be a direct child of Toolbar component
+- Inherits accessibility context from parent Toolbar
+- Participates in keyboard navigation flow
+
+**Parent Requirements:** Required parent component is Toolbar for proper functionality
+
+**Usage Example:**
+```tsx
+// Must be used within Toolbar component
+<Toolbar>
+  <ToolbarItem>
+    <Button icon="save">Save</Button>
+  </ToolbarItem>
+  <ToolbarItem>
+    <ButtonGroup>
+      <Button icon="cut">Cut</Button>
+      <Button icon="copy">Copy</Button>
+      <Button icon="paste">Paste</Button>
+    </ButtonGroup>
+  </ToolbarItem>
+</Toolbar>
+```
+
+### ToolbarSeparator {Dependent Component}
+A visual separator component that creates a dividing line between groups of toolbar items.
+
+**Purpose:** Provides visual separation between logical groups of toolbar items, helping users understand the organization and relationship between different tool groups.
+
+**Interface:**
+```typescript
+interface ToolbarSeparatorProps {
+  className?: string; // Additional CSS classes for custom styling
+}
+```
+
+**Context Dependencies:** 
+- Must be used within Toolbar component
+- Automatically styled to match the toolbar's theme and size
+
+**Parent Requirements:** Required parent component is Toolbar for proper rendering and styling
+
+**Usage Example:**
+```tsx
+// Must be used within Toolbar component
+<Toolbar>
+  <ToolbarItem>
+    <Button icon="bold">Bold</Button>
+  </ToolbarItem>
+  <ToolbarItem>
+    <Button icon="italic">Italic</Button>
+  </ToolbarItem>
+  <ToolbarSeparator />
+  <ToolbarItem>
+    <Button icon="hyperlink">Link</Button>
+  </ToolbarItem>
+</Toolbar>
+```
+
+### ToolbarSpacer {Dependent Component}
+A flexible spacing component that creates empty space and can push subsequent items to the right side of the toolbar.
+
+**Purpose:** Creates flexible spacing between toolbar items, typically used to push certain items to the right side of the toolbar or create specific alignment patterns.
+
+**Interface:**
+```typescript
+interface ToolbarSpacerProps {
+  className?: string; // Additional CSS classes for custom styling
+}
+```
+
+**Context Dependencies:** 
+- Must be used within Toolbar component
+- Takes up flexible space within the toolbar layout
+
+**Parent Requirements:** Required parent component is Toolbar for proper layout behavior
+
+**Usage Example:**
+```tsx
+// Must be used within Toolbar component to push items to the right
+<Toolbar>
+  <ToolbarItem>
+    <Button icon="save">Save</Button>
+  </ToolbarItem>
+  <ToolbarSpacer />
+  <ToolbarItem>
+    <Button icon="settings">Settings</Button>
+  </ToolbarItem>
+</Toolbar>
+```
+
+## Integration Patterns
+
+### Basic Usage
+```tsx
+import { 
+  Toolbar, 
+  ToolbarItem, 
+  ToolbarSeparator, 
+  ToolbarSpacer,
+  Button 
+} from '@progress/kendo-react-buttons';
+
+// Minimal required structure
+function BasicToolbar() {
+  return (
+    <Toolbar>
+      <ToolbarItem>
+        <Button>Action 1</Button>
+      </ToolbarItem>
+      <ToolbarItem>
+        <Button>Action 2</Button>
+      </ToolbarItem>
+    </Toolbar>
+  );
+}
+```
+
+### Advanced Usage
+```tsx
+import { 
+  Toolbar, 
+  ToolbarItem, 
+  ToolbarSeparator, 
+  ToolbarSpacer,
+  Button,
+  ButtonGroup,
+  DropDownButton 
+} from '@progress/kendo-react-buttons';
+
+// Complex usage with all features
+function AdvancedToolbar() {
+  const formatItems = [
+    { text: 'Font Size', icon: 'font-size' },
+    { text: 'Font Family', icon: 'font-family' }
+  ];
+
+  return (
+    <Toolbar 
+      ariaLabel="Document editing toolbar"
+      size="medium"
+      fillMode="solid"
+      overflow="scroll"
+      scrollButtons="auto"
+      onResize={(event) => console.log('Toolbar resized')}
+    >
+      <ToolbarItem>
+        <ButtonGroup>
+          <Button togglable={true} icon="bold" />
+          <Button togglable={true} icon="italic" />
+          <Button togglable={true} icon="underline" />
+        </ButtonGroup>
+      </ToolbarItem>
+      
+      <ToolbarSeparator />
+      
+      <ToolbarItem>
+        <DropDownButton text="Format" items={formatItems} />
+      </ToolbarItem>
+      
+      <ToolbarSeparator />
+      
+      <ToolbarItem>
+        <Button icon="hyperlink">Insert Link</Button>
+      </ToolbarItem>
+      
+      <ToolbarSpacer />
+      
+      <ToolbarItem>
+        <Button icon="save">Save</Button>
+      </ToolbarItem>
+    </Toolbar>
+  );
+}
+```
+
+### Common Variations
+
+#### Editor Toolbar
+```tsx
+// Rich text editor toolbar pattern
+function EditorToolbar() {
+  return (
+    <Toolbar ariaLabel="Text editor toolbar">
+      <ToolbarItem>
+        <ButtonGroup>
+          <Button togglable icon="bold" />
+          <Button togglable icon="italic" />
+          <Button togglable icon="underline" />
+        </ButtonGroup>
+      </ToolbarItem>
+      
+      <ToolbarSeparator />
+      
+      <ToolbarItem>
+        <ButtonGroup>
+          <Button icon="align-left" />
+          <Button icon="align-center" />
+          <Button icon="align-right" />
+        </ButtonGroup>
+      </ToolbarItem>
+      
+      <ToolbarSpacer />
+      
+      <ToolbarItem>
+        <Button icon="undo">Undo</Button>
+      </ToolbarItem>
+    </Toolbar>
+  );
+}
+```
+
+#### Application Command Bar
+```tsx
+// Application-level command toolbar
+function AppCommandBar() {
+  return (
+    <Toolbar ariaLabel="Application commands" fillMode="flat">
+      <ToolbarItem>
+        <Button icon="home">Home</Button>
+      </ToolbarItem>
+      
+      <ToolbarItem>
+        <Button icon="refresh">Refresh</Button>
+      </ToolbarItem>
+      
+      <ToolbarSpacer />
+      
+      <ToolbarItem>
+        <Button icon="user">Profile</Button>
+      </ToolbarItem>
+      
+      <ToolbarItem>
+        <Button icon="logout">Logout</Button>
+      </ToolbarItem>
+    </Toolbar>
+  );
+}
+```
+
+#### Responsive Toolbar with Overflow
+```tsx
+// Toolbar that handles overflow with scrolling
+function ResponsiveToolbar() {
+  return (
+    <Toolbar 
+      overflow="scroll"
+      scrollButtons="visible"
+      scrollButtonsPosition="split"
+      buttonScrollSpeed={150}
+    >
+      {Array.from({ length: 15 }, (_, i) => (
+        <ToolbarItem key={i}>
+          <Button>Tool {i + 1}</Button>
+        </ToolbarItem>
+      ))}
+    </Toolbar>
+  );
+}
+```
+
+## Component Relationships
+
+### Data Flow
+The Toolbar component manages the overall state and coordinates between its child components:
+- **Keyboard Navigation**: Toolbar tracks focus state and manages tab order between items
+- **Overflow Management**: Toolbar monitors available space and triggers scroll behavior when needed
+- **Resize Events**: Toolbar detects size changes and provides resize event information
+
+### Context Sharing
+- **Accessibility Context**: Toolbar provides ARIA attributes and roles that child components inherit
+- **Theme Context**: Size and fillMode props from Toolbar affect the styling of child components
+- **Navigation Context**: Keyboard navigation state is shared between Toolbar and its items
+
+### Event Handling
+- **Focus Management**: Toolbar coordinates focus movement between ToolbarItems during keyboard navigation
+- **Resize Handling**: Toolbar monitors its own size changes and can trigger overflow behavior
+- **Keyboard Events**: Arrow key navigation is handled at the Toolbar level and propagated to appropriate items
+
+## Best Practices
+
+### Usage Guidelines
+- Always wrap toolbar tools in ToolbarItem components to ensure proper spacing and accessibility
+- Use ToolbarSeparator to create logical groupings of related tools and improve visual organization
+- Employ ToolbarSpacer strategically to align items to the right side or create specific layout patterns
+- Set meaningful ariaLabel props on Toolbar for screen reader accessibility
+- Consider overflow behavior for toolbars with many items or responsive layouts
+
+### Accessibility
+- ARIA relationships are automatically established between Toolbar and its child components
+- Keyboard navigation follows standard toolbar patterns (arrow keys for movement, Tab to exit)
+- Each ToolbarItem participates in the keyboard navigation sequence automatically
+- Screen readers announce the toolbar role and can navigate between focusable tools
+- Use descriptive button text or aria-label on individual toolbar buttons for clarity
+
+### Performance
+- Toolbar efficiently manages keyboard navigation without unnecessary re-renders
+- Overflow detection is optimized using native browser APIs for resize observation
+- Child components are rendered statically unless overflow behavior requires dynamic management
+- Use React.memo for custom toolbar items if they contain complex rendering logic
+
+## Common Patterns
+
+### Pattern 1: Text Editor Toolbar
+```tsx
+// Comprehensive text editing toolbar with grouped formatting options
+function TextEditorToolbar() {
+  return (
+    <Toolbar ariaLabel="Text formatting toolbar" size="medium">
+      {/* Text formatting group */}
+      <ToolbarItem>
+        <ButtonGroup>
+          <Button togglable icon="bold" title="Bold (Ctrl+B)" />
+          <Button togglable icon="italic" title="Italic (Ctrl+I)" />
+          <Button togglable icon="underline" title="Underline (Ctrl+U)" />
+        </ButtonGroup>
+      </ToolbarItem>
+      
+      <ToolbarSeparator />
+      
+      {/* Alignment group */}
+      <ToolbarItem>
+        <ButtonGroup>
+          <Button icon="align-left" title="Align Left" />
+          <Button icon="align-center" title="Align Center" />
+          <Button icon="align-right" title="Align Right" />
+          <Button icon="align-justify" title="Justify" />
+        </ButtonGroup>
+      </ToolbarItem>
+      
+      <ToolbarSeparator />
+      
+      {/* List group */}
+      <ToolbarItem>
+        <ButtonGroup>
+          <Button icon="list-unordered" title="Bullet List" />
+          <Button icon="list-ordered" title="Numbered List" />
+        </ButtonGroup>
+      </ToolbarItem>
+      
+      <ToolbarSpacer />
+      
+      {/* Action buttons */}
+      <ToolbarItem>
+        <Button icon="undo" title="Undo">Undo</Button>
+      </ToolbarItem>
+      <ToolbarItem>
+        <Button icon="redo" title="Redo">Redo</Button>
+      </ToolbarItem>
+    </Toolbar>
+  );
+}
+```
+
+### Pattern 2: Data Grid Toolbar
+```tsx
+// Data management toolbar for grids and tables
+function DataGridToolbar() {
+  const exportItems = [
+    { text: 'Export to Excel', icon: 'excel' },
+    { text: 'Export to PDF', icon: 'pdf' },
+    { text: 'Export to CSV', icon: 'csv' }
+  ];
+
+  return (
+    <Toolbar ariaLabel="Data grid actions" fillMode="flat">
+      <ToolbarItem>
+        <Button icon="plus" primary>Add New</Button>
+      </ToolbarItem>
+      
+      <ToolbarItem>
+        <Button icon="edit">Edit</Button>
+      </ToolbarItem>
+      
+      <ToolbarItem>
+        <Button icon="delete">Delete</Button>
+      </ToolbarItem>
+      
+      <ToolbarSeparator />
+      
+      <ToolbarItem>
+        <DropDownButton 
+          text="Export" 
+          icon="download"
+          items={exportItems}
+        />
+      </ToolbarItem>
+      
+      <ToolbarSpacer />
+      
+      <ToolbarItem>
+        <Button icon="refresh">Refresh</Button>
+      </ToolbarItem>
+    </Toolbar>
+  );
+}
+```
+
+### Pattern 3: Media Player Controls
+```tsx
+// Media player control toolbar with playback and volume controls
+function MediaPlayerToolbar() {
+  return (
+    <Toolbar ariaLabel="Media player controls" size="large">
+      <ToolbarItem>
+        <Button icon="skip-previous" title="Previous Track" />
+      </ToolbarItem>
+      
+      <ToolbarItem>
+        <Button icon="play" primary title="Play">Play</Button>
+      </ToolbarItem>
+      
+      <ToolbarItem>
+        <Button icon="pause" title="Pause">Pause</Button>
+      </ToolbarItem>
+      
+      <ToolbarItem>
+        <Button icon="skip-next" title="Next Track" />
+      </ToolbarItem>
+      
+      <ToolbarSeparator />
+      
+      <ToolbarItem>
+        <Button icon="volume" title="Volume" />
+      </ToolbarItem>
+      
+      <ToolbarSpacer />
+      
+      <ToolbarItem>
+        <Button icon="fullscreen" title="Full Screen" />
+      </ToolbarItem>
+    </Toolbar>
+  );
+}
+```

@@ -1,0 +1,370 @@
+# Skeleton Components
+
+## Overview
+
+### Purpose
+Use this component to generate skeleton loading placeholder functionality
+
+### When to Use
+Skeleton components are essential for creating smooth loading experiences by providing visual placeholders while content is being fetched or processed. Common use cases include:
+
+- **Content loading states** - Display placeholders for text, images, and other content while data loads
+- **Progressive loading** - Show skeleton layouts before actual content renders to reduce perceived loading time
+- **Data fetching feedback** - Provide visual feedback during API calls or database queries
+- **Image placeholders** - Show circular or rectangular skeletons while images are loading
+- **List item previews** - Display consistent placeholders for dynamic content like user profiles or product cards
+- **Form field placeholders** - Show loading states for dynamic form fields or validation feedback
+- **Dashboard widgets** - Provide placeholders for charts, metrics, or other data visualization components
+- **Infinite scroll loading** - Display skeleton items at the bottom of lists during pagination
+
+### Architecture
+**No Coupling**: Skeleton is a standalone component that doesn't require other components to function. It can be used independently anywhere in your application where loading placeholders are needed.
+
+## Components
+
+### Skeleton
+
+**Purpose:** Displays an animated placeholder that mimics the shape and size of content while it loads, improving user experience by reducing perceived loading time and providing visual feedback.
+
+**Interface:**
+```typescript
+interface SkeletonProps {
+  animation?: boolean | SkeletonAnimation; // Animation behavior configuration (default: { type: 'pulse' })
+  className?: string; // Additional CSS classes for custom styling
+  shape?: SkeletonShape; // Visual shape of the placeholder (default: 'text')
+  style?: React.CSSProperties; // Inline styles for size and positioning
+}
+
+interface SkeletonAnimation {
+  type: 'pulse' | 'wave'; // Animation type: pulse or wave effect
+}
+
+type SkeletonShape = 'text' | 'circle' | 'rectangle'; // Available placeholder shapes
+```
+
+**Usage Example:**
+```tsx
+import { Skeleton } from '@progress/kendo-react-indicators';
+
+function Example() {
+  return (
+    <div>
+      {/* Text line placeholder */}
+      <Skeleton shape="text" style={{ width: '80%', height: '20px' }} />
+      
+      {/* Circular avatar placeholder */}
+      <Skeleton 
+        shape="circle" 
+        style={{ width: '50px', height: '50px' }} 
+        animation={{ type: 'wave' }}
+      />
+      
+      {/* Rectangular image placeholder */}
+      <Skeleton 
+        shape="rectangle" 
+        style={{ width: '200px', height: '150px' }}
+        animation={false}
+      />
+    </div>
+  );
+}
+```
+
+## Integration Patterns
+
+### Loading Card Content
+```tsx
+import { Skeleton } from '@progress/kendo-react-indicators';
+
+function LoadingCard({ isLoading, content }) {
+  if (isLoading) {
+    return (
+      <div className="card">
+        {/* Avatar placeholder */}
+        <Skeleton 
+          shape="circle" 
+          style={{ width: '40px', height: '40px', marginBottom: '12px' }} 
+        />
+        
+        {/* Title placeholder */}
+        <Skeleton 
+          shape="text" 
+          style={{ width: '60%', height: '24px', marginBottom: '8px' }} 
+        />
+        
+        {/* Description lines */}
+        <Skeleton 
+          shape="text" 
+          style={{ width: '100%', height: '16px', marginBottom: '4px' }} 
+        />
+        <Skeleton 
+          shape="text" 
+          style={{ width: '75%', height: '16px' }} 
+        />
+      </div>
+    );
+  }
+  
+  return <div className="card">{content}</div>;
+}
+```
+
+### Data Grid Loading State
+```tsx
+import { Skeleton } from '@progress/kendo-react-indicators';
+
+function DataGridSkeleton({ rows = 5, columns = 4 }) {
+  return (
+    <div className="grid-skeleton">
+      {/* Header row */}
+      <div className="row header">
+        {Array.from({ length: columns }).map((_, index) => (
+          <Skeleton 
+            key={`header-${index}`}
+            shape="text" 
+            style={{ width: '80%', height: '18px' }}
+          />
+        ))}
+      </div>
+      
+      {/* Data rows */}
+      {Array.from({ length: rows }).map((_, rowIndex) => (
+        <div key={`row-${rowIndex}`} className="row">
+          {Array.from({ length: columns }).map((_, colIndex) => (
+            <Skeleton 
+              key={`cell-${rowIndex}-${colIndex}`}
+              shape="text" 
+              style={{ width: '90%', height: '16px' }}
+            />
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+}
+```
+
+### User Profile Loading
+```tsx
+import { Skeleton } from '@progress/kendo-react-indicators';
+
+function UserProfileSkeleton() {
+  return (
+    <div className="profile-skeleton">
+      {/* Profile image */}
+      <Skeleton 
+        shape="circle" 
+        style={{ 
+          width: '80px', 
+          height: '80px', 
+          margin: '0 auto 16px' 
+        }}
+        animation={{ type: 'wave' }}
+      />
+      
+      {/* Name */}
+      <Skeleton 
+        shape="text" 
+        style={{ 
+          width: '150px', 
+          height: '20px', 
+          margin: '0 auto 8px' 
+        }} 
+      />
+      
+      {/* Bio */}
+      <Skeleton 
+        shape="text" 
+        style={{ 
+          width: '200px', 
+          height: '16px', 
+          margin: '0 auto 4px' 
+        }} 
+      />
+      <Skeleton 
+        shape="text" 
+        style={{ 
+          width: '180px', 
+          height: '16px', 
+          margin: '0 auto' 
+        }} 
+      />
+    </div>
+  );
+}
+```
+
+## Best Practices
+
+### Usage Guidelines
+- **Match content dimensions** - Size skeleton elements to closely match the expected content dimensions for seamless transitions
+- **Maintain layout consistency** - Use skeletons that preserve the overall page layout to prevent content jumping when real data loads
+- **Choose appropriate shapes** - Use 'text' for text content, 'circle' for avatars/profile images, and 'rectangle' for images or cards
+- **Combine multiple skeletons** - Create realistic loading states by combining different skeleton shapes and sizes
+- **Consider animation preferences** - Respect user motion preferences; disable animations for users who prefer reduced motion
+
+### Animation Guidelines
+- **Use pulse animation** - Default pulse animation works well for most content types and is less distracting
+- **Apply wave animation sparingly** - Wave animation is more eye-catching; use for primary content or when you want to draw attention
+- **Disable when appropriate** - Turn off animations for fast-loading content or when showing many skeleton elements simultaneously
+- **Match brand personality** - Choose animation types that align with your application's overall motion design language
+
+### Performance Considerations
+- **Limit simultaneous skeletons** - Too many animated skeletons can impact performance; consider staggered loading or reduced animation
+- **Use semantic timing** - Display skeletons immediately but remove them promptly when content is ready
+- **Optimize for mobile** - Ensure skeleton animations perform well on lower-powered devices
+- **Cache skeleton layouts** - For repeated loading states, consider reusing skeleton component instances
+
+### Accessibility
+- **Provide screen reader context** - Use aria-label or aria-describedby to inform screen readers that content is loading
+- **Respect motion preferences** - Honor the `prefers-reduced-motion` CSS media query by disabling animations when appropriate
+- **Maintain focus management** - Ensure focus isn't trapped in skeleton elements during loading states
+- **Use semantic markup** - Structure skeleton elements to match the semantic structure of the content they're replacing
+
+## Common Patterns
+
+### Pattern 1: Progressive Content Loading
+```tsx
+import { Skeleton } from '@progress/kendo-react-indicators';
+
+// Show skeletons for content that loads at different times
+function ProgressiveLoader({ titleLoaded, contentLoaded, imageLoaded, title, content, imageUrl }) {
+  return (
+    <article className="progressive-content">
+      <header>
+        {titleLoaded ? (
+          <h1>{title}</h1>
+        ) : (
+          <Skeleton shape="text" style={{ width: '70%', height: '32px' }} />
+        )}
+      </header>
+      
+      <div className="content-area">
+        {imageLoaded ? (
+          <img src={imageUrl} alt="Content" />
+        ) : (
+          <Skeleton 
+            shape="rectangle" 
+            style={{ width: '100%', height: '200px' }}
+            animation={{ type: 'wave' }}
+          />
+        )}
+        
+        <div className="text-content">
+          {contentLoaded ? (
+            <p>{content}</p>
+          ) : (
+            <>
+              <Skeleton shape="text" style={{ width: '100%', height: '16px', marginBottom: '8px' }} />
+              <Skeleton shape="text" style={{ width: '85%', height: '16px', marginBottom: '8px' }} />
+              <Skeleton shape="text" style={{ width: '60%', height: '16px' }} />
+            </>
+          )}
+        </div>
+      </div>
+    </article>
+  );
+}
+```
+
+### Pattern 2: List Item Skeletons
+```tsx
+import { Skeleton } from '@progress/kendo-react-indicators';
+
+// Consistent skeleton for list items with varied content
+function ListItemSkeleton({ showAvatar = true, lineCount = 2 }) {
+  return (
+    <div className="list-item-skeleton" style={{ display: 'flex', gap: '12px', padding: '16px' }}>
+      {showAvatar && (
+        <Skeleton 
+          shape="circle" 
+          style={{ width: '32px', height: '32px', flexShrink: 0 }} 
+        />
+      )}
+      
+      <div style={{ flex: 1 }}>
+        {Array.from({ length: lineCount }).map((_, index) => (
+          <Skeleton 
+            key={index}
+            shape="text" 
+            style={{ 
+              width: index === lineCount - 1 ? '70%' : '100%', 
+              height: '16px',
+              marginBottom: index < lineCount - 1 ? '6px' : '0'
+            }} 
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Usage in a loading list
+function LoadingList({ itemCount = 5 }) {
+  return (
+    <div className="loading-list">
+      {Array.from({ length: itemCount }).map((_, index) => (
+        <ListItemSkeleton 
+          key={index} 
+          lineCount={Math.floor(Math.random() * 3) + 1} // Vary line count for realism
+        />
+      ))}
+    </div>
+  );
+}
+```
+
+### Pattern 3: Form Field Loading
+```tsx
+import { Skeleton } from '@progress/kendo-react-indicators';
+
+// Loading state for dynamic form fields
+function FormFieldSkeleton({ hasLabel = true, fieldType = 'input' }) {
+  return (
+    <div className="form-field-skeleton" style={{ marginBottom: '16px' }}>
+      {hasLabel && (
+        <Skeleton 
+          shape="text" 
+          style={{ width: '120px', height: '14px', marginBottom: '6px' }} 
+        />
+      )}
+      
+      <Skeleton 
+        shape={fieldType === 'textarea' ? 'rectangle' : 'text'}
+        style={{ 
+          width: '100%', 
+          height: fieldType === 'textarea' ? '80px' : '40px',
+          borderRadius: '4px'
+        }}
+        animation={{ type: 'pulse' }}
+      />
+    </div>
+  );
+}
+
+// Usage in dynamic forms
+function DynamicForm({ isLoading, fields }) {
+  if (isLoading) {
+    return (
+      <form className="dynamic-form">
+        <FormFieldSkeleton hasLabel={true} fieldType="input" />
+        <FormFieldSkeleton hasLabel={true} fieldType="textarea" />
+        <FormFieldSkeleton hasLabel={false} fieldType="input" />
+        
+        {/* Submit button skeleton */}
+        <Skeleton 
+          shape="rectangle" 
+          style={{ 
+            width: '120px', 
+            height: '36px', 
+            borderRadius: '4px',
+            marginTop: '16px'
+          }} 
+        />
+      </form>
+    );
+  }
+  
+  return <form>{/* Render actual form fields */}</form>;
+}
+```

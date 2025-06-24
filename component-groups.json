@@ -1,0 +1,428 @@
+[
+  {
+    "name": "Grid",
+    "description": "Use this component group to generate comprehensive data grid functionality with all required sub-components for tabular data display and manipulation",
+    "components": ["Grid", "GridColumn", "GridCell", "GridColumnMenuWrapper", "GridColumnMenuFilter", "GridColumnMenuGroup", "GridColumnMenuSort", "GridColumnMenuCheckboxFilter", "GridColumnMenuColumnsChooser", "GridColumnMenuColumnsList", "GridColumnMenuItem", "GridColumnMenuItemContent", "GridColumnMenuItemGroup"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-grid/index.d.ts", "node_modules/@progress/kendo-react-grid/Grid.js", "node_modules/@progress/kendo-react-grid/GridColumn.js", "node_modules/@progress/kendo-react-grid/cells", "node_modules/@progress/kendo-react-grid/columnMenu", "node_modules/@progress/kendo-react-grid/header", "node_modules/@progress/kendo-react-grid/rows"]
+  },
+  {
+    "name": "Toolbar",
+    "description": "Use this component group to generate toolbar functionality with items, separators and spacers that work together as a cohesive unit",
+    "components": ["Toolbar", "ToolbarItem", "ToolbarSeparator", "ToolbarSpacer"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-buttons/index.d.ts", "node_modules/@progress/kendo-react-buttons/toolbar"]
+  },
+  {
+    "name": "Dialog",
+    "description": "Use this component group to generate dialog functionality with integrated actions bar",
+    "components": ["Dialog", "DialogActionsBar"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-dialogs/index.d.ts", "node_modules/@progress/kendo-react-dialogs/Dialog.js", "node_modules/@progress/kendo-react-dialogs/DialogActionsBar.js"]
+  },
+  {
+    "name": "Window",
+    "description": "Use this component group to generate window functionality with integrated actions bar",
+    "components": ["Window", "WindowActionsBar"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-dialogs/index.d.ts", "node_modules/@progress/kendo-react-dialogs/Window.js", "node_modules/@progress/kendo-react-dialogs/WindowActionsBar.js"]
+  },
+  {
+    "name": "ListBox",
+    "description": "Use this component group to generate list box functionality with integrated toolbar for item manipulation",
+    "components": ["ListBox", "ListBoxToolbar"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-listbox/index.d.ts"]
+  },
+  {
+    "name": "ActionSheet",
+    "description": "Use this component group to generate action sheet functionality with header, content, footer and items that work together",
+    "components": ["ActionSheet", "ActionSheetHeader", "ActionSheetContent", "ActionSheetFooter", "ActionSheetItem"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-layout/index.d.ts", "node_modules/@progress/kendo-react-layout/actionsheet"]
+  },
+  {
+    "name": "AppBar", 
+    "description": "Use this component group to generate app bar functionality with sections and spacers",
+    "components": ["AppBar", "AppBarSection", "AppBarSpacer"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-layout/index.d.ts", "node_modules/@progress/kendo-react-layout/appbar"]
+  },
+  {
+    "name": "BottomNavigation",
+    "description": "Use this component group to generate bottom navigation functionality with navigation items",
+    "components": ["BottomNavigation", "BottomNavigationItem"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-layout/index.d.ts", "node_modules/@progress/kendo-react-layout/bottomnavigation"]
+  },
+  {
+    "name": "Breadcrumb",
+    "description": "Use this component group to generate breadcrumb navigation with all required sub-components",
+    "components": ["Breadcrumb", "BreadcrumbDelimiter", "BreadcrumbLink", "BreadcrumbListItem", "BreadcrumbOrderedList"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-layout/index.d.ts", "node_modules/@progress/kendo-react-layout/breadcrumb"]
+  },
+  {
+    "name": "Badge",
+    "description": "Use this component group to generate badge functionality with container",
+    "components": ["Badge", "BadgeContainer"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-indicators/index.d.ts"]
+  },
+  {
+    "name": "FloatingActionButton",
+    "description": "Use this component group to generate floating action button functionality with items",
+    "components": ["FloatingActionButton", "FloatingActionButtonItem"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-buttons/index.d.ts", "node_modules/@progress/kendo-react-buttons/FloatingActionButton"]
+  },
+  {
+    "name": "Chip",
+    "description": "Use this component group to generate chip functionality with list container",
+    "components": ["Chip", "ChipList"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-buttons/index.d.ts", "node_modules/@progress/kendo-react-buttons/Chip"]
+  },
+  {
+    "name": "Input",
+    "description": "Use this component group to generate enhanced input functionality with prefix, suffix, and clear value components",
+    "components": ["Input", "InputPrefix", "InputSeparator", "InputClearValue"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-inputs/index.d.ts", "node_modules/@progress/kendo-react-inputs/input"]
+  },
+  {
+    "name": "ColorPicker",
+    "description": "Use this component group to generate color picker functionality with gradient and palette components",
+    "components": ["ColorPicker", "FlatColorPicker", "ColorGradient", "ColorPalette"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-inputs/index.d.ts", "node_modules/@progress/kendo-react-inputs/colors"]
+  },
+  {
+    "name": "Popover",
+    "description": "Use this component group to generate popover functionality with actions bar",
+    "components": ["Popover", "PopoverActionsBar"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-tooltip/index.d.ts"]
+  },
+  {
+    "name": "Button",
+    "description": "Use this component to generate standard button functionality",
+    "components": ["Button"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-buttons/index.d.ts", "node_modules/@progress/kendo-react-buttons/Button.js"]
+  },
+  {
+    "name": "ButtonGroup",
+    "description": "Use this component to generate button group functionality for grouping multiple buttons",
+    "components": ["ButtonGroup"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-buttons/index.d.ts", "node_modules/@progress/kendo-react-buttons/ButtonGroup.js"]
+  },
+  {
+    "name": "DropDownButton",
+    "description": "Use this component to generate dropdown button functionality",
+    "components": ["DropDownButton"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-buttons/index.d.ts"]
+  },
+  {
+    "name": "SplitButton",
+    "description": "Use this component to generate split button functionality",
+    "components": ["SplitButton"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-buttons/index.d.ts"]
+  },
+  {
+    "name": "AutoComplete",
+    "description": "Use this component to generate autocomplete input functionality",
+    "components": ["AutoComplete"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-dropdowns/index.d.ts", "node_modules/@progress/kendo-react-dropdowns/AutoComplete"]
+  },
+  {
+    "name": "ComboBox",
+    "description": "Use this component to generate combo box dropdown functionality",
+    "components": ["ComboBox"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-dropdowns/index.d.ts", "node_modules/@progress/kendo-react-dropdowns/ComboBox"]
+  },
+  {
+    "name": "DropDownList",
+    "description": "Use this component to generate dropdown list functionality",
+    "components": ["DropDownList"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-dropdowns/index.d.ts", "node_modules/@progress/kendo-react-dropdowns/DropDownList"]
+  },
+  {
+    "name": "DropDownTree",
+    "description": "Use this component to generate dropdown tree functionality",
+    "components": ["DropDownTree"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-dropdowns/index.d.ts", "node_modules/@progress/kendo-react-dropdowns/DropDownTree"]
+  },
+  {
+    "name": "MultiSelect",
+    "description": "Use this component to generate multi-select dropdown functionality",
+    "components": ["MultiSelect"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-dropdowns/index.d.ts", "node_modules/@progress/kendo-react-dropdowns/MultiSelect"]
+  },
+  {
+    "name": "MultiSelectTree",
+    "description": "Use this component to generate multi-select tree functionality",
+    "components": ["MultiSelectTree"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-dropdowns/index.d.ts", "node_modules/@progress/kendo-react-dropdowns/MultiSelectTree"]
+  },
+  {
+    "name": "MultiColumnComboBox",
+    "description": "Use this component to generate multi-column combo box functionality",
+    "components": ["MultiColumnComboBox"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-dropdowns/index.d.ts", "node_modules/@progress/kendo-react-dropdowns/MultiColumnComboBox"]
+  },
+  {
+    "name": "Calendar",
+    "description": "Use this component to generate calendar functionality",
+    "components": ["Calendar"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-dateinputs/index.d.ts", "node_modules/@progress/kendo-react-dateinputs/calendar"]
+  },
+  {
+    "name": "DateInput",
+    "description": "Use this component to generate date input functionality",
+    "components": ["DateInput"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-dateinputs/index.d.ts", "node_modules/@progress/kendo-react-dateinputs/dateinput"]
+  },
+  {
+    "name": "DatePicker",
+    "description": "Use this component to generate date picker functionality",
+    "components": ["DatePicker"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-dateinputs/index.d.ts", "node_modules/@progress/kendo-react-dateinputs/datepicker"]
+  },
+  {
+    "name": "DateTimePicker",
+    "description": "Use this component to generate date-time picker functionality",
+    "components": ["DateTimePicker"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-dateinputs/index.d.ts", "node_modules/@progress/kendo-react-dateinputs/datetimepicker"]
+  },
+  {
+    "name": "DateRangePicker",
+    "description": "Use this component to generate date range picker functionality",
+    "components": ["DateRangePicker"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-dateinputs/index.d.ts", "node_modules/@progress/kendo-react-dateinputs/daterangepicker"]
+  },
+  {
+    "name": "TimePicker",
+    "description": "Use this component to generate time picker functionality",
+    "components": ["TimePicker"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-dateinputs/index.d.ts", "node_modules/@progress/kendo-react-dateinputs/timepicker"]
+  },
+  {
+    "name": "MultiViewCalendar",
+    "description": "Use this component to generate multi-view calendar functionality",
+    "components": ["MultiViewCalendar"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-dateinputs/index.d.ts"]
+  },
+  {
+    "name": "Checkbox",
+    "description": "Use this component to generate checkbox input functionality",
+    "components": ["Checkbox"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-inputs/index.d.ts", "node_modules/@progress/kendo-react-inputs/checkbox"]
+  },
+  {
+    "name": "RadioButton",
+    "description": "Use this component to generate radio button input functionality",
+    "components": ["RadioButton"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-inputs/index.d.ts", "node_modules/@progress/kendo-react-inputs/radiobutton"]
+  },
+  {
+    "name": "Switch",
+    "description": "Use this component to generate switch toggle functionality",
+    "components": ["Switch"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-inputs/index.d.ts", "node_modules/@progress/kendo-react-inputs/switch"]
+  },
+  {
+    "name": "NumericTextBox",
+    "description": "Use this component to generate numeric text input functionality",
+    "components": ["NumericTextBox"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-inputs/index.d.ts", "node_modules/@progress/kendo-react-inputs/numerictextbox"]
+  },
+  {
+    "name": "MaskedTextBox",
+    "description": "Use this component to generate masked text input functionality",
+    "components": ["MaskedTextBox"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-inputs/index.d.ts", "node_modules/@progress/kendo-react-inputs/maskedtextbox"]
+  },
+  {
+    "name": "TextBox",
+    "description": "Use this component to generate text input functionality",
+    "components": ["TextBox"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-inputs/index.d.ts", "node_modules/@progress/kendo-react-inputs/textbox"]
+  },
+  {
+    "name": "TextArea",
+    "description": "Use this component to generate textarea input functionality",
+    "components": ["TextArea"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-inputs/index.d.ts", "node_modules/@progress/kendo-react-inputs/textarea"]
+  },
+  {
+    "name": "Slider",
+    "description": "Use this component to generate slider input functionality",
+    "components": ["Slider"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-inputs/index.d.ts", "node_modules/@progress/kendo-react-inputs/slider"]
+  },
+  {
+    "name": "RangeSlider",
+    "description": "Use this component to generate range slider functionality",
+    "components": ["RangeSlider"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-inputs/index.d.ts", "node_modules/@progress/kendo-react-inputs/range-slider"]
+  },
+  {
+    "name": "Rating",
+    "description": "Use this component to generate rating input functionality",
+    "components": ["Rating"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-inputs/index.d.ts", "node_modules/@progress/kendo-react-inputs/rating"]
+  },
+  {
+    "name": "Signature",
+    "description": "Use this component to generate signature pad functionality",
+    "components": ["Signature"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-inputs/index.d.ts", "node_modules/@progress/kendo-react-inputs/signature"]
+  },
+  {
+    "name": "Card",
+    "description": "Use this component to generate card container functionality",
+    "components": ["Card"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-layout/index.d.ts", "node_modules/@progress/kendo-react-layout/card"]
+  },
+  {
+    "name": "Avatar",
+    "description": "Use this component to generate avatar functionality",
+    "components": ["Avatar"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-layout/index.d.ts"]
+  },
+  {
+    "name": "Drawer",
+    "description": "Use this component to generate drawer navigation functionality",
+    "components": ["Drawer"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-layout/index.d.ts", "node_modules/@progress/kendo-react-layout/drawer"]
+  },
+  {
+    "name": "ExpansionPanel",
+    "description": "Use this component to generate expansion panel functionality",
+    "components": ["ExpansionPanel"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-layout/index.d.ts", "node_modules/@progress/kendo-react-layout/expansionpanel"]
+  },
+  {
+    "name": "GridLayout",
+    "description": "Use this component to generate grid layout functionality",
+    "components": ["GridLayout"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-layout/index.d.ts", "node_modules/@progress/kendo-react-layout/gridlayout"]
+  },
+  {
+    "name": "Menu",
+    "description": "Use this component to generate menu navigation functionality",
+    "components": ["Menu"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-layout/index.d.ts", "node_modules/@progress/kendo-react-layout/menu"]
+  },
+  {
+    "name": "ContextMenu",
+    "description": "Use this component to generate context menu functionality",
+    "components": ["ContextMenu"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-layout/index.d.ts", "node_modules/@progress/kendo-react-layout/contextmenu"]
+  },
+  {
+    "name": "PanelBar",
+    "description": "Use this component to generate panel bar navigation functionality",
+    "components": ["PanelBar"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-layout/index.d.ts", "node_modules/@progress/kendo-react-layout/panelbar"]
+  },
+  {
+    "name": "Splitter",
+    "description": "Use this component to generate splitter layout functionality",
+    "components": ["Splitter"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-layout/index.d.ts", "node_modules/@progress/kendo-react-layout/splitter"]
+  },
+  {
+    "name": "StackLayout",
+    "description": "Use this component to generate stack layout functionality",
+    "components": ["StackLayout"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-layout/index.d.ts", "node_modules/@progress/kendo-react-layout/stacklayout"]
+  },
+  {
+    "name": "Stepper",
+    "description": "Use this component to generate stepper navigation functionality",
+    "components": ["Stepper"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-layout/index.d.ts", "node_modules/@progress/kendo-react-layout/stepper"]
+  },
+  {
+    "name": "TabStrip",
+    "description": "Use this component to generate tab strip functionality",
+    "components": ["TabStrip"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-layout/index.d.ts", "node_modules/@progress/kendo-react-layout/tabstrip"]
+  },
+  {
+    "name": "TileLayout",
+    "description": "Use this component to generate tile layout functionality",
+    "components": ["TileLayout"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-layout/index.d.ts", "node_modules/@progress/kendo-react-layout/tilelayout"]
+  },
+  {
+    "name": "Timeline",
+    "description": "Use this component to generate timeline functionality",
+    "components": ["Timeline"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-layout/index.d.ts", "node_modules/@progress/kendo-react-layout/timeline"]
+  },
+  {
+    "name": "Loader",
+    "description": "Use this component to generate loading indicator functionality",
+    "components": ["Loader"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-indicators/index.d.ts"]
+  },
+  {
+    "name": "Skeleton",
+    "description": "Use this component to generate skeleton loading placeholder functionality",
+    "components": ["Skeleton"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-indicators/index.d.ts"]
+  },
+  {
+    "name": "ProgressBar",
+    "description": "Use this component to generate progress bar functionality",
+    "components": ["ProgressBar"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-progressbars/index.d.ts"]
+  },
+  {
+    "name": "ChunkProgressBar",
+    "description": "Use this component to generate chunk progress bar functionality",
+    "components": ["ChunkProgressBar"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-progressbars/index.d.ts"]
+  },
+  {
+    "name": "TreeView",
+    "description": "Use this component to generate tree view functionality",
+    "components": ["TreeView"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-treeview/index.d.ts"]
+  },
+  {
+    "name": "Label",
+    "description": "Use this component to generate label functionality",
+    "components": ["Label"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-labels/index.d.ts"]
+  },
+  {
+    "name": "FloatingLabel",
+    "description": "Use this component to generate floating label functionality",
+    "components": ["FloatingLabel"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-labels/index.d.ts"]
+  },
+  {
+    "name": "Hint",
+    "description": "Use this component to generate hint functionality",
+    "components": ["Hint"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-labels/index.d.ts"]
+  },
+  {
+    "name": "Fade",
+    "description": "Use this component to generate fade animation functionality",
+    "components": ["Fade"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-animation/index.d.ts"]
+  },
+  {
+    "name": "Expand",
+    "description": "Use this component to generate expand animation functionality", 
+    "components": ["Expand"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-animation/index.d.ts"]
+  },
+  {
+    "name": "Push",
+    "description": "Use this component to generate push animation functionality",
+    "components": ["Push"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-animation/index.d.ts"]
+  },
+  {
+    "name": "Reveal",
+    "description": "Use this component to generate reveal animation functionality",
+    "components": ["Reveal"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-animation/index.d.ts"]
+  },
+  {
+    "name": "AnimationChild",
+    "description": "Use this component to generate animation child functionality",
+    "components": ["AnimationChild"],
+    "relevantFiles": ["node_modules/@progress/kendo-react-animation/index.d.ts"]
+  }
+]
