@@ -1,0 +1,825 @@
+# Rating Component
+
+## Overview
+
+### Purpose
+Use this component to generate rating input functionality
+
+### When to Use
+The Rating component is perfect for scenarios where users need to provide numerical feedback or ratings. Use this component when you need to:
+
+- **Product reviews and feedback** - Allow customers to rate products, services, or experiences on a scale
+- **Content evaluation** - Enable users to rate articles, videos, courses, or other content
+- **Skill assessment** - Provide self-assessment or peer review functionality for skills and competencies
+- **Survey and polling interfaces** - Collect quantitative feedback in questionnaires and surveys
+- **Quality metrics** - Display or collect ratings for service quality, satisfaction levels, or performance indicators
+- **Recommendation systems** - Show average ratings and collect user preferences for personalized recommendations
+- **Interactive dashboards** - Provide quick rating inputs for monitoring and evaluation interfaces
+- **Accessibility-compliant rating systems** - Implement keyboard-navigable and screen reader-friendly rating controls
+- **Mobile-responsive rating interfaces** - Create touch-friendly rating controls that work across all device sizes
+
+### Architecture
+**No Coupling**: This is a standalone component that can be used independently. The Rating component encapsulates all its functionality within a single, self-contained element that manages its own state, styling, accessibility features, and value validation.
+
+## Components
+
+### Rating {Standalone Component}
+A comprehensive rating input component that allows users to select and display numerical ratings with customizable ranges and visual feedback.
+
+**Purpose:** Enables users to select a rating value from a predefined range using an intuitive star-based or custom icon interface with full accessibility and form integration support.
+
+**Interface:**
+```typescript
+interface RatingProps {
+  // Value and Range Configuration
+  value?: number; // Current rating value for controlled component
+  defaultValue?: number; // Initial rating value for uncontrolled usage
+  max?: number; // Maximum rating value (default: 5)
+  min?: number; // Minimum rating value (default: 1)
+  
+  // Interaction Control
+  disabled?: boolean; // Disable user interaction
+  readonly?: boolean; // Make component read-only (display-only mode)
+  
+  // Visual Customization
+  itemRenderer?: (props: RatingItemProps) => React.ReactNode; // Custom icon renderer
+  precision?: number; // Allow fractional ratings (e.g., 0.5 for half-stars)
+  
+  // Form Integration
+  name?: string; // Form field name for submission
+  id?: string; // Component identifier
+  
+  // Accessibility
+  ariaLabel?: string; // Accessible label for the rating component
+  ariaLabelledBy?: string; // Reference to element that labels this rating
+  ariaDescribedBy?: string; // Reference to element that describes this rating
+  tabIndex?: number; // Tab order for keyboard navigation
+  
+  // Styling
+  className?: string; // Additional CSS classes
+  style?: React.CSSProperties; // Inline styles
+  dir?: 'ltr' | 'rtl'; // Text direction for internationalization
+  
+  // Event Handlers
+  onChange?: (event: RatingChangeEvent) => void; // Fired when rating value changes
+  onFocus?: (event: RatingFocusEvent) => void; // Fired when component receives focus
+  onBlur?: (event: RatingBlurEvent) => void; // Fired when component loses focus
+}
+
+// Event interfaces
+interface RatingChangeEvent {
+  value: number; // The new rating value
+  target: Rating; // Reference to the rating component
+  syntheticEvent: React.ChangeEvent; // Original React event
+}
+
+interface RatingFocusEvent {
+  target: Rating; // Reference to the rating component
+}
+
+interface RatingBlurEvent {
+  target: Rating; // Reference to the rating component
+}
+
+// Custom item renderer props
+interface RatingItemProps {
+  filled: boolean; // Whether this rating item is filled/selected
+  index: number; // Zero-based index of this rating item
+  hovered: boolean; // Whether this item is currently being hovered
+  focused: boolean; // Whether this item has keyboard focus
+}
+```
+
+**Usage Example:**
+```tsx
+import { Rating } from '@progress/kendo-react-inputs';
+import { useState } from 'react';
+
+// Basic rating usage
+function BasicRating() {
+  const [rating, setRating] = useState(0);
+  
+  return (
+    <div>
+      <label>Rate this product:</label>
+      <Rating
+        value={rating}
+        onChange={(event) => setRating(event.value)}
+        max={5}
+        min={1}
+      />
+      <p>Your rating: {rating} out of 5 stars</p>
+    </div>
+  );
+}
+
+// Advanced rating with custom configuration
+function AdvancedRating() {
+  const [satisfaction, setSatisfaction] = useState(3);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    try {
+      await submitFeedback({ satisfaction });
+      console.log('Feedback submitted successfully');
+    } catch (error) {
+      console.error('Failed to submit feedback');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+  
+  return (
+    <div className="feedback-form">
+      <h3>Customer Satisfaction Survey</h3>
+      <label htmlFor="satisfaction-rating">
+        How satisfied are you with our service?
+      </label>
+      <Rating
+        id="satisfaction-rating"
+        value={satisfaction}
+        onChange={(event) => setSatisfaction(event.value)}
+        max={10}
+        min={1}
+        disabled={isSubmitting}
+        ariaLabel="Rate your satisfaction from 1 to 10"
+        className="satisfaction-rating"
+      />
+      <div className="rating-labels">
+        <span>Very Dissatisfied (1)</span>
+        <span>Very Satisfied (10)</span>
+      </div>
+      <button 
+        onClick={handleSubmit} 
+        disabled={isSubmitting || satisfaction === 0}
+      >
+        {isSubmitting ? 'Submitting...' : 'Submit Feedback'}
+      </button>
+    </div>
+  );
+}
+
+// Read-only rating display
+function DisplayRating({ productRating, reviewCount }) {
+  return (
+    <div className="product-rating">
+      <Rating
+        value={productRating}
+        max={5}
+        readonly={true}
+        ariaLabel={`Average rating ${productRating} out of 5 stars`}
+      />
+      <span className="rating-details">
+        {productRating.toFixed(1)} ({reviewCount} reviews)
+      </span>
+    </div>
+  );
+}
+
+// Half-star precision rating
+function PreciseRating() {
+  const [rating, setRating] = useState(2.5);
+  
+  return (
+    <div>
+      <label>Rate this course (half-stars allowed):</label>
+      <Rating
+        value={rating}
+        onChange={(event) => setRating(event.value)}
+        max={5}
+        min={0.5}
+        precision={0.5}
+        ariaLabel="Rate from 0.5 to 5 stars with half-star precision"
+      />
+      <p>Course rating: {rating} stars</p>
+    </div>
+  );
+}
+```
+
+## Integration Patterns
+
+### Product Review System
+```tsx
+import { Rating } from '@progress/kendo-react-inputs';
+import { Button } from '@progress/kendo-react-buttons';
+import { useState } from 'react';
+
+function ProductReview({ productId, onReviewSubmitted }) {
+  const [ratings, setRatings] = useState({
+    overall: 0,
+    quality: 0,
+    value: 0,
+    delivery: 0
+  });
+  
+  const [comment, setComment] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const updateRating = (category, value) => {
+    setRatings(prev => ({ ...prev, [category]: value }));
+  };
+  
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    
+    try {
+      await submitReview({
+        productId,
+        ratings,
+        comment,
+        timestamp: new Date()
+      });
+      
+      onReviewSubmitted();
+      // Reset form
+      setRatings({ overall: 0, quality: 0, value: 0, delivery: 0 });
+      setComment('');
+    } catch (error) {
+      console.error('Failed to submit review:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+  
+  const averageRating = Object.values(ratings).reduce((sum, rating) => sum + rating, 0) / 4;
+  
+  return (
+    <form onSubmit={handleSubmit} className="product-review-form">
+      <h3>Rate This Product</h3>
+      
+      <div className="rating-categories">
+        <div className="rating-group">
+          <label>Overall Satisfaction</label>
+          <Rating
+            value={ratings.overall}
+            onChange={(event) => updateRating('overall', event.value)}
+            max={5}
+            min={1}
+            ariaLabel="Rate overall satisfaction from 1 to 5 stars"
+          />
+        </div>
+        
+        <div className="rating-group">
+          <label>Product Quality</label>
+          <Rating
+            value={ratings.quality}
+            onChange={(event) => updateRating('quality', event.value)}
+            max={5}
+            min={1}
+            ariaLabel="Rate product quality from 1 to 5 stars"
+          />
+        </div>
+        
+        <div className="rating-group">
+          <label>Value for Money</label>
+          <Rating
+            value={ratings.value}
+            onChange={(event) => updateRating('value', event.value)}
+            max={5}
+            min={1}
+            ariaLabel="Rate value for money from 1 to 5 stars"
+          />
+        </div>
+        
+        <div className="rating-group">
+          <label>Delivery Experience</label>
+          <Rating
+            value={ratings.delivery}
+            onChange={(event) => updateRating('delivery', event.value)}
+            max={5}
+            min={1}
+            ariaLabel="Rate delivery experience from 1 to 5 stars"
+          />
+        </div>
+      </div>
+      
+      <div className="overall-summary">
+        <strong>Average Rating: {averageRating.toFixed(1)}/5</strong>
+      </div>
+      
+      <div className="comment-section">
+        <label htmlFor="review-comment">Additional Comments (Optional)</label>
+        <textarea
+          id="review-comment"
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+          placeholder="Share your experience with this product..."
+          rows={4}
+        />
+      </div>
+      
+      <Button
+        type="submit"
+        disabled={averageRating === 0 || isSubmitting}
+        primary
+      >
+        {isSubmitting ? 'Submitting Review...' : 'Submit Review'}
+      </Button>
+    </form>
+  );
+}
+```
+
+### Rating Display Dashboard
+```tsx
+function RatingsDashboard({ ratings }) {
+  const categories = [
+    { key: 'customer_service', label: 'Customer Service', color: '#2196F3' },
+    { key: 'product_quality', label: 'Product Quality', color: '#4CAF50' },
+    { key: 'delivery_speed', label: 'Delivery Speed', color: '#FF9800' },
+    { key: 'website_experience', label: 'Website Experience', color: '#9C27B0' }
+  ];
+  
+  const overallRating = categories.reduce((sum, cat) => 
+    sum + (ratings[cat.key] || 0), 0
+  ) / categories.length;
+  
+  return (
+    <div className="ratings-dashboard">
+      <div className="overall-rating-card">
+        <h2>Overall Performance</h2>
+        <div className="overall-rating-display">
+          <Rating
+            value={overallRating}
+            max={5}
+            readonly={true}
+            className="large-rating"
+            ariaLabel={`Overall rating ${overallRating.toFixed(1)} out of 5 stars`}
+          />
+          <div className="rating-value">
+            {overallRating.toFixed(1)}/5.0
+          </div>
+        </div>
+      </div>
+      
+      <div className="category-ratings">
+        <h3>Performance by Category</h3>
+        {categories.map(category => (
+          <div key={category.key} className="category-rating-item">
+            <div className="category-info">
+              <span 
+                className="category-indicator" 
+                style={{ backgroundColor: category.color }}
+              />
+              <span className="category-label">{category.label}</span>
+            </div>
+            
+            <div className="category-rating">
+              <Rating
+                value={ratings[category.key] || 0}
+                max={5}
+                readonly={true}
+                ariaLabel={`${category.label} rating ${ratings[category.key] || 0} out of 5 stars`}
+              />
+              <span className="rating-numeric">
+                {(ratings[category.key] || 0).toFixed(1)}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+      
+      <div className="rating-trends">
+        <h3>Recent Trends</h3>
+        <div className="trend-indicators">
+          {categories.map(category => {
+            const currentRating = ratings[category.key] || 0;
+            const previousRating = ratings[`${category.key}_previous`] || currentRating;
+            const trend = currentRating - previousRating;
+            
+            return (
+              <div key={category.key} className="trend-item">
+                <span>{category.label}</span>
+                <div className="trend-change">
+                  <span className={`trend-value ${trend >= 0 ? 'positive' : 'negative'}`}>
+                    {trend >= 0 ? '+' : ''}{trend.toFixed(1)}
+                  </span>
+                  <span className="trend-icon">
+                    {trend >= 0 ? '↗' : '↘'}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+
+### Interactive Rating Comparison
+```tsx
+function RatingComparison({ products }) {
+  const [selectedProducts, setSelectedProducts] = useState([]);
+  const [comparisonMetric, setComparisonMetric] = useState('overall');
+  
+  const metrics = [
+    { key: 'overall', label: 'Overall Rating' },
+    { key: 'quality', label: 'Quality' },
+    { key: 'value', label: 'Value' },
+    { key: 'design', label: 'Design' }
+  ];
+  
+  const toggleProductSelection = (productId) => {
+    setSelectedProducts(prev => 
+      prev.includes(productId)
+        ? prev.filter(id => id !== productId)
+        : [...prev, productId]
+    );
+  };
+  
+  return (
+    <div className="rating-comparison">
+      <h2>Product Rating Comparison</h2>
+      
+      <div className="comparison-controls">
+        <div className="metric-selector">
+          <label>Compare by:</label>
+          <select 
+            value={comparisonMetric} 
+            onChange={(e) => setComparisonMetric(e.target.value)}
+          >
+            {metrics.map(metric => (
+              <option key={metric.key} value={metric.key}>
+                {metric.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+      
+      <div className="product-grid">
+        {products.map(product => {
+          const isSelected = selectedProducts.includes(product.id);
+          const metricRating = product.ratings[comparisonMetric] || 0;
+          
+          return (
+            <div 
+              key={product.id} 
+              className={`product-card ${isSelected ? 'selected' : ''}`}
+              onClick={() => toggleProductSelection(product.id)}
+            >
+              <img src={product.image} alt={product.name} />
+              <h3>{product.name}</h3>
+              <div className="product-rating">
+                <Rating
+                  value={metricRating}
+                  max={5}
+                  readonly={true}
+                  ariaLabel={`${product.name} ${metrics.find(m => m.key === comparisonMetric)?.label} rating ${metricRating} out of 5 stars`}
+                />
+                <span className="rating-text">
+                  {metricRating.toFixed(1)}/5
+                </span>
+              </div>
+              <div className="product-reviews">
+                {product.reviewCount} reviews
+              </div>
+              <div className="product-price">
+                ${product.price}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      
+      {selectedProducts.length > 1 && (
+        <div className="comparison-results">
+          <h3>Selected Products Comparison</h3>
+          <div className="comparison-chart">
+            {selectedProducts.map(productId => {
+              const product = products.find(p => p.id === productId);
+              const rating = product.ratings[comparisonMetric] || 0;
+              
+              return (
+                <div key={productId} className="comparison-item">
+                  <div className="product-name">{product.name}</div>
+                  <div className="rating-bar">
+                    <Rating
+                      value={rating}
+                      max={5}
+                      readonly={true}
+                      className="comparison-rating"
+                    />
+                    <span className="rating-value">{rating.toFixed(1)}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+### Accessibility-Enhanced Rating Form
+```tsx
+function AccessibleRatingForm() {
+  const [ratings, setRatings] = useState({
+    ease_of_use: 0,
+    accessibility: 0,
+    performance: 0
+  });
+  
+  const [focusedRating, setFocusedRating] = useState(null);
+  const [announcements, setAnnouncements] = useState('');
+  
+  const ratingDescriptions = {
+    ease_of_use: {
+      label: 'Ease of Use',
+      description: 'How easy was it to complete your task?',
+      scale: ['Very Difficult', 'Difficult', 'Neutral', 'Easy', 'Very Easy']
+    },
+    accessibility: {
+      label: 'Accessibility',
+      description: 'How accessible was the interface?',
+      scale: ['Not Accessible', 'Poor', 'Fair', 'Good', 'Excellent']
+    },
+    performance: {
+      label: 'Performance',
+      description: 'How would you rate the system performance?',
+      scale: ['Very Slow', 'Slow', 'Average', 'Fast', 'Very Fast']
+    }
+  };
+  
+  const updateRating = (category, value) => {
+    setRatings(prev => ({ ...prev, [category]: value }));
+    
+    const description = ratingDescriptions[category];
+    const scaleLabel = description.scale[value - 1] || '';
+    setAnnouncements(
+      `${description.label} rated ${value} out of 5: ${scaleLabel}`
+    );
+  };
+  
+  const handleRatingFocus = (category) => {
+    setFocusedRating(category);
+    const description = ratingDescriptions[category];
+    setAnnouncements(
+      `${description.label}: ${description.description} Use arrow keys to select rating.`
+    );
+  };
+  
+  const handleRatingBlur = () => {
+    setFocusedRating(null);
+    setAnnouncements('');
+  };
+  
+  return (
+    <div className="accessible-rating-form">
+      <h2>Accessibility Feedback Form</h2>
+      
+      {/* Screen reader announcements */}
+      <div 
+        aria-live="polite" 
+        aria-atomic="true" 
+        className="sr-only"
+      >
+        {announcements}
+      </div>
+      
+      <fieldset>
+        <legend>Rate Your Experience</legend>
+        
+        {Object.entries(ratingDescriptions).map(([key, config]) => (
+          <div key={key} className="rating-field">
+            <div className="field-header">
+              <label htmlFor={`rating-${key}`} className="field-label">
+                {config.label}
+              </label>
+              <p className="field-description">
+                {config.description}
+              </p>
+            </div>
+            
+            <div className="rating-container">
+              <Rating
+                id={`rating-${key}`}
+                value={ratings[key]}
+                onChange={(event) => updateRating(key, event.value)}
+                onFocus={() => handleRatingFocus(key)}
+                onBlur={handleRatingBlur}
+                max={5}
+                min={1}
+                ariaLabel={`${config.label}: ${config.description} Rate from 1 to 5`}
+                ariaDescribedBy={`rating-${key}-help`}
+                className="accessible-rating"
+              />
+              
+              <div id={`rating-${key}-help`} className="rating-help">
+                Current selection: {ratings[key] > 0 ? (
+                  <span>
+                    {ratings[key]} - {config.scale[ratings[key] - 1]}
+                  </span>
+                ) : (
+                  'Not rated'
+                )}
+              </div>
+            </div>
+            
+            <div className="scale-labels">
+              <span>1 - {config.scale[0]}</span>
+              <span>5 - {config.scale[4]}</span>
+            </div>
+          </div>
+        ))}
+      </fieldset>
+      
+      <div className="form-actions">
+        <Button 
+          type="submit"
+          disabled={Object.values(ratings).every(rating => rating === 0)}
+          primary
+        >
+          Submit Feedback
+        </Button>
+      </div>
+    </div>
+  );
+}
+```
+
+## Component Relationships
+
+### Data Flow
+The Rating component manages its own value state when used in uncontrolled mode or accepts controlled state via the `value` prop. User interactions (clicks, keyboard navigation) trigger `onChange` events that provide the new rating value to parent components for state management and processing.
+
+### Event Handling
+- **onChange**: Primary event fired when the rating value changes, providing the new numeric value
+- **onFocus**: Fired when the rating component receives focus, useful for accessibility announcements
+- **onBlur**: Fired when the rating component loses focus, often used for validation or help text management
+- Events include both the new value and reference to the component for advanced integration scenarios
+
+## Best Practices
+
+### Usage Guidelines
+- Always provide clear labels and instructions for what the rating represents and its scale
+- Use appropriate `max` and `min` values that match user expectations (commonly 1-5 or 1-10)
+- Consider using `precision` for more granular ratings when half-values make sense
+- Implement proper form validation to ensure ratings are within expected ranges
+- Provide visual feedback about the current selection and scale endpoints
+- Use `readonly` mode for displaying existing ratings without allowing modification
+
+### Accessibility
+- Include descriptive `ariaLabel` that explains the rating purpose and scale range
+- Use `ariaDescribedBy` to reference additional help text or current selection information
+- Ensure sufficient color contrast for visual rating indicators across all states
+- Test keyboard navigation (arrow keys for selection, Tab for component navigation)
+- Provide clear announcements for screen readers when rating values change
+- Consider including text labels for scale endpoints (e.g., "Poor" to "Excellent")
+
+### Performance
+- Use controlled components (`value` prop) when integrating with form libraries or complex state management
+- Implement debounced handlers for ratings that trigger expensive operations like API calls
+- Consider React.memo for rating lists that don't change frequently to prevent unnecessary re-renders
+- Optimize custom `itemRenderer` functions to avoid creating new components on each render
+
+## Common Patterns
+
+### Survey Rating Collection
+```tsx
+function SurveyRating() {
+  const [responses, setResponses] = useState({});
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  
+  const questions = [
+    {
+      id: 'satisfaction',
+      text: 'How satisfied are you with our service?',
+      scale: { min: 1, max: 5, labels: ['Very Dissatisfied', 'Very Satisfied'] }
+    },
+    {
+      id: 'recommendation',
+      text: 'How likely are you to recommend us to a friend?',
+      scale: { min: 0, max: 10, labels: ['Not Likely', 'Very Likely'] }
+    },
+    {
+      id: 'ease_of_use',
+      text: 'How easy was it to use our platform?',
+      scale: { min: 1, max: 5, labels: ['Very Difficult', 'Very Easy'] }
+    }
+  ];
+  
+  const currentQ = questions[currentQuestion];
+  
+  const handleRatingChange = (value) => {
+    setResponses(prev => ({ ...prev, [currentQ.id]: value }));
+  };
+  
+  const goToNext = () => {
+    if (currentQuestion < questions.length - 1) {
+      setCurrentQuestion(prev => prev + 1);
+    } else {
+      submitSurvey(responses);
+    }
+  };
+  
+  const goToPrevious = () => {
+    if (currentQuestion > 0) {
+      setCurrentQuestion(prev => prev - 1);
+    }
+  };
+  
+  return (
+    <div className="survey-rating">
+      <div className="survey-progress">
+        Question {currentQuestion + 1} of {questions.length}
+        <div className="progress-bar">
+          <div 
+            className="progress-fill" 
+            style={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}
+          />
+        </div>
+      </div>
+      
+      <div className="question-container">
+        <h2>{currentQ.text}</h2>
+        
+        <div className="rating-section">
+          <Rating
+            value={responses[currentQ.id] || 0}
+            onChange={(event) => handleRatingChange(event.value)}
+            max={currentQ.scale.max}
+            min={currentQ.scale.min}
+            ariaLabel={`Rate from ${currentQ.scale.min} to ${currentQ.scale.max}`}
+            className="survey-rating-input"
+          />
+          
+          <div className="scale-labels">
+            <span>{currentQ.scale.labels[0]}</span>
+            <span>{currentQ.scale.labels[1]}</span>
+          </div>
+        </div>
+        
+        <div className="navigation-buttons">
+          <Button 
+            onClick={goToPrevious} 
+            disabled={currentQuestion === 0}
+          >
+            Previous
+          </Button>
+          
+          <Button 
+            onClick={goToNext} 
+            disabled={!responses[currentQ.id]}
+            primary
+          >
+            {currentQuestion === questions.length - 1 ? 'Submit' : 'Next'}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+
+### Star Rating with Custom Icons
+```tsx
+function CustomStarRating() {
+  const [rating, setRating] = useState(3);
+  const [hoverRating, setHoverRating] = useState(0);
+  
+  const customItemRenderer = (props) => {
+    const { filled, index, hovered } = props;
+    const isActive = filled || (hoverRating > 0 && index < hoverRating);
+    
+    return (
+      <span 
+        className={`custom-star ${isActive ? 'active' : ''}`}
+        onMouseEnter={() => setHoverRating(index + 1)}
+        onMouseLeave={() => setHoverRating(0)}
+      >
+        {isActive ? '★' : '☆'}
+      </span>
+    );
+  };
+  
+  return (
+    <div className="custom-star-rating">
+      <h3>Rate Your Experience</h3>
+      <Rating
+        value={rating}
+        onChange={(event) => setRating(event.value)}
+        max={5}
+        min={1}
+        itemRenderer={customItemRenderer}
+        ariaLabel="Rate your experience from 1 to 5 stars"
+      />
+      <p className="rating-feedback">
+        {rating === 0 && 'Click to rate'}
+        {rating === 1 && 'Poor - We\'ll do better next time'}
+        {rating === 2 && 'Fair - Room for improvement'}
+        {rating === 3 && 'Good - Thanks for your feedback'}
+        {rating === 4 && 'Great - We\'re glad you enjoyed it'}
+        {rating === 5 && 'Excellent - Thank you for the amazing review!'}
+      </p>
+    </div>
+  );
+}
+```

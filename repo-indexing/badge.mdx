@@ -1,0 +1,372 @@
+# Badge Components
+
+## Overview
+
+### Purpose
+Use this component group to generate badge functionality with container
+
+### When to Use
+Badge components are ideal for displaying small pieces of information that need to be prominently positioned relative to other UI elements. Common use cases include:
+
+- **Notification indicators** - Show unread message counts, alerts, or status updates
+- **Status badges** - Display user status, online/offline states, or verification indicators  
+- **Overlay information** - Add contextual information like "new", "sale", or version numbers
+- **Profile elements** - Show activity indicators on avatars or user photos
+- **Navigation badges** - Display counts or status on menu items, tabs, or buttons
+- **Product labeling** - Add promotional tags, stock status, or category labels to items
+
+### Architecture
+**Moderate Coupling**: The Badge and BadgeContainer components are designed to work together but can also function independently. BadgeContainer provides enhanced positioning and layout context for Badge components, enabling precise placement relative to other elements.
+
+### Component Interdependencies
+The components have an optional parent-child relationship:
+- **BadgeContainer** acts as a positioning wrapper that can contain any React element along with Badge components
+- **Badge** can be used standalone for simple scenarios or within BadgeContainer for advanced positioning
+- No shared context or state management - positioning is handled through CSS and component composition
+
+## Components
+
+### Badge
+
+**Purpose:** Displays small informational elements like counts, status indicators, or short text labels with customizable appearance and positioning options.
+
+**Interface:**
+```typescript
+interface BadgeProps {
+  children?: React.ReactNode; // Content to display inside the badge
+  className?: string; // Additional CSS classes
+  dir?: string; // Text direction for RTL support
+  style?: React.CSSProperties; // Inline styles
+  size?: null | 'small' | 'medium' | 'large'; // Badge size (default: 'medium')
+  rounded?: null | 'small' | 'medium' | 'large' | 'full'; // Border radius (default: 'medium')
+  fillMode?: null | 'solid' | 'outline'; // Background style (default: 'solid')
+  themeColor?: null | 'base' | 'primary' | 'secondary' | 'tertiary' | 'info' | 'success' | 'warning' | 'error' | 'dark' | 'light' | 'inverse' | 'inherit'; // Color theme (default: 'primary')
+  align?: {
+    horizontal: 'start' | 'end' | null; // Horizontal alignment (default: 'end')
+    vertical: 'top' | 'bottom' | null; // Vertical alignment (default: 'top')
+  };
+  position?: 'edge' | 'outside' | 'inside' | null; // Position relative to container edge (default: 'edge')
+  cutoutBorder?: boolean; // Render additional border around badge (default: false)
+}
+```
+
+**Dependencies:** None - can be used standalone
+**Provides:** Visual indicator with customizable appearance and positioning
+
+**Usage Example:**
+```tsx
+import { Badge } from '@progress/kendo-react-indicators';
+
+function Example() {
+  return (
+    <Badge
+      themeColor="error"
+      size="small"
+      rounded="full"
+    >
+      99+
+    </Badge>
+  );
+}
+```
+
+### BadgeContainer
+
+**Purpose:** Provides a wrapper component that enables precise positioning of Badge components relative to other content elements.
+
+**Interface:**
+```typescript
+interface BadgeContainerProps {
+  children?: React.ReactNode; // Content including badges and other elements
+  className?: string; // Additional CSS classes
+  dir?: string; // Text direction for RTL support
+  style?: React.CSSProperties; // Inline styles
+}
+```
+
+**Context Dependencies:** None
+**Parent Requirements:** None - can be used as a root container
+
+**Usage Example:**
+```tsx
+import { BadgeContainer, Badge } from '@progress/kendo-react-indicators';
+
+// Used with any content element
+function Example() {
+  return (
+    <BadgeContainer>
+      <Avatar shape="circle" type="image">
+        <img src="avatar.jpg" alt="User" />
+      </Avatar>
+      <Badge 
+        position="edge" 
+        align={{ horizontal: 'end', vertical: 'top' }}
+        themeColor="success"
+      >
+        5
+      </Badge>
+    </BadgeContainer>
+  );
+}
+```
+
+## Integration Patterns
+
+### Basic Standalone Usage
+```tsx
+import { Badge } from '@progress/kendo-react-indicators';
+
+// Simple badge without container
+function NotificationBadge() {
+  return (
+    <Badge themeColor="error">
+      New
+    </Badge>
+  );
+}
+```
+
+### Badge with Container - Basic
+```tsx
+import { BadgeContainer, Badge } from '@progress/kendo-react-indicators';
+
+// Minimal container usage
+function BasicContainerExample() {
+  return (
+    <BadgeContainer>
+      <button className="icon-button">
+        <IconMail />
+      </button>
+      <Badge position="edge" themeColor="primary">
+        3
+      </Badge>
+    </BadgeContainer>
+  );
+}
+```
+
+### Badge with Container - Advanced
+```tsx
+import { BadgeContainer, Badge } from '@progress/kendo-react-indicators';
+
+// Complex usage with multiple badges and positioning
+function AdvancedExample() {
+  return (
+    <BadgeContainer style={{ position: 'relative' }}>
+      <div className="product-card">
+        <img src="product.jpg" alt="Product" />
+        <h3>Product Name</h3>
+      </div>
+      <Badge 
+        position="outside"
+        align={{ horizontal: 'end', vertical: 'top' }}
+        themeColor="warning"
+        size="small"
+        rounded="full"
+      >
+        Sale
+      </Badge>
+      <Badge 
+        position="inside"
+        align={{ horizontal: 'start', vertical: 'bottom' }}
+        themeColor="success"
+        fillMode="outline"
+      >
+        ✓
+      </Badge>
+    </BadgeContainer>
+  );
+}
+```
+
+### Common Variations
+
+#### Notification Counts
+```tsx
+function NotificationCount({ count }: { count: number }) {
+  return (
+    <BadgeContainer>
+      <IconBell />
+      <Badge 
+        themeColor={count > 0 ? 'error' : 'base'}
+        size="small"
+        rounded="full"
+        position="edge"
+      >
+        {count > 99 ? '99+' : count}
+      </Badge>
+    </BadgeContainer>
+  );
+}
+```
+
+#### Status Indicators
+```tsx
+function UserStatus({ isOnline }: { isOnline: boolean }) {
+  return (
+    <BadgeContainer>
+      <Avatar size="large">JD</Avatar>
+      <Badge 
+        themeColor={isOnline ? 'success' : 'base'}
+        size="small"
+        rounded="full"
+        position="edge"
+        align={{ horizontal: 'end', vertical: 'bottom' }}
+      />
+    </BadgeContainer>
+  );
+}
+```
+
+#### Content Labels
+```tsx
+function ProductLabel() {
+  return (
+    <BadgeContainer>
+      <div className="product-image">
+        <img src="product.jpg" alt="Product" />
+      </div>
+      <Badge 
+        themeColor="warning"
+        fillMode="solid"
+        position="outside"
+        align={{ horizontal: 'start', vertical: 'top' }}
+      >
+        NEW
+      </Badge>
+    </BadgeContainer>
+  );
+}
+```
+
+## Component Relationships
+
+### Data Flow
+- **Badge**: Receives props directly, no data dependencies
+- **BadgeContainer**: Acts as a positioning wrapper, doesn't manage state or pass data between components
+- **Communication**: No direct communication between Badge and BadgeContainer - positioning is handled through CSS
+
+### Context Sharing
+- No shared contexts or providers
+- Components are self-contained with their own props
+- Positioning relationship is established through DOM structure and CSS
+
+### Event Handling
+- Badge components don't emit events by default
+- Event handling should be implemented at the parent level or through wrapper elements
+- BadgeContainer doesn't intercept or modify events
+
+## Best Practices
+
+### Usage Guidelines
+- **Use BadgeContainer for complex positioning**: When you need precise control over badge placement relative to other elements
+- **Keep badge content concise**: Limit text to short labels, numbers, or simple icons for optimal visual impact
+- **Choose appropriate positioning**: Use `edge` for overlays, `outside` for labels, and `inside` for subtle indicators
+- **Consider accessibility**: Ensure badge content is readable and provides meaningful information to screen readers
+
+### Accessibility
+- **Provide meaningful content**: Badge text should be descriptive enough to convey its purpose
+- **Use appropriate color contrast**: Ensure badge content is readable against the background
+- **Consider screen readers**: Badge content is announced by screen readers as part of the document flow
+- **Focus management**: Badges are not focusable by default - use wrapper elements for interactive badges
+
+### Performance
+- **Lightweight components**: Both Badge and BadgeContainer have minimal rendering overhead
+- **CSS-based positioning**: Positioning is handled through CSS classes, not JavaScript calculations
+- **Efficient re-renders**: Components only re-render when their props change
+
+## Common Patterns
+
+### Pattern 1: Notification Badge
+```tsx
+// Classic notification badge on menu items or icons
+function NotificationMenuItem({ icon, label, count }: MenuItemProps) {
+  return (
+    <BadgeContainer>
+      <div className="menu-item">
+        {icon}
+        <span>{label}</span>
+      </div>
+      {count > 0 && (
+        <Badge 
+          themeColor="error"
+          size="small"
+          rounded="full"
+          position="edge"
+          align={{ horizontal: 'end', vertical: 'top' }}
+        >
+          {count}
+        </Badge>
+      )}
+    </BadgeContainer>
+  );
+}
+```
+
+### Pattern 2: Status Indicator
+```tsx
+// Status badge for user presence or system states
+function StatusIndicator({ status, children }: StatusProps) {
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'online': return 'success';
+      case 'busy': return 'warning';
+      case 'offline': return 'base';
+      default: return 'base';
+    }
+  };
+
+  return (
+    <BadgeContainer>
+      {children}
+      <Badge 
+        themeColor={getStatusColor(status)}
+        size="small"
+        rounded="full"
+        position="edge"
+        align={{ horizontal: 'end', vertical: 'bottom' }}
+        cutoutBorder={true}
+      />
+    </BadgeContainer>
+  );
+}
+```
+
+### Pattern 3: Product Labeling
+```tsx
+// Multiple badges for product features or promotions
+function ProductCard({ product }: ProductCardProps) {
+  return (
+    <BadgeContainer className="product-card">
+      <img src={product.image} alt={product.name} />
+      
+      {product.isNew && (
+        <Badge 
+          themeColor="info"
+          position="outside"
+          align={{ horizontal: 'start', vertical: 'top' }}
+          size="small"
+        >
+          NEW
+        </Badge>
+      )}
+      
+      {product.discount && (
+        <Badge 
+          themeColor="error"
+          position="outside"
+          align={{ horizontal: 'end', vertical: 'top' }}
+          size="small"
+        >
+          -{product.discount}%
+        </Badge>
+      )}
+      
+      <div className="product-info">
+        <h3>{product.name}</h3>
+        <p>{product.price}</p>
+      </div>
+    </BadgeContainer>
+  );
+}
+```

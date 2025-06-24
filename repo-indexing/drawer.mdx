@@ -1,0 +1,467 @@
+# Drawer Component
+
+## Overview
+
+### Purpose
+Use this component to generate drawer navigation functionality
+
+### When to Use
+The Drawer component is ideal for creating navigation panels that can slide in from the side of the screen. Use it when you need:
+- **Side navigation menus** - Primary navigation that doesn't take up main content space
+- **Mobile-first navigation** - Collapsible navigation that works well on smaller screens
+- **Progressive disclosure** - Hide/show navigation options based on user context
+- **Multi-level navigation** - Navigation with hierarchical menu structures
+- **Compact layouts** - Space-efficient navigation with mini mode support
+
+### Architecture
+**No Coupling** - The Drawer is a standalone component that can work independently or be enhanced with optional sub-components:
+
+- **DrawerContent** - Provides the main content area adjacent to the drawer
+- **DrawerNavigation** - Renders navigation items with proper structure
+- **DrawerItem** - Represents individual navigation items
+
+### Component Interdependencies
+While the Drawer can function as a standalone component, it provides enhanced functionality when used with related components:
+- **Optional Enhancement**: DrawerContent provides structured content layout
+- **Optional Enhancement**: DrawerNavigation provides semantic navigation structure
+- **Optional Enhancement**: DrawerItem provides individual navigation items with proper styling and behavior
+
+## Components
+
+### Drawer {Primary Component}
+
+**Purpose:** Main navigation drawer that slides in from the side with support for overlay and push modes
+
+**Interface:**
+```typescript
+interface DrawerProps {
+  // State and Display
+  expanded?: boolean; // Controls the open/closed state of the drawer
+  mode?: 'overlay' | 'push'; // How the drawer appears relative to content
+  position?: 'start' | 'end'; // Which side the drawer slides from
+  
+  // Sizing and Layout
+  width?: number; // Width when expanded (default: 240)
+  mini?: boolean; // Enable compact mode when collapsed
+  miniWidth?: number; // Width in mini mode (default: 48)
+  
+  // Animation
+  animation?: boolean | DrawerAnimation; // Animation settings for show/hide
+  
+  // Content and Structure
+  children?: React.ReactNode; // JSX content (DrawerNavigation, DrawerContent, etc.)
+  items?: Array<DrawerItemProps>; // Declarative item configuration
+  item?: React.ComponentType<DrawerItemProps>; // Custom item renderer
+  
+  // Events
+  onSelect?: (event: DrawerSelectEvent) => void; // Item selection handler
+  onOverlayClick?: (event: React.MouseEvent) => void; // Overlay click handler
+  
+  // Styling and Accessibility
+  className?: string; // CSS classes for container
+  drawerClassName?: string; // CSS classes for drawer element
+  style?: React.CSSProperties; // Inline styles
+  tabIndex?: number; // Tab order control
+  dir?: string; // Text direction (LTR/RTL)
+}
+
+interface DrawerAnimation {
+  type?: boolean;
+  duration?: number; // Animation duration in milliseconds
+}
+
+interface DrawerSelectEvent {
+  itemTarget: any; // The clicked item data
+  itemIndex: number; // Index of the selected item
+  syntheticEvent: React.SyntheticEvent;
+  nativeEvent: Event;
+}
+```
+
+**Usage Example:**
+```tsx
+import { Drawer, DrawerNavigation, DrawerItem, DrawerContent } from '@progress/kendo-react-layout';
+
+function BasicDrawer() {
+  const [expanded, setExpanded] = useState(false);
+  
+  return (
+    <Drawer 
+      expanded={expanded}
+      mode="push"
+      position="start"
+      onSelect={(e) => console.log('Selected:', e.itemTarget)}
+    >
+      <DrawerNavigation>
+        <DrawerItem text="Dashboard" icon="home" />
+        <DrawerItem text="Reports" icon="chart" />
+        <DrawerItem separator={true} />
+        <DrawerItem text="Settings" icon="gear" />
+      </DrawerNavigation>
+      <DrawerContent>
+        <button onClick={() => setExpanded(!expanded)}>
+          Toggle Drawer
+        </button>
+      </DrawerContent>
+    </Drawer>
+  );
+}
+```
+
+### DrawerNavigation {Enhanced Component}
+
+**Purpose:** Provides semantic navigation structure and proper accessibility for drawer items
+
+**Interface:**
+```typescript
+interface DrawerNavigationProps {
+  children?: React.ReactNode; // DrawerItem components
+  className?: string; // Additional CSS classes
+  style?: React.CSSProperties; // Inline styles
+}
+```
+
+**Context Dependencies:** Inherits configuration from parent Drawer context
+**Parent Requirements:** Should be used within a Drawer component for proper styling and behavior
+
+**Usage Example:**
+```tsx
+<Drawer expanded={true}>
+  <DrawerNavigation>
+    <DrawerItem text="Home" icon="home" />
+    <DrawerItem text="Profile" icon="user" />
+  </DrawerNavigation>
+</Drawer>
+```
+
+### DrawerItem {Enhanced Component}
+
+**Purpose:** Represents individual navigation items with proper styling, state management, and interaction
+
+**Interface:**
+```typescript
+interface DrawerItemProps {
+  // Content
+  text?: string; // Display text for the item
+  children?: React.ReactNode; // Custom content
+  icon?: string; // CSS icon class name
+  svgIcon?: React.ReactElement; // Custom SVG icon
+  
+  // State
+  selected?: boolean; // Whether item is currently selected
+  disabled?: boolean; // Whether item is disabled
+  separator?: boolean; // Render as a visual separator
+  
+  // Layout and Hierarchy
+  level?: number; // Indentation level for hierarchical menus
+  index?: number; // Unique identifier for the item
+  
+  // Custom Properties
+  [customProperty: string]: any; // Additional data passed to onSelect
+  
+  // Styling and Accessibility
+  className?: string; // Additional CSS classes
+  style?: React.CSSProperties; // Inline styles
+  tabIndex?: number; // Tab order control
+}
+```
+
+**Context Dependencies:** Inherits selection handling and styling from parent Drawer
+**Parent Requirements:** Should be used within DrawerNavigation for proper structure
+
+**Usage Example:**
+```tsx
+<DrawerNavigation>
+  <DrawerItem 
+    text="Dashboard" 
+    icon="k-i-dashboard"
+    selected={true}
+    customData="dashboard-page"
+  />
+  <DrawerItem 
+    text="Analytics" 
+    icon="k-i-chart-line"
+    level={1}
+  />
+  <DrawerItem separator={true} />
+  <DrawerItem 
+    text="Settings" 
+    icon="k-i-gear"
+    disabled={false}
+  />
+</DrawerNavigation>
+```
+
+### DrawerContent {Enhanced Component}
+
+**Purpose:** Provides the main content area that sits adjacent to the drawer navigation
+
+**Interface:**
+```typescript
+interface DrawerContentProps {
+  children?: React.ReactNode; // Main application content
+  className?: string; // Additional CSS classes  
+  style?: React.CSSProperties; // Inline styles
+}
+```
+
+**Context Dependencies:** Inherits layout behavior from parent Drawer (push/overlay modes)
+**Parent Requirements:** Should be used within a Drawer component for proper layout
+
+**Usage Example:**
+```tsx
+<Drawer expanded={true} mode="push">
+  <DrawerNavigation>
+    <DrawerItem text="Home" />
+  </DrawerNavigation>
+  <DrawerContent>
+    <h1>Main Content Area</h1>
+    <p>This content shifts when drawer opens in push mode</p>
+  </DrawerContent>
+</Drawer>
+```
+
+## Integration Patterns
+
+### Basic Usage
+```tsx
+import { Drawer, DrawerNavigation, DrawerItem, DrawerContent } from '@progress/kendo-react-layout';
+
+// Minimal required structure
+function BasicExample() {
+  const [isOpen, setIsOpen] = useState(false);
+  
+  return (
+    <Drawer expanded={isOpen}>
+      <DrawerNavigation>
+        <DrawerItem text="Home" />
+        <DrawerItem text="About" />
+      </DrawerNavigation>
+      <DrawerContent>
+        <button onClick={() => setIsOpen(!isOpen)}>
+          Toggle Navigation
+        </button>
+      </DrawerContent>
+    </Drawer>
+  );
+}
+```
+
+### Advanced Usage
+```tsx
+// Complex usage with all features
+function AdvancedExample() {
+  const [expanded, setExpanded] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  
+  const handleSelect = (event) => {
+    setSelectedIndex(event.itemIndex);
+    setExpanded(false); // Close on mobile
+  };
+  
+  return (
+    <Drawer 
+      expanded={expanded}
+      mode="push"
+      position="start"
+      mini={true}
+      miniWidth={60}
+      width={280}
+      animation={{ duration: 300 }}
+      onSelect={handleSelect}
+      onOverlayClick={() => setExpanded(false)}
+    >
+      <DrawerNavigation>
+        <DrawerItem 
+          text="Dashboard" 
+          icon="k-i-dashboard"
+          selected={selectedIndex === 0}
+        />
+        <DrawerItem 
+          text="Reports" 
+          icon="k-i-chart-line"
+          selected={selectedIndex === 1}
+        />
+        <DrawerItem separator={true} />
+        <DrawerItem 
+          text="Users" 
+          icon="k-i-users"
+          selected={selectedIndex === 2}
+        />
+        <DrawerItem 
+          text="Settings" 
+          icon="k-i-gear"
+          level={1}
+          disabled={false}
+        />
+      </DrawerNavigation>
+      <DrawerContent>
+        <header>
+          <button onClick={() => setExpanded(!expanded)}>
+            ☰ Menu
+          </button>
+        </header>
+        <main>
+          <h1>Content Area</h1>
+          <p>Main application content goes here</p>
+        </main>
+      </DrawerContent>
+    </Drawer>
+  );
+}
+```
+
+### Declarative Items Usage
+```tsx
+// Using items prop instead of JSX children
+function DeclarativeExample() {
+  const navigationItems = [
+    { text: 'Home', icon: 'k-i-home' },
+    { text: 'Profile', icon: 'k-i-user' },
+    { separator: true },
+    { text: 'Settings', icon: 'k-i-gear', disabled: true }
+  ];
+  
+  return (
+    <Drawer 
+      expanded={true}
+      items={navigationItems}
+      onSelect={(e) => console.log('Selected:', e.itemTarget.text)}
+    >
+      <DrawerContent>
+        <h1>Declarative Navigation</h1>
+      </DrawerContent>
+    </Drawer>
+  );
+}
+```
+
+## Component Relationships
+
+### Data Flow
+- **Parent to Child**: Drawer passes configuration through React Context to DrawerNavigation and DrawerItem
+- **Child to Parent**: DrawerItem click events bubble up to Drawer's onSelect handler
+- **State Management**: Expanded state controls visibility; selection state manages active items
+
+### Context Sharing
+The Drawer component provides a React Context that shares:
+- Animation settings
+- Expand/collapse state
+- Mode and position configuration
+- Item selection handlers
+- Styling and layout properties
+
+### Event Handling
+- **Item Selection**: DrawerItem clicks trigger the parent Drawer's onSelect event
+- **Overlay Interaction**: Clicking outside the drawer (in overlay mode) triggers onOverlayClick
+- **Keyboard Navigation**: Automatic tab order and arrow key navigation between items
+
+## Best Practices
+
+### Usage Guidelines
+- **Use mini mode for desktop applications** where navigation should remain accessible but compact
+- **Implement overlay mode for mobile** to maximize content space on smaller screens
+- **Provide clear visual feedback** for selected and hover states on navigation items
+- **Group related navigation items** using separators and proper hierarchy levels
+
+### Accessibility
+- **Keyboard Navigation**: Drawer automatically manages tab order and arrow key navigation between items
+- **Screen Reader Support**: DrawerNavigation provides proper semantic structure with role="navigation"
+- **Focus Management**: Drawer handles focus restoration when opening/closing
+- **ARIA Attributes**: Items include proper aria-selected and aria-disabled states
+
+### Performance
+- **Lazy Rendering**: Consider lazy loading content in DrawerContent for large applications
+- **Animation Optimization**: Use appropriate animation duration (200-300ms) for smooth transitions
+- **Event Handler Optimization**: Memoize onSelect handlers to prevent unnecessary re-renders
+
+## Common Patterns
+
+### Pattern 1: Responsive Navigation
+```tsx
+// Responsive drawer that adapts to screen size
+function ResponsiveDrawer() {
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isOpen, setIsOpen] = useState(!isMobile);
+  
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      setIsOpen(!mobile); // Auto-open on desktop, closed on mobile
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  
+  return (
+    <Drawer 
+      expanded={isOpen}
+      mode={isMobile ? 'overlay' : 'push'}
+      mini={!isMobile}
+      onOverlayClick={() => isMobile && setIsOpen(false)}
+    >
+      <DrawerNavigation>
+        <DrawerItem text="Dashboard" icon="k-i-dashboard" />
+        <DrawerItem text="Settings" icon="k-i-gear" />
+      </DrawerNavigation>
+      <DrawerContent>
+        <button onClick={() => setIsOpen(!isOpen)}>
+          {isMobile ? '☰' : isOpen ? '‹' : '›'} Toggle
+        </button>
+      </DrawerContent>
+    </Drawer>
+  );
+}
+```
+
+### Pattern 2: Hierarchical Navigation
+```tsx
+// Multi-level navigation with expandable sections
+function HierarchicalDrawer() {
+  const [selectedPath, setSelectedPath] = useState('dashboard');
+  
+  const handleSelect = (event) => {
+    const path = event.itemTarget.path || event.itemTarget.text.toLowerCase();
+    setSelectedPath(path);
+  };
+  
+  return (
+    <Drawer expanded={true} onSelect={handleSelect}>
+      <DrawerNavigation>
+        <DrawerItem 
+          text="Dashboard" 
+          icon="k-i-dashboard"
+          selected={selectedPath === 'dashboard'}
+          path="dashboard"
+        />
+        <DrawerItem text="Reports" icon="k-i-chart" />
+        <DrawerItem 
+          text="Sales Report" 
+          level={1}
+          selected={selectedPath === 'sales-report'}
+          path="sales-report"
+        />
+        <DrawerItem 
+          text="Analytics" 
+          level={1}
+          selected={selectedPath === 'analytics'}
+          path="analytics"
+        />
+        <DrawerItem separator={true} />
+        <DrawerItem text="Administration" icon="k-i-gear" />
+        <DrawerItem 
+          text="Users" 
+          level={1}
+          selected={selectedPath === 'users'}
+          path="users"
+        />
+      </DrawerNavigation>
+      <DrawerContent>
+        <h1>Content for: {selectedPath}</h1>
+      </DrawerContent>
+    </Drawer>
+  );
+}
+```

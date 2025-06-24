@@ -1,0 +1,792 @@
+# Switch Component
+
+## Overview
+
+### Purpose
+Use this component to generate switch toggle functionality
+
+### When to Use
+The Switch component is ideal for scenarios where users need to toggle between two distinct states with immediate visual feedback. Common use cases include:
+
+- **Settings and preferences** - Enable/disable features like notifications, dark mode, or privacy settings
+- **Feature toggles** - Control the visibility or availability of application features
+- **Binary choices** - Present clear on/off, enabled/disabled, or yes/no options
+- **Status controls** - Toggle system states like online/offline, active/inactive
+- **Form controls** - Replace checkboxes when the action feels more like switching than selecting
+- **Accessibility preferences** - Control accessibility features like high contrast, screen reader modes
+- **Device controls** - Toggle hardware or software features like WiFi, Bluetooth, or airplane mode
+
+### Architecture
+**No Coupling**: Switch is a standalone component that operates independently without requiring other components. It provides a complete toggle control solution with built-in state management, accessibility features, and customizable labels.
+
+## Components
+
+### Switch
+
+**Purpose:** Provides a toggle control that allows users to switch between checked (on) and unchecked (off) states with smooth animations and clear visual feedback.
+
+**Interface:**
+```typescript
+interface SwitchProps {
+  // State management
+  checked?: boolean; // Current toggle state (controlled component)
+  defaultChecked?: boolean; // Initial state for uncontrolled usage
+  onChange?: (event: SwitchChangeEvent) => void; // Callback when state changes
+  
+  // Visual customization
+  onLabel?: string; // Label text displayed when switch is "on"
+  offLabel?: string; // Label text displayed when switch is "off"
+  
+  // Interaction control
+  disabled?: boolean; // Disable user interaction with the switch
+  readonly?: boolean; // Make the switch read-only (visual state only)
+  
+  // Form integration
+  name?: string; // Form field name for form submissions
+  value?: string; // Form field value
+  
+  // Accessibility
+  id?: string; // Unique identifier for the switch
+  ariaLabelledBy?: string; // Reference to element that labels this switch
+  ariaDescribedBy?: string; // Reference to element that describes this switch
+  tabIndex?: number; // Tab order position
+  
+  // Styling
+  className?: string; // Custom CSS classes
+  style?: React.CSSProperties; // Inline styles
+  dir?: 'ltr' | 'rtl'; // Text direction for internationalization
+  
+  // Event handlers
+  onFocus?: (event: SwitchFocusEvent) => void; // Callback when switch gains focus
+  onBlur?: (event: SwitchBlurEvent) => void; // Callback when switch loses focus
+}
+
+interface SwitchChangeEvent {
+  checked: boolean; // The new toggle state
+  target: Switch; // Reference to the switch component
+  syntheticEvent: React.ChangeEvent; // Original React event
+}
+
+interface SwitchFocusEvent {
+  target: Switch; // Reference to the switch component
+}
+
+interface SwitchBlurEvent {
+  target: Switch; // Reference to the switch component
+}
+```
+
+**Usage Example:**
+```tsx
+import { Switch } from '@progress/kendo-react-inputs';
+import { useState } from 'react';
+
+function BasicSwitch() {
+  const [isEnabled, setIsEnabled] = useState(false);
+
+  return (
+    <Switch
+      checked={isEnabled}
+      onChange={(event) => setIsEnabled(event.checked)}
+      onLabel="Enabled"
+      offLabel="Disabled"
+    />
+  );
+}
+```
+
+## Integration Patterns
+
+### Basic Usage
+```tsx
+import { Switch } from '@progress/kendo-react-inputs';
+
+// Simple controlled switch
+function SimpleExample() {
+  const [isOn, setIsOn] = useState(false);
+
+  return (
+    <Switch
+      checked={isOn}
+      onChange={(event) => setIsOn(event.checked)}
+    />
+  );
+}
+
+// Uncontrolled with default state
+function UncontrolledExample() {
+  return (
+    <Switch
+      defaultChecked={true}
+      onChange={(event) => console.log('Switch toggled:', event.checked)}
+    />
+  );
+}
+```
+
+### Advanced Usage with Labels
+```tsx
+import { Switch } from '@progress/kendo-react-inputs';
+import { useState } from 'react';
+
+function LabeledSwitch() {
+  const [darkModeEnabled, setDarkModeEnabled] = useState(false);
+
+  const handleDarkModeToggle = (event: SwitchChangeEvent) => {
+    setDarkModeEnabled(event.checked);
+    // Apply dark mode theme
+    document.body.classList.toggle('dark-theme', event.checked);
+  };
+
+  return (
+    <div>
+      <label htmlFor="dark-mode-switch">Dark Mode:</label>
+      <Switch
+        id="dark-mode-switch"
+        checked={darkModeEnabled}
+        onChange={handleDarkModeToggle}
+        onLabel="On"
+        offLabel="Off"
+      />
+    </div>
+  );
+}
+```
+
+### Settings Panel Integration
+```tsx
+function SettingsPanel() {
+  const [settings, setSettings] = useState({
+    notifications: true,
+    autoSave: false,
+    analytics: true,
+    accessibility: false
+  });
+
+  const updateSetting = (key: string) => (event: SwitchChangeEvent) => {
+    setSettings(prev => ({
+      ...prev,
+      [key]: event.checked
+    }));
+  };
+
+  return (
+    <div className="settings-panel">
+      <div className="setting-item">
+        <label htmlFor="notifications">Push Notifications</label>
+        <Switch
+          id="notifications"
+          name="notifications"
+          checked={settings.notifications}
+          onChange={updateSetting('notifications')}
+          onLabel="Enabled"
+          offLabel="Disabled"
+        />
+      </div>
+
+      <div className="setting-item">
+        <label htmlFor="auto-save">Auto Save</label>
+        <Switch
+          id="auto-save"
+          name="autoSave"
+          checked={settings.autoSave}
+          onChange={updateSetting('autoSave')}
+          onLabel="On"
+          offLabel="Off"
+        />
+      </div>
+
+      <div className="setting-item">
+        <label htmlFor="analytics">Analytics Tracking</label>
+        <Switch
+          id="analytics"
+          name="analytics"
+          checked={settings.analytics}
+          onChange={updateSetting('analytics')}
+          onLabel="Allow"
+          offLabel="Block"
+        />
+      </div>
+
+      <div className="setting-item">
+        <label htmlFor="accessibility">High Contrast Mode</label>
+        <Switch
+          id="accessibility"
+          name="accessibility"
+          checked={settings.accessibility}
+          onChange={updateSetting('accessibility')}
+          onLabel="Active"
+          offLabel="Inactive"
+        />
+      </div>
+    </div>
+  );
+}
+```
+
+### Form Integration
+```tsx
+import { Switch } from '@progress/kendo-react-inputs';
+import { Button } from '@progress/kendo-react-buttons';
+import { useState } from 'react';
+
+function PreferencesForm() {
+  const [formData, setFormData] = useState({
+    emailNotifications: true,
+    smsNotifications: false,
+    marketingEmails: false,
+    termsAccepted: false
+  });
+
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    console.log('Preferences saved:', formData);
+  };
+
+  const updatePreference = (key: string) => (event: SwitchChangeEvent) => {
+    setFormData(prev => ({
+      ...prev,
+      [key]: event.checked
+    }));
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <h3>Notification Preferences</h3>
+      
+      <div>
+        <label htmlFor="email-notifications">Email Notifications:</label>
+        <Switch
+          id="email-notifications"
+          name="emailNotifications"
+          checked={formData.emailNotifications}
+          onChange={updatePreference('emailNotifications')}
+          onLabel="Yes"
+          offLabel="No"
+        />
+      </div>
+
+      <div>
+        <label htmlFor="sms-notifications">SMS Notifications:</label>
+        <Switch
+          id="sms-notifications"
+          name="smsNotifications"
+          checked={formData.smsNotifications}
+          onChange={updatePreference('smsNotifications')}
+          onLabel="Yes"
+          offLabel="No"
+        />
+      </div>
+
+      <div>
+        <label htmlFor="marketing-emails">Marketing Emails:</label>
+        <Switch
+          id="marketing-emails"
+          name="marketingEmails"
+          checked={formData.marketingEmails}
+          onChange={updatePreference('marketingEmails')}
+          onLabel="Subscribe"
+          offLabel="Unsubscribe"
+        />
+      </div>
+
+      <div>
+        <label htmlFor="terms-accepted">I accept the terms and conditions:</label>
+        <Switch
+          id="terms-accepted"
+          name="termsAccepted"
+          checked={formData.termsAccepted}
+          onChange={updatePreference('termsAccepted')}
+          onLabel="Accepted"
+          offLabel="Declined"
+          required
+        />
+      </div>
+
+      <Button 
+        type="submit" 
+        primary 
+        disabled={!formData.termsAccepted}
+      >
+        Save Preferences
+      </Button>
+    </form>
+  );
+}
+```
+
+### Disabled and Read-only States
+```tsx
+function ConditionalSwitches() {
+  const [isPremiumUser, setIsPremiumUser] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  return (
+    <div>
+      <div>
+        <label htmlFor="premium-status">Premium Account:</label>
+        <Switch
+          id="premium-status"
+          checked={isPremiumUser}
+          onChange={(event) => setIsPremiumUser(event.checked)}
+          onLabel="Premium"
+          offLabel="Basic"
+        />
+      </div>
+
+      <div>
+        <label htmlFor="advanced-features">Advanced Features:</label>
+        <Switch
+          id="advanced-features"
+          checked={isPremiumUser}
+          disabled={!isPremiumUser}
+          onLabel="Enabled"
+          offLabel="Disabled"
+          onChange={() => {}} // No-op since it's controlled by premium status
+        />
+        {!isPremiumUser && <span>Upgrade to Premium to access</span>}
+      </div>
+
+      <div>
+        <label htmlFor="admin-mode">Admin Mode:</label>
+        <Switch
+          id="admin-mode"
+          checked={isAdmin}
+          readonly={!isPremiumUser} // Read-only for non-premium users
+          onChange={(event) => setIsAdmin(event.checked)}
+          onLabel="Admin"
+          offLabel="User"
+        />
+      </div>
+    </div>
+  );
+}
+```
+
+## Best Practices
+
+### Usage Guidelines
+- **Use descriptive labels** - Provide clear `onLabel` and `offLabel` text that describe the active and inactive states
+- **Provide external labels** - Always associate switches with descriptive label elements for better accessibility
+- **Choose appropriate use cases** - Use switches for immediate state changes, checkboxes for selections that require form submission
+- **Group related switches** - Organize multiple switches logically in settings panels or preference forms
+- **Handle state appropriately** - Use controlled components for form integration, uncontrolled for simple toggle behaviors
+
+### Accessibility
+- **Semantic labeling** - Always provide accessible labels using label elements or `ariaLabelledBy` attributes
+- **Keyboard navigation** - Switch supports full keyboard accessibility with Space and Enter key activation
+- **Screen reader support** - The component announces state changes and current values to assistive technologies
+- **Focus management** - Clear visual focus indicators help users navigate with keyboard or screen readers
+- **State announcement** - Screen readers announce both the current state and available labels for context
+
+### Performance
+- **Controlled vs Uncontrolled** - Use controlled switches (`checked` + `onChange`) for form state, uncontrolled (`defaultChecked`) for simple cases
+- **Event handler optimization** - Use useCallback hooks to prevent unnecessary re-renders in complex components
+- **State management** - Consider using state management libraries for complex switch interactions across components
+
+## Common Patterns
+
+### Pattern 1: Feature Toggle Dashboard
+```tsx
+function FeatureToggleDashboard() {
+  const [features, setFeatures] = useState({
+    betaFeatures: false,
+    experimentalUI: false,
+    advancedAnalytics: false,
+    debugMode: false
+  });
+
+  const [isAdmin] = useState(true); // Simulate admin status
+
+  const toggleFeature = (featureName: string) => (event: SwitchChangeEvent) => {
+    setFeatures(prev => ({
+      ...prev,
+      [featureName]: event.checked
+    }));
+
+    // Log feature toggle for analytics
+    console.log(`Feature ${featureName} ${event.checked ? 'enabled' : 'disabled'}`);
+  };
+
+  return (
+    <div className="feature-dashboard">
+      <h2>Feature Toggles</h2>
+      
+      <div className="feature-group">
+        <h3>User Features</h3>
+        
+        <div className="feature-item">
+          <div className="feature-info">
+            <label htmlFor="beta-features">Beta Features</label>
+            <span className="feature-description">
+              Access to experimental features before public release
+            </span>
+          </div>
+          <Switch
+            id="beta-features"
+            checked={features.betaFeatures}
+            onChange={toggleFeature('betaFeatures')}
+            onLabel="Enabled"
+            offLabel="Disabled"
+          />
+        </div>
+
+        <div className="feature-item">
+          <div className="feature-info">
+            <label htmlFor="experimental-ui">Experimental UI</label>
+            <span className="feature-description">
+              Try the new user interface design
+            </span>
+          </div>
+          <Switch
+            id="experimental-ui"
+            checked={features.experimentalUI}
+            onChange={toggleFeature('experimentalUI')}
+            disabled={!features.betaFeatures} // Requires beta features
+            onLabel="Active"
+            offLabel="Inactive"
+          />
+        </div>
+      </div>
+
+      {isAdmin && (
+        <div className="feature-group">
+          <h3>Admin Features</h3>
+          
+          <div className="feature-item">
+            <div className="feature-info">
+              <label htmlFor="advanced-analytics">Advanced Analytics</label>
+              <span className="feature-description">
+                Detailed usage analytics and reporting
+              </span>
+            </div>
+            <Switch
+              id="advanced-analytics"
+              checked={features.advancedAnalytics}
+              onChange={toggleFeature('advancedAnalytics')}
+              onLabel="Tracking"
+              offLabel="Off"
+            />
+          </div>
+
+          <div className="feature-item">
+            <div className="feature-info">
+              <label htmlFor="debug-mode">Debug Mode</label>
+              <span className="feature-description">
+                Show debugging information in console
+              </span>
+            </div>
+            <Switch
+              id="debug-mode"
+              checked={features.debugMode}
+              onChange={toggleFeature('debugMode')}
+              onLabel="Debug"
+              offLabel="Normal"
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+### Pattern 2: Privacy Settings
+```tsx
+function PrivacySettings() {
+  const [privacy, setPrivacy] = useState({
+    publicProfile: false,
+    shareAnalytics: true,
+    allowCookies: true,
+    locationTracking: false,
+    targetedAds: false
+  });
+
+  const updatePrivacySetting = (setting: string) => (event: SwitchChangeEvent) => {
+    setPrivacy(prev => ({
+      ...prev,
+      [setting]: event.checked
+    }));
+
+    // Save privacy preferences to backend
+    savePrivacyPreference(setting, event.checked);
+  };
+
+  const savePrivacyPreference = async (setting: string, value: boolean) => {
+    try {
+      await fetch('/api/privacy-settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ [setting]: value })
+      });
+    } catch (error) {
+      console.error('Failed to save privacy setting:', error);
+    }
+  };
+
+  return (
+    <div className="privacy-settings">
+      <h2>Privacy Settings</h2>
+      <p>Control how your data is used and shared</p>
+
+      <div className="privacy-section">
+        <h3>Profile Visibility</h3>
+        <div className="setting-item">
+          <div className="setting-details">
+            <label htmlFor="public-profile">Public Profile</label>
+            <span className="setting-note">
+              Make your profile visible to other users
+            </span>
+          </div>
+          <Switch
+            id="public-profile"
+            checked={privacy.publicProfile}
+            onChange={updatePrivacySetting('publicProfile')}
+            onLabel="Public"
+            offLabel="Private"
+          />
+        </div>
+      </div>
+
+      <div className="privacy-section">
+        <h3>Data Usage</h3>
+        
+        <div className="setting-item">
+          <div className="setting-details">
+            <label htmlFor="share-analytics">Share Analytics</label>
+            <span className="setting-note">
+              Help improve our service by sharing usage data
+            </span>
+          </div>
+          <Switch
+            id="share-analytics"
+            checked={privacy.shareAnalytics}
+            onChange={updatePrivacySetting('shareAnalytics')}
+            onLabel="Allow"
+            offLabel="Block"
+          />
+        </div>
+
+        <div className="setting-item">
+          <div className="setting-details">
+            <label htmlFor="allow-cookies">Accept Cookies</label>
+            <span className="setting-note">
+              Allow cookies for better user experience
+            </span>
+          </div>
+          <Switch
+            id="allow-cookies"
+            checked={privacy.allowCookies}
+            onChange={updatePrivacySetting('allowCookies')}
+            onLabel="Accept"
+            offLabel="Reject"
+          />
+        </div>
+
+        <div className="setting-item">
+          <div className="setting-details">
+            <label htmlFor="location-tracking">Location Tracking</label>
+            <span className="setting-note">
+              Use your location to provide relevant content
+            </span>
+          </div>
+          <Switch
+            id="location-tracking"
+            checked={privacy.locationTracking}
+            onChange={updatePrivacySetting('locationTracking')}
+            onLabel="Enabled"
+            offLabel="Disabled"
+          />
+        </div>
+
+        <div className="setting-item">
+          <div className="setting-details">
+            <label htmlFor="targeted-ads">Targeted Advertising</label>
+            <span className="setting-note">
+              Show ads based on your interests and activity
+            </span>
+          </div>
+          <Switch
+            id="targeted-ads"
+            checked={privacy.targetedAds}
+            onChange={updatePrivacySetting('targetedAds')}
+            disabled={!privacy.allowCookies} // Requires cookies
+            onLabel="Personal"
+            offLabel="Generic"
+          />
+        </div>
+      </div>
+
+      <div className="privacy-note">
+        <p>
+          Changes to privacy settings take effect immediately. 
+          You can update these preferences at any time.
+        </p>
+      </div>
+    </div>
+  );
+}
+```
+
+### Pattern 3: Device Control Panel
+```tsx
+function DeviceControlPanel() {
+  const [deviceStates, setDeviceStates] = useState({
+    wifi: true,
+    bluetooth: false,
+    airplane: false,
+    notification: true,
+    doNotDisturb: false
+  });
+
+  const [connectionStatus, setConnectionStatus] = useState({
+    wifi: 'connected',
+    bluetooth: 'disconnected'
+  });
+
+  const handleDeviceToggle = (device: string) => (event: SwitchChangeEvent) => {
+    const newState = event.checked;
+    
+    setDeviceStates(prev => ({
+      ...prev,
+      [device]: newState
+    }));
+
+    // Handle special device logic
+    switch (device) {
+      case 'airplane':
+        if (newState) {
+          // Airplane mode disables wifi and bluetooth
+          setDeviceStates(prev => ({
+            ...prev,
+            wifi: false,
+            bluetooth: false
+          }));
+        }
+        break;
+      
+      case 'doNotDisturb':
+        if (newState) {
+          // Do not disturb overrides notification settings
+          setDeviceStates(prev => ({
+            ...prev,
+            notification: false
+          }));
+        }
+        break;
+    }
+
+    // Simulate API call to control actual device
+    controlDevice(device, newState);
+  };
+
+  const controlDevice = async (device: string, enabled: boolean) => {
+    try {
+      await fetch(`/api/devices/${device}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enabled })
+      });
+    } catch (error) {
+      console.error(`Failed to control ${device}:`, error);
+    }
+  };
+
+  return (
+    <div className="device-control-panel">
+      <h2>Device Settings</h2>
+
+      <div className="control-section">
+        <h3>Connectivity</h3>
+        
+        <div className="control-item">
+          <div className="control-info">
+            <label htmlFor="wifi-toggle">Wi-Fi</label>
+            <span className="control-status">
+              {deviceStates.wifi ? connectionStatus.wifi : 'disconnected'}
+            </span>
+          </div>
+          <Switch
+            id="wifi-toggle"
+            checked={deviceStates.wifi}
+            disabled={deviceStates.airplane}
+            onChange={handleDeviceToggle('wifi')}
+            onLabel="On"
+            offLabel="Off"
+          />
+        </div>
+
+        <div className="control-item">
+          <div className="control-info">
+            <label htmlFor="bluetooth-toggle">Bluetooth</label>
+            <span className="control-status">
+              {deviceStates.bluetooth ? connectionStatus.bluetooth : 'disconnected'}
+            </span>
+          </div>
+          <Switch
+            id="bluetooth-toggle"
+            checked={deviceStates.bluetooth}
+            disabled={deviceStates.airplane}
+            onChange={handleDeviceToggle('bluetooth')}
+            onLabel="On"
+            offLabel="Off"
+          />
+        </div>
+
+        <div className="control-item">
+          <div className="control-info">
+            <label htmlFor="airplane-toggle">Airplane Mode</label>
+            <span className="control-status">
+              {deviceStates.airplane ? 'All wireless disabled' : 'Wireless enabled'}
+            </span>
+          </div>
+          <Switch
+            id="airplane-toggle"
+            checked={deviceStates.airplane}
+            onChange={handleDeviceToggle('airplane')}
+            onLabel="Enabled"
+            offLabel="Disabled"
+          />
+        </div>
+      </div>
+
+      <div className="control-section">
+        <h3>Notifications</h3>
+        
+        <div className="control-item">
+          <div className="control-info">
+            <label htmlFor="notification-toggle">Notifications</label>
+            <span className="control-status">
+              {deviceStates.notification ? 'Allowed' : 'Blocked'}
+            </span>
+          </div>
+          <Switch
+            id="notification-toggle"
+            checked={deviceStates.notification}
+            disabled={deviceStates.doNotDisturb}
+            onChange={handleDeviceToggle('notification')}
+            onLabel="Allow"
+            offLabel="Block"
+          />
+        </div>
+
+        <div className="control-item">
+          <div className="control-info">
+            <label htmlFor="dnd-toggle">Do Not Disturb</label>
+            <span className="control-status">
+              {deviceStates.doNotDisturb ? 'Silence all' : 'Normal mode'}
+            </span>
+          </div>
+          <Switch
+            id="dnd-toggle"
+            checked={deviceStates.doNotDisturb}
+            onChange={handleDeviceToggle('doNotDisturb')}
+            onLabel="Silent"
+            offLabel="Normal"
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+```

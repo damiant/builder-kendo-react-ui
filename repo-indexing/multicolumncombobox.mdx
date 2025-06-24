@@ -1,0 +1,492 @@
+# MultiColumnComboBox Component
+
+## Overview
+
+### Purpose
+Use this component to generate multi-column combo box functionality
+
+### When to Use
+The MultiColumnComboBox is ideal for scenarios where you need to present data in a dropdown format with multiple columns for enhanced data visualization and selection. Common use cases include:
+
+- **Product catalogs** - Display products with name, price, category, and availability columns
+- **Employee directories** - Show employee details with name, department, role, and contact information
+- **Invoice line items** - Present items with description, quantity, unit price, and total columns
+- **Location selectors** - Display locations with city, state, country, and postal code information
+- **Customer lookup** - Show customer data with name, company, phone, and email in separate columns
+- **Complex data selection** - Any scenario where single-column dropdowns don't provide enough context for user decision-making
+
+### Architecture
+**No Coupling**: This is a standalone component that can be used independently without requiring other components. It provides a complete multi-column dropdown solution with built-in filtering, virtualization, and selection capabilities.
+
+## Components
+
+### MultiColumnComboBox
+
+**Purpose:** A dropdown component that displays data in a grid-like format with multiple columns, enabling users to select items while viewing comprehensive information in a structured layout.
+
+**Interface:**
+```typescript
+interface MultiColumnComboBoxProps {
+  // Data and columns
+  data: any[]; // Array of data items to populate the ComboBox
+  columns: MultiColumnComboBoxColumn[]; // Array defining the columns to display
+  textField: string; // Field of the data item that provides the text content
+  valueField: string; // Field of the data item that provides the value
+  
+  // Selection and value
+  value?: any; // The current value of the ComboBox
+  onChange?: (event: MultiColumnComboBoxChangeEvent) => void; // Callback when value changes
+  
+  // Filtering
+  filterable?: boolean; // Enable filtering of data items
+  onFilterChange?: (event: MultiColumnComboBoxFilterChangeEvent) => void; // Callback when filter changes
+  suggest?: boolean; // Automatically use first suggestion as value
+  
+  // Display customization
+  placeholder?: string; // Hint displayed when ComboBox is empty
+  itemRender?: (li: React.ReactElement<HTMLLIElement>, itemProps: any) => React.ReactNode; // Custom item rendering
+  valueRender?: (element: React.ReactElement<HTMLSpanElement>, value: any) => React.ReactNode; // Custom value rendering
+  
+  // Accessibility
+  ariaLabel?: string; // Accessible name for the ComboBox
+  ariaDescribedBy?: string; // ID of element describing the ComboBox
+  ariaLabelledBy?: string; // ID of element labeling the ComboBox
+  
+  // Behavior
+  disabled?: boolean; // Disable the ComboBox
+  clearButton?: boolean; // Display a clear button
+  
+  // Mobile/Adaptive
+  adaptive?: boolean; // Enable adaptive rendering for mobile devices
+  adaptiveTitle?: string; // Title displayed in adaptive popup
+  adaptiveSubtitle?: string; // Subtitle displayed in adaptive popup
+  
+  // Validation
+  valid?: boolean; // Validation state of the ComboBox
+  validationMessage?: string; // Validation message when invalid
+  validityStyles?: boolean; // Apply validity styles
+  
+  // Virtualization
+  virtual?: VirtualizationSettings; // Settings for virtualization
+  
+  // Styling
+  className?: string; // CSS class name
+  style?: React.CSSProperties; // Inline styles
+  
+  // Form attributes
+  id?: string; // HTML ID attribute
+  name?: string; // HTML name attribute
+  tabIndex?: number; // Tab index for keyboard navigation
+}
+
+interface MultiColumnComboBoxColumn {
+  field: string; // Field name in the data object
+  header?: string; // Column header text
+  width?: string | number; // Column width
+  uniqueKey?: string; // Unique identifier for the column
+}
+
+interface MultiColumnComboBoxChangeEvent {
+  value: any; // The new value
+  target: MultiColumnComboBox; // Reference to the component
+}
+
+interface MultiColumnComboBoxFilterChangeEvent {
+  filter: string; // The current filter value
+  target: MultiColumnComboBox; // Reference to the component
+}
+```
+
+**Usage Example:**
+```tsx
+import { MultiColumnComboBox } from '@progress/kendo-react-dropdowns';
+
+function Example() {
+  const [value, setValue] = React.useState(null);
+  
+  const products = [
+    { id: 1, name: 'Laptop Pro', category: 'Electronics', price: 1299.99, stock: 15 },
+    { id: 2, name: 'Wireless Mouse', category: 'Accessories', price: 29.99, stock: 150 },
+    { id: 3, name: 'Monitor 4K', category: 'Electronics', price: 399.99, stock: 25 }
+  ];
+
+  const columns = [
+    { field: 'name', header: 'Product Name', width: '200px' },
+    { field: 'category', header: 'Category', width: '120px' },
+    { field: 'price', header: 'Price', width: '100px' },
+    { field: 'stock', header: 'Stock', width: '80px' }
+  ];
+
+  return (
+    <MultiColumnComboBox
+      data={products}
+      columns={columns}
+      textField="name"
+      valueField="id"
+      value={value}
+      onChange={(e) => setValue(e.value)}
+      placeholder="Select a product..."
+      filterable={true}
+      clearButton={true}
+    />
+  );
+}
+```
+
+## Integration Patterns
+
+### Basic Data Display
+```tsx
+import { MultiColumnComboBox } from '@progress/kendo-react-dropdowns';
+
+// Simple multi-column display
+function BasicExample() {
+  const employees = [
+    { id: 1, name: 'John Doe', department: 'Engineering', role: 'Senior Developer' },
+    { id: 2, name: 'Jane Smith', department: 'Marketing', role: 'Product Manager' },
+    { id: 3, name: 'Bob Johnson', department: 'Sales', role: 'Account Executive' }
+  ];
+
+  const columns = [
+    { field: 'name', header: 'Name' },
+    { field: 'department', header: 'Department' },
+    { field: 'role', header: 'Role' }
+  ];
+
+  return (
+    <MultiColumnComboBox
+      data={employees}
+      columns={columns}
+      textField="name"
+      valueField="id"
+      placeholder="Select an employee..."
+    />
+  );
+}
+```
+
+### Advanced Filtering and Customization
+```tsx
+// Complex usage with filtering, custom rendering, and validation
+function AdvancedExample() {
+  const [selectedCustomer, setSelectedCustomer] = React.useState(null);
+  const [isValid, setIsValid] = React.useState(true);
+  
+  const customers = [
+    { 
+      id: 1, 
+      name: 'Acme Corp', 
+      contact: 'John Smith', 
+      email: 'john@acme.com',
+      phone: '+1-555-0123',
+      status: 'Active'
+    },
+    { 
+      id: 2, 
+      name: 'TechStart Inc', 
+      contact: 'Sarah Johnson', 
+      email: 'sarah@techstart.com',
+      phone: '+1-555-0456',
+      status: 'Pending'
+    }
+  ];
+
+  const columns = [
+    { field: 'name', header: 'Company', width: '150px' },
+    { field: 'contact', header: 'Contact', width: '120px' },
+    { field: 'email', header: 'Email', width: '180px' },
+    { field: 'status', header: 'Status', width: '80px' }
+  ];
+
+  const handleChange = (event) => {
+    setSelectedCustomer(event.value);
+    setIsValid(event.value !== null);
+  };
+
+  const customItemRender = (li, itemProps) => {
+    const customer = itemProps.dataItem;
+    return React.cloneElement(li, li.props, 
+      <div style={{ padding: '8px 12px' }}>
+        <div style={{ fontWeight: 'bold' }}>{customer.name}</div>
+        <div style={{ fontSize: '0.85em', color: '#666' }}>
+          {customer.contact} • {customer.email}
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <MultiColumnComboBox
+      data={customers}
+      columns={columns}
+      textField="name"
+      valueField="id"
+      value={selectedCustomer}
+      onChange={handleChange}
+      placeholder="Search customers..."
+      filterable={true}
+      suggest={true}
+      clearButton={true}
+      itemRender={customItemRender}
+      valid={isValid}
+      validationMessage={!isValid ? "Please select a customer" : ""}
+      validityStyles={true}
+      ariaLabel="Customer selection"
+    />
+  );
+}
+```
+
+### Form Integration
+```tsx
+import { MultiColumnComboBox } from '@progress/kendo-react-dropdowns';
+import { Label } from '@progress/kendo-react-labels';
+import { Button } from '@progress/kendo-react-buttons';
+
+// Integration within a form
+function FormExample() {
+  const [formData, setFormData] = React.useState({
+    productId: null,
+    quantity: 1
+  });
+
+  const products = [
+    { id: 'SKU001', name: 'Premium Headphones', category: 'Audio', price: 199.99, available: true },
+    { id: 'SKU002', name: 'Bluetooth Speaker', category: 'Audio', price: 89.99, available: true },
+    { id: 'SKU003', name: 'Gaming Keyboard', category: 'Gaming', price: 129.99, available: false }
+  ];
+
+  const columns = [
+    { field: 'name', header: 'Product', width: '200px' },
+    { field: 'category', header: 'Category', width: '100px' },
+    { field: 'price', header: 'Price', width: '80px' },
+    { field: 'available', header: 'Available', width: '80px' }
+  ];
+
+  const handleProductChange = (event) => {
+    setFormData(prev => ({ ...prev, productId: event.value }));
+  };
+
+  const handleSubmit = () => {
+    console.log('Form submitted:', formData);
+  };
+
+  return (
+    <form>
+      <div style={{ marginBottom: '16px' }}>
+        <Label>Product Selection:</Label>
+        <MultiColumnComboBox
+          data={products.filter(p => p.available)}
+          columns={columns}
+          textField="name"
+          valueField="id"
+          value={formData.productId}
+          onChange={handleProductChange}
+          placeholder="Choose a product..."
+          filterable={true}
+          name="product"
+          required
+        />
+      </div>
+      
+      <Button 
+        onClick={handleSubmit}
+        disabled={!formData.productId}
+        themeColor="primary"
+      >
+        Add to Cart
+      </Button>
+    </form>
+  );
+}
+```
+
+### Virtualization for Large Datasets
+```tsx
+// Handling large datasets with virtualization
+function VirtualizedExample() {
+  // Simulate large dataset
+  const largeDataset = React.useMemo(() => {
+    return Array.from({ length: 10000 }, (_, index) => ({
+      id: index + 1,
+      code: `ITEM${String(index + 1).padStart(5, '0')}`,
+      description: `Product Item ${index + 1}`,
+      category: `Category ${Math.floor(index / 100) + 1}`,
+      price: Math.round((Math.random() * 1000 + 10) * 100) / 100
+    }));
+  }, []);
+
+  const columns = [
+    { field: 'code', header: 'Code', width: '100px' },
+    { field: 'description', header: 'Description', width: '200px' },
+    { field: 'category', header: 'Category', width: '120px' },
+    { field: 'price', header: 'Price', width: '80px' }
+  ];
+
+  return (
+    <MultiColumnComboBox
+      data={largeDataset}
+      columns={columns}
+      textField="description"
+      valueField="id"
+      placeholder="Search from 10,000 items..."
+      filterable={true}
+      virtual={{
+        itemHeight: 36,
+        pageSize: 50
+      }}
+    />
+  );
+}
+```
+
+## Best Practices
+
+### Usage Guidelines
+- **Use meaningful column headers** to help users understand the data structure and make informed selections
+- **Limit column count** to 3-5 columns to avoid overwhelming users and maintain readability on different screen sizes
+- **Enable filtering** for datasets with more than 20 items to improve user experience and selection efficiency
+- **Set appropriate column widths** to ensure all important information is visible without horizontal scrolling
+- **Use virtualization** for datasets larger than 1000 items to maintain performance and responsiveness
+
+### Accessibility
+- **Provide descriptive aria labels** using `ariaLabel` to identify the purpose of the selection component
+- **Use proper form labels** when integrating with forms to establish clear relationships between labels and controls
+- **Include validation messages** with `validationMessage` to provide clear feedback for required fields or invalid selections
+- **Ensure keyboard navigation** works smoothly by testing tab order and arrow key navigation through options
+- **Consider screen reader support** by providing meaningful `textField` values that will be announced when items are focused
+
+### Performance
+- **Implement virtualization** for large datasets using the `virtual` prop to prevent DOM bloat and maintain smooth scrolling
+- **Optimize filtering** by implementing server-side filtering for very large datasets instead of client-side filtering
+- **Use stable keys** in your data objects to help React efficiently update and render list items
+- **Minimize re-renders** by memoizing column definitions and event handlers when they don't change between renders
+- **Consider pagination** for extremely large datasets combined with server-side filtering for optimal performance
+
+## Common Patterns
+
+### Pattern 1: Master-Detail Selection
+```tsx
+// Using MultiColumnComboBox for master-detail scenarios
+function MasterDetailExample() {
+  const [selectedOrder, setSelectedOrder] = React.useState(null);
+  const [orderDetails, setOrderDetails] = React.useState([]);
+
+  const orders = [
+    { id: 'ORD001', customer: 'Acme Corp', date: '2024-01-15', total: 1250.00, status: 'Shipped' },
+    { id: 'ORD002', customer: 'Tech Solutions', date: '2024-01-16', total: 890.50, status: 'Processing' }
+  ];
+
+  const orderColumns = [
+    { field: 'id', header: 'Order #', width: '100px' },
+    { field: 'customer', header: 'Customer', width: '150px' },
+    { field: 'date', header: 'Date', width: '100px' },
+    { field: 'total', header: 'Total', width: '100px' },
+    { field: 'status', header: 'Status', width: '100px' }
+  ];
+
+  const handleOrderSelection = (event) => {
+    setSelectedOrder(event.value);
+    // Fetch order details based on selection
+    fetchOrderDetails(event.value);
+  };
+
+  const fetchOrderDetails = (orderId) => {
+    // Simulate API call to get order details
+    console.log('Fetching details for order:', orderId);
+  };
+
+  return (
+    <div>
+      <MultiColumnComboBox
+        data={orders}
+        columns={orderColumns}
+        textField="id"
+        valueField="id"
+        value={selectedOrder}
+        onChange={handleOrderSelection}
+        placeholder="Select an order to view details..."
+        filterable={true}
+      />
+      
+      {selectedOrder && (
+        <div style={{ marginTop: '20px', padding: '16px', border: '1px solid #ccc' }}>
+          <h3>Order Details for {selectedOrder}</h3>
+          {/* Order details would be displayed here */}
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+### Pattern 2: Cascading Selection
+```tsx
+// Implementing cascading dropdowns with MultiColumnComboBox
+function CascadingExample() {
+  const [selectedCategory, setSelectedCategory] = React.useState(null);
+  const [products, setProducts] = React.useState([]);
+
+  const categories = [
+    { id: 1, name: 'Electronics', description: 'Electronic devices and accessories' },
+    { id: 2, name: 'Clothing', description: 'Apparel and fashion items' },
+    { id: 3, name: 'Books', description: 'Books and educational materials' }
+  ];
+
+  const categoryColumns = [
+    { field: 'name', header: 'Category', width: '120px' },
+    { field: 'description', header: 'Description', width: '200px' }
+  ];
+
+  const productColumns = [
+    { field: 'name', header: 'Product', width: '150px' },
+    { field: 'brand', header: 'Brand', width: '100px' },
+    { field: 'price', header: 'Price', width: '80px' }
+  ];
+
+  const handleCategoryChange = (event) => {
+    setSelectedCategory(event.value);
+    // Load products for selected category
+    loadProductsForCategory(event.value);
+  };
+
+  const loadProductsForCategory = (categoryId) => {
+    // Simulate loading products based on category
+    const mockProducts = [
+      { id: 1, name: 'Smartphone', brand: 'TechBrand', price: 699.99 },
+      { id: 2, name: 'Laptop', brand: 'CompBrand', price: 1299.99 }
+    ];
+    setProducts(mockProducts);
+  };
+
+  return (
+    <div>
+      <div style={{ marginBottom: '16px' }}>
+        <Label>Category:</Label>
+        <MultiColumnComboBox
+          data={categories}
+          columns={categoryColumns}
+          textField="name"
+          valueField="id"
+          value={selectedCategory}
+          onChange={handleCategoryChange}
+          placeholder="Select a category..."
+        />
+      </div>
+      
+      <div>
+        <Label>Product:</Label>
+        <MultiColumnComboBox
+          data={products}
+          columns={productColumns}
+          textField="name"
+          valueField="id"
+          placeholder={selectedCategory ? "Select a product..." : "Please select a category first"}
+          disabled={!selectedCategory}
+          filterable={true}
+        />
+      </div>
+    </div>
+  );
+}
+```

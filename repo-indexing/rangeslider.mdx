@@ -1,0 +1,459 @@
+# RangeSlider Components
+
+## Overview
+
+### Purpose
+Use this component to generate range slider functionality
+
+### When to Use
+The RangeSlider component is ideal for collecting dual-value numeric input where users need to select a range between two values. Use this component when you need to:
+
+- Allow users to select a price range for product filtering (e.g., $100 - $500)
+- Set time ranges for scheduling or booking applications
+- Define data visualization ranges for charts and analytics
+- Configure numeric ranges for search filters and data queries
+- Create audio/video trimming controls with start and end points
+- Set performance thresholds with minimum and maximum values
+- Build responsive slider controls that work on both desktop and mobile devices
+- Provide accessible range selection with keyboard navigation support
+
+### Architecture
+**No Coupling**: The RangeSlider is a standalone component that can be used independently without requiring other components. It optionally supports SliderLabel child components for enhanced labeling and tick marks.
+
+### Component Interdependencies
+The RangeSlider component works independently but can be enhanced with:
+
+- **SliderLabel** (Optional): Can be used as children to provide labels and tick marks at specific positions
+- **Form validation components** (Optional): Can integrate with form validation systems
+- **Accessibility components** (Optional): Can work with aria-describedby elements for enhanced accessibility
+
+## Components
+
+### RangeSlider {Standalone Component}
+A dual-handle slider component that allows users to select a range of values between defined minimum and maximum bounds.
+
+**Purpose:** Provides an intuitive interface for selecting numeric ranges with visual feedback, keyboard accessibility, and customizable step increments.
+
+**Interface:**
+```typescript
+interface RangeSliderProps extends FormComponentProps {
+  // Core functionality
+  min: number; // Required - minimum possible value
+  max: number; // Required - maximum possible value
+  value?: Range; // Current range value (controlled)
+  defaultValue?: Range; // Initial range value (uncontrolled)
+  onChange?: (event: RangeSliderChangeEvent) => void; // Value change handler
+  
+  // Behavior configuration
+  step?: number; // Step increment for arrow keys (default: 1)
+  largeStep?: number; // Step increment for page up/down (default: 10)
+  vertical?: boolean; // Orientation (default: false - horizontal)
+  disabled?: boolean; // Disable interaction
+  dir?: Direction; // Text direction ('ltr' | 'rtl')
+  
+  // Styling and layout
+  id?: string; // Element ID
+  className?: string; // Additional CSS classes
+  style?: React.CSSProperties; // Inline styles
+  children?: React.ReactNode; // SliderLabel components
+  
+  // Accessibility
+  startTabIndex?: number; // Tab index for start handle
+  endTabIndex?: number; // Tab index for end handle
+  ariaDescribedBy?: string; // Reference to describing elements
+  ariaLabelledBy?: string; // Reference to labeling elements
+}
+
+// Range value type
+interface Range {
+  start: number; // Start of the range
+  end: number; // End of the range
+}
+
+// Change event interface
+interface RangeSliderChangeEvent {
+  value: Range; // New range value
+  target: RangeSliderHandle; // Component reference
+  syntheticEvent: React.SyntheticEvent | DraggableDragEvent; // Original event
+}
+```
+
+**Usage Example:**
+```tsx
+import { RangeSlider } from '@progress/kendo-react-inputs';
+
+function PriceRangeFilter() {
+  const [priceRange, setPriceRange] = React.useState({ start: 100, end: 500 });
+
+  const handleRangeChange = (event) => {
+    setPriceRange(event.value);
+    console.log(`Price range: $${event.value.start} - $${event.value.end}`);
+  };
+
+  return (
+    <RangeSlider
+      min={0}
+      max={1000}
+      value={priceRange}
+      onChange={handleRangeChange}
+      step={10}
+      largeStep={50}
+      ariaLabelledBy="price-range-label"
+    />
+  );
+}
+```
+
+### SliderLabel {Enhancement Component}
+An optional child component that provides labels and tick marks at specific positions on the slider track.
+
+**Purpose:** Adds visual reference points and labels to help users understand the scale and select precise values on the range slider.
+
+**Interface:**
+```typescript
+interface SliderLabelProps {
+  position: number; // Required - position value on the slider scale
+  onClick?: (event: React.MouseEvent<HTMLLIElement>) => void; // Click handler
+  title?: string; // Tooltip text
+  children?: React.ReactNode; // Label content
+}
+```
+
+**Parent Requirements:** Must be used as a child of RangeSlider for proper positioning and styling
+
+**Usage Example:**
+```tsx
+import { RangeSlider, SliderLabel } from '@progress/kendo-react-inputs';
+
+// Enhanced range slider with labeled tick marks
+<RangeSlider min={0} max={100} step={10}>
+  <SliderLabel position={0}>0%</SliderLabel>
+  <SliderLabel position={25}>25%</SliderLabel>
+  <SliderLabel position={50}>50%</SliderLabel>
+  <SliderLabel position={75}>75%</SliderLabel>
+  <SliderLabel position={100}>100%</SliderLabel>
+</RangeSlider>
+```
+
+## Integration Patterns
+
+### Basic Usage
+```tsx
+import { RangeSlider } from '@progress/kendo-react-inputs';
+
+// Minimal required structure
+function BasicRangeSlider() {
+  const [range, setRange] = React.useState({ start: 20, end: 80 });
+
+  return (
+    <RangeSlider
+      min={0}
+      max={100}
+      value={range}
+      onChange={(event) => setRange(event.value)}
+    />
+  );
+}
+```
+
+### Advanced Usage
+```tsx
+import { RangeSlider, SliderLabel } from '@progress/kendo-react-inputs';
+
+// Complex usage with all features
+function AdvancedRangeSlider() {
+  const [range, setRange] = React.useState({ start: 25, end: 75 });
+  const [isVertical, setIsVertical] = React.useState(false);
+
+  const handleChange = (event) => {
+    setRange(event.value);
+    // Trigger additional logic like API calls or validation
+  };
+
+  return (
+    <div>
+      <label id="temperature-range">Temperature Range (°C)</label>
+      <RangeSlider
+        min={-10}
+        max={40}
+        value={range}
+        onChange={handleChange}
+        step={1}
+        largeStep={5}
+        vertical={isVertical}
+        ariaLabelledBy="temperature-range"
+        ariaDescribedBy="temperature-help"
+        className="temperature-slider"
+      >
+        <SliderLabel position={-10}>-10°C</SliderLabel>
+        <SliderLabel position={0}>0°C</SliderLabel>
+        <SliderLabel position={20}>20°C</SliderLabel>
+        <SliderLabel position={40}>40°C</SliderLabel>
+      </RangeSlider>
+      <div id="temperature-help">
+        Selected range: {range.start}°C to {range.end}°C
+      </div>
+    </div>
+  );
+}
+```
+
+### Common Variations
+
+#### Price Range Filter
+```tsx
+// E-commerce price filtering with currency formatting
+function PriceRangeFilter() {
+  const [priceRange, setPriceRange] = React.useState({ start: 50, end: 200 });
+
+  const formatPrice = (value) => `$${value}`;
+
+  return (
+    <div className="price-filter">
+      <h3>Price Range</h3>
+      <RangeSlider
+        min={0}
+        max={500}
+        value={priceRange}
+        onChange={(event) => setPriceRange(event.value)}
+        step={5}
+        largeStep={25}
+      >
+        <SliderLabel position={0}>{formatPrice(0)}</SliderLabel>
+        <SliderLabel position={100}>{formatPrice(100)}</SliderLabel>
+        <SliderLabel position={250}>{formatPrice(250)}</SliderLabel>
+        <SliderLabel position={500}>{formatPrice(500)}</SliderLabel>
+      </RangeSlider>
+      <div className="price-display">
+        {formatPrice(priceRange.start)} - {formatPrice(priceRange.end)}
+      </div>
+    </div>
+  );
+}
+```
+
+#### Time Range Selector
+```tsx
+// Time range selection for scheduling
+function TimeRangeSelector() {
+  const [timeRange, setTimeRange] = React.useState({ start: 9, end: 17 });
+
+  const formatTime = (hour) => {
+    const period = hour >= 12 ? 'PM' : 'AM';
+    const displayHour = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
+    return `${displayHour}:00 ${period}`;
+  };
+
+  return (
+    <div className="time-selector">
+      <label>Available Hours</label>
+      <RangeSlider
+        min={0}
+        max={23}
+        value={timeRange}
+        onChange={(event) => setTimeRange(event.value)}
+        step={1}
+        largeStep={4}
+      >
+        <SliderLabel position={0}>{formatTime(0)}</SliderLabel>
+        <SliderLabel position={6}>{formatTime(6)}</SliderLabel>
+        <SliderLabel position={12}>{formatTime(12)}</SliderLabel>
+        <SliderLabel position={18}>{formatTime(18)}</SliderLabel>
+        <SliderLabel position={23}>{formatTime(23)}</SliderLabel>
+      </RangeSlider>
+      <p>
+        Available from {formatTime(timeRange.start)} to {formatTime(timeRange.end)}
+      </p>
+    </div>
+  );
+}
+```
+
+#### Vertical Range Slider
+```tsx
+// Vertical range slider for mobile-friendly layouts
+function VerticalRangeSlider() {
+  const [volumeRange, setVolumeRange] = React.useState({ start: 20, end: 80 });
+
+  return (
+    <div className="volume-control" style={{ height: '300px' }}>
+      <label>Volume Range</label>
+      <RangeSlider
+        min={0}
+        max={100}
+        value={volumeRange}
+        onChange={(event) => setVolumeRange(event.value)}
+        vertical={true}
+        step={5}
+        largeStep={20}
+      >
+        <SliderLabel position={0}>Silent</SliderLabel>
+        <SliderLabel position={50}>Medium</SliderLabel>
+        <SliderLabel position={100}>Max</SliderLabel>
+      </RangeSlider>
+    </div>
+  );
+}
+```
+
+## Best Practices
+
+### Usage Guidelines
+- Always provide meaningful min and max values that reflect the actual data range users need to select
+- Use appropriate step values - smaller steps for precise control, larger steps for broad selections
+- Consider using SliderLabel components to provide context and reference points for users
+- Set reasonable default values that represent common use cases for your application
+- Ensure sufficient contrast and size for drag handles, especially on mobile devices
+
+### Accessibility
+- Always provide descriptive labels using ariaLabelledBy to identify the purpose of the range slider
+- Use ariaDescribedBy to reference help text or current value descriptions
+- Ensure keyboard navigation works smoothly with appropriate step and largeStep values
+- Test with screen readers to verify that range changes are announced clearly
+- Consider providing alternative text input fields for users who prefer precise numeric entry
+- Maintain focus management when the component is part of a larger form
+
+### Performance
+- Use controlled components (value prop) when you need to validate or transform range values
+- Use uncontrolled components (defaultValue) for simpler cases to reduce re-renders
+- Debounce onChange handlers when making API calls or expensive operations based on range changes
+- Avoid excessive re-rendering by memoizing change handlers and child components
+- Consider virtualization for sliders with many SliderLabel components
+
+## Common Patterns
+
+### Pattern 1: Form Integration with Validation
+```tsx
+// Range slider with form validation and error handling
+function ValidatedRangeForm() {
+  const [range, setRange] = React.useState({ start: 10, end: 90 });
+  const [error, setError] = React.useState('');
+
+  const handleRangeChange = (event) => {
+    const newRange = event.value;
+    const rangeSize = newRange.end - newRange.start;
+    
+    if (rangeSize < 10) {
+      setError('Range must be at least 10 units wide');
+    } else if (rangeSize > 80) {
+      setError('Range cannot exceed 80 units');
+    } else {
+      setError('');
+    }
+    
+    setRange(newRange);
+  };
+
+  return (
+    <div className="validated-range-form">
+      <label id="data-range-label">Data Range Selection</label>
+      <RangeSlider
+        min={0}
+        max={100}
+        value={range}
+        onChange={handleRangeChange}
+        step={1}
+        largeStep={10}
+        ariaLabelledBy="data-range-label"
+        ariaDescribedBy={error ? "range-error" : "range-help"}
+        className={error ? 'has-error' : ''}
+      />
+      {error ? (
+        <div id="range-error" className="error-message" role="alert">
+          {error}
+        </div>
+      ) : (
+        <div id="range-help" className="help-text">
+          Select a range between {range.start} and {range.end}
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+### Pattern 2: Real-time Data Filtering
+```tsx
+// Range slider that filters data in real-time
+function DataFilterSlider({ data, onDataFilter }) {
+  const [ageRange, setAgeRange] = React.useState({ start: 18, end: 65 });
+  
+  // Debounced filtering to avoid excessive API calls
+  const debouncedFilter = React.useMemo(
+    () => debounce((range) => {
+      const filteredData = data.filter(
+        item => item.age >= range.start && item.age <= range.end
+      );
+      onDataFilter(filteredData);
+    }, 300),
+    [data, onDataFilter]
+  );
+
+  React.useEffect(() => {
+    debouncedFilter(ageRange);
+  }, [ageRange, debouncedFilter]);
+
+  return (
+    <div className="data-filter">
+      <h3>Filter by Age</h3>
+      <RangeSlider
+        min={0}
+        max={100}
+        value={ageRange}
+        onChange={(event) => setAgeRange(event.value)}
+        step={1}
+        largeStep={5}
+      >
+        <SliderLabel position={0}>0</SliderLabel>
+        <SliderLabel position={25}>25</SliderLabel>
+        <SliderLabel position={50}>50</SliderLabel>
+        <SliderLabel position={75}>75</SliderLabel>
+        <SliderLabel position={100}>100+</SliderLabel>
+      </RangeSlider>
+      <div className="filter-summary">
+        Showing ages {ageRange.start} - {ageRange.end}
+      </div>
+    </div>
+  );
+}
+```
+
+### Pattern 3: Responsive Range Slider
+```tsx
+// Range slider that adapts to different screen sizes
+function ResponsiveRangeSlider() {
+  const [isMobile, setIsMobile] = React.useState(false);
+  const [range, setRange] = React.useState({ start: 300, end: 700 });
+
+  React.useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  return (
+    <div className={`responsive-slider ${isMobile ? 'mobile' : 'desktop'}`}>
+      <label>Budget Range</label>
+      <RangeSlider
+        min={0}
+        max={1000}
+        value={range}
+        onChange={(event) => setRange(event.value)}
+        step={isMobile ? 25 : 10} // Larger steps on mobile for easier touch interaction
+        largeStep={isMobile ? 100 : 50}
+        vertical={isMobile} // Vertical orientation on mobile
+      >
+        <SliderLabel position={0}>$0</SliderLabel>
+        {!isMobile && <SliderLabel position={250}>$250</SliderLabel>}
+        <SliderLabel position={500}>$500</SliderLabel>
+        {!isMobile && <SliderLabel position={750}>$750</SliderLabel>}
+        <SliderLabel position={1000}>$1000+</SliderLabel>
+      </RangeSlider>
+      <div className="range-display">
+        Budget: ${range.start} - ${range.end}
+      </div>
+    </div>
+  );
+}
+```

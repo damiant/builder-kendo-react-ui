@@ -1,0 +1,405 @@
+# TileLayout Component
+
+## Overview
+
+### Purpose
+Use this component to generate tile layout functionality
+
+### When to Use
+The TileLayout component is ideal for creating dashboard-style layouts, widget galleries, or any interface that requires a flexible grid system with:
+- **Dynamic tile positioning** - Users can drag and drop tiles to reorder them
+- **Resizable tiles** - Tiles can be resized horizontally, vertically, or both directions
+- **Responsive grid layout** - Automatically adapts to different container sizes
+- **Interactive dashboards** - Perfect for business intelligence dashboards, admin panels, and customizable workspaces
+- **Card-based interfaces** - Organizing content cards in a flexible, user-controllable layout
+- **Widget systems** - Building configurable widget layouts where users can arrange components
+
+### Architecture
+**No Coupling**: This is a standalone component that operates independently without requiring other specific components to function.
+
+The TileLayout uses a CSS Grid-based layout system that automatically positions tiles based on their configuration, supports drag-and-drop reordering, and enables resizing functionality. It manages tile positions internally and provides events for external state synchronization.
+
+## Components
+
+### TileLayout
+
+**Purpose:** A flexible grid layout component that allows users to arrange, resize, and reorder tiles through drag and drop interactions.
+
+**Interface:**
+```typescript
+interface TileLayoutProps {
+  // Basic configuration
+  id?: string; // Sets the id property of the root element
+  style?: React.CSSProperties; // Additional CSS styles
+  className?: string; // Additional CSS classes
+  dir?: string; // Text direction for RTL support
+
+  // Layout configuration
+  columns?: number; // Default number of columns
+  columnWidth?: number | string; // Default width of columns
+  rowHeight?: number | string; // Default height of rows
+  gap?: TileLayoutGap; // Gaps between tiles
+  autoFlow?: TileLayoutAutoFlow; // Auto-placement algorithm direction
+
+  // Data and positioning
+  items?: TileLayoutItem[]; // Collection of items to render
+  positions?: TilePosition[]; // Controlled mode positions
+  dataItemKey?: string; // Key field for unique tile identification
+
+  // Event handlers
+  onReposition?: (event: TileLayoutRepositionEvent) => void; // Fires when tiles are repositioned
+  ignoreDrag?: (event: any) => boolean; // Control which elements can be dragged
+}
+
+interface TileLayoutGap {
+  rows?: number | string; // Gap between rows (default: 16px)
+  columns?: number | string; // Gap between columns (default: 16px)
+}
+
+interface TileLayoutItem {
+  // Content
+  header?: React.ReactNode; // Title in the tile header
+  body?: React.ReactNode; // Content in the tile body
+  item?: React.ReactNode; // Custom rendering override
+
+  // Positioning
+  defaultPosition?: TilePosition; // Initial position for uncontrolled mode
+
+  // Styling
+  style?: React.CSSProperties; // Additional tile styles
+  className?: string; // Additional tile classes
+  hintStyle?: React.CSSProperties; // Hint element styles during drag
+  hintClassName?: string; // Hint element classes during drag
+
+  // Interaction
+  resizable?: TileResizeMode; // Enable/configure resizing
+  reorderable?: boolean; // Enable/disable reordering
+}
+
+interface TilePosition {
+  order?: number; // Order index for sequential arrangement
+  col: number; // Starting column (required)
+  row?: number; // Starting row
+  colSpan?: number; // Number of columns to span (default: 1)
+  rowSpan?: number; // Number of rows to span (default: 1)
+}
+
+type TileLayoutAutoFlow = 'column' | 'row' | 'column dense' | 'row dense' | 'unset';
+type TileResizeMode = 'horizontal' | 'vertical' | boolean;
+```
+
+**Usage Example:**
+```tsx
+import { TileLayout } from '@progress/kendo-react-layout';
+
+function BasicTileLayoutExample() {
+  const [items] = useState([
+    {
+      header: 'Tile 1',
+      body: <div>Content for tile 1</div>,
+      defaultPosition: { col: 1, row: 1 }
+    },
+    {
+      header: 'Tile 2', 
+      body: <div>Content for tile 2</div>,
+      defaultPosition: { col: 2, row: 1, colSpan: 2 }
+    },
+    {
+      header: 'Tile 3',
+      body: <div>Content for tile 3</div>,
+      defaultPosition: { col: 1, row: 2, rowSpan: 2 }
+    }
+  ]);
+
+  return (
+    <TileLayout
+      columns={4}
+      rowHeight={100}
+      gap={{ rows: 10, columns: 10 }}
+      items={items}
+      onReposition={(e) => console.log('New positions:', e.value)}
+    />
+  );
+}
+```
+
+## Integration Patterns
+
+### Basic Usage
+```tsx
+import { TileLayout } from '@progress/kendo-react-layout';
+
+// Simple static layout
+function StaticTileLayout() {
+  const items = [
+    { header: 'Header 1', body: 'Body content 1' },
+    { header: 'Header 2', body: 'Body content 2' },
+    { header: 'Header 3', body: 'Body content 3' }
+  ];
+
+  return (
+    <TileLayout
+      columns={3}
+      rowHeight={150}
+      items={items}
+    />
+  );
+}
+```
+
+### Controlled Mode with State Management
+```tsx
+import { TileLayout } from '@progress/kendo-react-layout';
+import { useState } from 'react';
+
+function ControlledTileLayout() {
+  const [items] = useState([
+    { header: 'Dashboard', body: <DashboardWidget /> },
+    { header: 'Analytics', body: <AnalyticsWidget /> },
+    { header: 'Reports', body: <ReportsWidget /> }
+  ]);
+
+  const [positions, setPositions] = useState([
+    { col: 1, row: 1, colSpan: 2, rowSpan: 1, order: 0 },
+    { col: 3, row: 1, colSpan: 1, rowSpan: 2, order: 1 },
+    { col: 1, row: 2, colSpan: 2, rowSpan: 1, order: 2 }
+  ]);
+
+  const handleReposition = (e) => {
+    setPositions(e.value);
+    // Optionally save to backend
+    savePositionsToServer(e.value);
+  };
+
+  return (
+    <TileLayout
+      columns={4}
+      columnWidth={200}
+      rowHeight={150}
+      gap={{ rows: 16, columns: 16 }}
+      items={items}
+      positions={positions}
+      onReposition={handleReposition}
+    />
+  );
+}
+```
+
+### Advanced Configuration with Custom Rendering
+```tsx
+import { TileLayout } from '@progress/kendo-react-layout';
+
+function AdvancedTileLayout() {
+  const items = [
+    {
+      item: ( // Custom rendering
+        <div className="custom-tile">
+          <h3>Custom Tile</h3>
+          <p>This tile uses custom rendering</p>
+          <button>Action</button>
+        </div>
+      ),
+      defaultPosition: { col: 1, row: 1, colSpan: 2 },
+      resizable: 'horizontal', // Only horizontal resizing
+      className: 'custom-tile-class'
+    },
+    {
+      header: 'Non-reorderable Tile',
+      body: <div>This tile cannot be moved</div>,
+      defaultPosition: { col: 3, row: 1 },
+      reorderable: false, // Disable reordering
+      resizable: false // Disable resizing
+    },
+    {
+      header: 'Input Form',
+      body: (
+        <form>
+          <input type="text" placeholder="Name" />
+          <input type="email" placeholder="Email" />
+          <button type="submit">Submit</button>
+        </form>
+      ),
+      defaultPosition: { col: 1, row: 2, colSpan: 3 },
+      hintClassName: 'form-tile-hint'
+    }
+  ];
+
+  const handleIgnoreDrag = (e) => {
+    // Prevent dragging when interacting with form elements
+    return e.target.nodeName === 'INPUT' || 
+           e.target.nodeName === 'BUTTON' ||
+           e.target.nodeName === 'SELECT';
+  };
+
+  return (
+    <TileLayout
+      columns={4}
+      columnWidth="minmax(200px, 1fr)"
+      rowHeight="auto"
+      autoFlow="row dense"
+      gap={{ rows: 20, columns: 20 }}
+      items={items}
+      ignoreDrag={handleIgnoreDrag}
+      onReposition={(e) => {
+        console.log('Tiles repositioned:', e.value);
+      }}
+    />
+  );
+}
+```
+
+## Best Practices
+
+### Usage Guidelines
+- **Use controlled mode for persistent layouts** - When tile positions need to be saved and restored, use the `positions` prop with state management
+- **Implement proper key management** - Use the `dataItemKey` prop to ensure stable tile identification across re-renders
+- **Configure appropriate grid constraints** - Set reasonable `columns`, `columnWidth`, and `rowHeight` values based on your content and container size
+- **Handle resize events appropriately** - Debounce or throttle position update callbacks to avoid excessive re-renders during drag operations
+
+### Accessibility
+- **Keyboard navigation** - The component supports keyboard navigation for reordering tiles using arrow keys and spacebar
+- **ARIA attributes** - Tiles automatically receive appropriate ARIA roles and labels for screen readers
+- **Focus management** - Focus is properly managed during drag and drop operations
+
+### Performance
+- **Optimize repositioning callbacks** - Use `useCallback` for `onReposition` handlers to prevent unnecessary re-renders
+- **Minimize tile content complexity** - Keep tile content lightweight to maintain smooth drag and resize operations  
+- **Use CSS transforms for animations** - The component uses CSS transforms for optimal performance during interactions
+
+## Common Patterns
+
+### Pattern 1: Dashboard Layout
+```tsx
+// Dashboard with different widget types and sizes
+function DashboardLayout() {
+  const widgets = [
+    {
+      header: 'Sales Overview',
+      body: <SalesChart />,
+      defaultPosition: { col: 1, row: 1, colSpan: 2, rowSpan: 2 }
+    },
+    {
+      header: 'Quick Stats',
+      body: <StatsWidget />,
+      defaultPosition: { col: 3, row: 1, colSpan: 1, rowSpan: 1 }
+    },
+    {
+      header: 'Recent Activity',
+      body: <ActivityFeed />,
+      defaultPosition: { col: 3, row: 2, colSpan: 1, rowSpan: 2 }
+    },
+    {
+      header: 'Performance Metrics',
+      body: <MetricsTable />,
+      defaultPosition: { col: 1, row: 3, colSpan: 2, rowSpan: 1 }
+    }
+  ];
+
+  return (
+    <div className="dashboard-container">
+      <TileLayout
+        columns={3}
+        columnWidth="1fr"
+        rowHeight={200}
+        gap={{ rows: 16, columns: 16 }}
+        items={widgets}
+        style={{ height: '100vh' }}
+      />
+    </div>
+  );
+}
+```
+
+### Pattern 2: Responsive Card Gallery
+```tsx
+// Responsive gallery that adapts to screen size
+function ResponsiveCardGallery() {
+  const [columns, setColumns] = useState(4);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+      if (width < 768) setColumns(1);
+      else if (width < 1024) setColumns(2);
+      else if (width < 1200) setColumns(3);
+      else setColumns(4);
+    };
+
+    window.addEventListener('resize', handleResize);
+    handleResize(); // Initial call
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const galleryItems = photos.map((photo, index) => ({
+    item: (
+      <div className="photo-card">
+        <img src={photo.url} alt={photo.title} />
+        <h4>{photo.title}</h4>
+        <p>{photo.description}</p>
+      </div>
+    ),
+    defaultPosition: { 
+      col: (index % columns) + 1, 
+      row: Math.floor(index / columns) + 1 
+    }
+  }));
+
+  return (
+    <TileLayout
+      columns={columns}
+      columnWidth="minmax(250px, 1fr)"
+      rowHeight="auto"
+      gap={{ rows: 20, columns: 20 }}
+      items={galleryItems}
+      autoFlow="row"
+    />
+  );
+}
+```
+
+### Pattern 3: Form Layout with Mixed Content
+```tsx
+// Mixed content layout with forms and displays
+function MixedContentLayout() {
+  const sections = [
+    {
+      header: 'User Profile',
+      body: (
+        <form className="profile-form">
+          <input type="text" placeholder="First Name" />
+          <input type="text" placeholder="Last Name" />
+          <input type="email" placeholder="Email" />
+        </form>
+      ),
+      defaultPosition: { col: 1, row: 1, colSpan: 2 },
+      resizable: 'vertical'
+    },
+    {
+      header: 'Settings',
+      body: <SettingsPanel />,
+      defaultPosition: { col: 3, row: 1 },
+      resizable: false
+    },
+    {
+      header: 'Recent Documents',
+      body: <DocumentList />,
+      defaultPosition: { col: 1, row: 2, colSpan: 3 },
+      reorderable: false // Keep at bottom
+    }
+  ];
+
+  return (
+    <TileLayout
+      columns={3}
+      columnWidth={300}
+      rowHeight="auto"
+      gap={{ rows: 24, columns: 24 }}
+      items={sections}
+      ignoreDrag={(e) => {
+        // Don't drag when interacting with form elements
+        return ['INPUT', 'SELECT', 'BUTTON', 'TEXTAREA'].includes(e.target.nodeName);
+      }}
+    />
+  );
+}
+```

@@ -1,0 +1,426 @@
+# DateInput Component
+
+## Overview
+
+### Purpose
+Use this component to generate date input functionality
+
+### When to Use
+The DateInput component is ideal for scenarios where users need to enter dates in a structured format with optional validation and formatting constraints. Use DateInput when you need:
+
+- **Form date collection** - Gathering birth dates, appointment dates, or event dates in forms
+- **Date range constraints** - When specific minimum or maximum date boundaries are required
+- **Formatted date entry** - When dates need to follow specific formatting patterns (e.g., MM/dd/yyyy, yyyy-MM-dd)
+- **Accessible date input** - When keyboard navigation and screen reader support are essential
+- **Real-time validation** - When immediate feedback on date validity is needed during user input
+- **Spinner controls** - When users benefit from incremental date adjustment using spin buttons
+- **Internationalization** - When date formats need to adapt to different locales and languages
+
+### Architecture
+**No Coupling**: DateInput is a standalone component that operates independently without requiring other components. It provides a complete date input solution with built-in validation, formatting, and accessibility features.
+
+## Components
+
+### DateInput
+
+**Purpose:** Provides a comprehensive date input control with formatting, validation, and accessibility features for collecting date values from users.
+
+**Interface:**
+```typescript
+interface DateInputProps {
+  // Value and change handling
+  value?: Date | null; // The current date value
+  onChange?: (event: DateInputChangeEvent) => void; // Callback when date changes
+  defaultValue?: Date | null; // Initial date value for uncontrolled usage
+  
+  // Date constraints
+  min?: Date; // Minimum allowable date
+  max?: Date; // Maximum allowable date
+  
+  // Formatting and display
+  format?: string | DateInputFormat; // Date display format (e.g., 'yyyy-MM-dd', 'MM/dd/yyyy')
+  formatPlaceholder?: FormatPlaceholder; // Placeholder format style
+  
+  // UI features
+  spinners?: boolean; // Enable/disable spin buttons for date adjustment
+  disabled?: boolean; // Disable the entire component
+  readonly?: boolean; // Make the input read-only
+  
+  // Validation
+  required?: boolean; // Mark field as required
+  valid?: boolean; // Override validation state
+  validationMessage?: string; // Custom validation message
+  validate?: boolean; // Enable built-in validation
+  
+  // Event handlers
+  onFocus?: (event: DateInputFocusEvent) => void; // Callback when input gains focus
+  onBlur?: (event: DateInputBlurEvent) => void; // Callback when input loses focus
+  
+  // Accessibility
+  id?: string; // Unique identifier
+  name?: string; // Form field name
+  ariaLabelledBy?: string; // Reference to labeling element
+  ariaDescribedBy?: string; // Reference to describing element
+  label?: string; // Accessible label text
+  
+  // Styling
+  className?: string; // Custom CSS classes
+  style?: React.CSSProperties; // Inline styles
+  dir?: 'ltr' | 'rtl'; // Text direction for internationalization
+  
+  // Form integration
+  tabIndex?: number; // Tab order position
+}
+
+interface DateInputChangeEvent {
+  value: Date | null; // The new date value
+  target: DateInput; // Reference to the component instance
+}
+
+interface DateInputFocusEvent {
+  target: DateInput; // Reference to the component instance
+}
+
+interface DateInputBlurEvent {
+  target: DateInput; // Reference to the component instance
+}
+```
+
+**Usage Example:**
+```tsx
+import { DateInput } from '@progress/kendo-react-dateinputs';
+import { useState } from 'react';
+
+function BasicDateInput() {
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+
+  return (
+    <DateInput
+      value={selectedDate}
+      onChange={(event) => setSelectedDate(event.value)}
+      format="MM/dd/yyyy"
+      placeholder="Select a date..."
+    />
+  );
+}
+```
+
+## Integration Patterns
+
+### Basic Usage
+```tsx
+import { DateInput } from '@progress/kendo-react-dateinputs';
+
+// Simple controlled date input
+function SimpleExample() {
+  const [date, setDate] = useState<Date | null>(null);
+
+  return (
+    <DateInput
+      value={date}
+      onChange={(event) => setDate(event.value)}
+    />
+  );
+}
+
+// Uncontrolled with default value
+function UncontrolledExample() {
+  return (
+    <DateInput
+      defaultValue={new Date()}
+      onChange={(event) => console.log('Date selected:', event.value)}
+    />
+  );
+}
+```
+
+### Advanced Usage with Validation
+```tsx
+import { DateInput } from '@progress/kendo-react-dateinputs';
+import { useState } from 'react';
+
+function ValidatedDateInput() {
+  const [birthDate, setBirthDate] = useState<Date | null>(null);
+  const [validationMessage, setValidationMessage] = useState<string>('');
+
+  const handleDateChange = (event: DateInputChangeEvent) => {
+    const selectedDate = event.value;
+    setBirthDate(selectedDate);
+
+    // Custom validation: Must be at least 18 years ago
+    if (selectedDate) {
+      const eighteenYearsAgo = new Date();
+      eighteenYearsAgo.setFullYear(eighteenYearsAgo.getFullYear() - 18);
+      
+      if (selectedDate > eighteenYearsAgo) {
+        setValidationMessage('Must be at least 18 years old');
+      } else {
+        setValidationMessage('');
+      }
+    }
+  };
+
+  const handleBlur = () => {
+    if (!birthDate) {
+      setValidationMessage('Birth date is required');
+    }
+  };
+
+  return (
+    <DateInput
+      value={birthDate}
+      onChange={handleDateChange}
+      onBlur={handleBlur}
+      onFocus={() => setValidationMessage('')}
+      format="MM/dd/yyyy"
+      max={new Date()} // Cannot select future dates
+      min={new Date(1900, 0, 1)} // Reasonable minimum date
+      validationMessage={validationMessage}
+      required
+      label="Birth Date"
+      placeholder="MM/dd/yyyy"
+    />
+  );
+}
+```
+
+### Date Range Constraints
+```tsx
+function AppointmentDateInput() {
+  const [appointmentDate, setAppointmentDate] = useState<Date | null>(null);
+  
+  // Only allow dates from tomorrow to 6 months in the future
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  
+  const sixMonthsFromNow = new Date();
+  sixMonthsFromNow.setMonth(sixMonthsFromNow.getMonth() + 6);
+
+  return (
+    <DateInput
+      value={appointmentDate}
+      onChange={(event) => setAppointmentDate(event.value)}
+      min={tomorrow}
+      max={sixMonthsFromNow}
+      format="EEEE, MMMM d, yyyy"
+      spinners={true}
+      label="Appointment Date"
+      validationMessage={
+        appointmentDate && (appointmentDate < tomorrow || appointmentDate > sixMonthsFromNow)
+          ? 'Please select a date between tomorrow and 6 months from now'
+          : ''
+      }
+    />
+  );
+}
+```
+
+### Internationalization Example
+```tsx
+function InternationalDateInput() {
+  const [eventDate, setEventDate] = useState<Date | null>(null);
+
+  return (
+    <DateInput
+      value={eventDate}
+      onChange={(event) => setEventDate(event.value)}
+      format="dd/MM/yyyy" // European date format
+      dir="ltr"
+      label="Event Date"
+      placeholder="dd/mm/yyyy"
+      spinners={true}
+    />
+  );
+}
+```
+
+### Form Integration
+```tsx
+import { DateInput } from '@progress/kendo-react-dateinputs';
+import { Button } from '@progress/kendo-react-buttons';
+import { useState } from 'react';
+
+function DateForm() {
+  const [formData, setFormData] = useState({
+    startDate: null as Date | null,
+    endDate: null as Date | null
+  });
+
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    console.log('Form submitted:', formData);
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <div>
+        <label htmlFor="start-date">Start Date:</label>
+        <DateInput
+          id="start-date"
+          name="startDate"
+          value={formData.startDate}
+          onChange={(event) => setFormData(prev => ({ ...prev, startDate: event.value }))}
+          format="yyyy-MM-dd"
+          required
+        />
+      </div>
+      
+      <div>
+        <label htmlFor="end-date">End Date:</label>
+        <DateInput
+          id="end-date"
+          name="endDate"
+          value={formData.endDate}
+          onChange={(event) => setFormData(prev => ({ ...prev, endDate: event.value }))}
+          format="yyyy-MM-dd"
+          min={formData.startDate || undefined} // End date must be after start date
+          required
+        />
+      </div>
+      
+      <Button type="submit" primary>Submit</Button>
+    </form>
+  );
+}
+```
+
+## Best Practices
+
+### Usage Guidelines
+- **Always provide a clear format** - Use the `format` prop to specify the expected date format and include a `placeholder` that matches this format
+- **Set appropriate constraints** - Use `min` and `max` props to define reasonable date ranges for your use case
+- **Implement proper validation** - Combine built-in validation with custom validation logic for comprehensive error handling
+- **Provide clear labeling** - Use the `label` prop or associate the DateInput with a label element for accessibility
+- **Handle edge cases** - Account for null values, invalid dates, and boundary conditions in your change handlers
+
+### Accessibility
+- **Semantic labeling** - Always provide accessible labels using the `label` prop or `ariaLabelledBy` attribute
+- **Keyboard navigation** - DateInput supports full keyboard navigation including arrow keys for date adjustment when spinners are enabled
+- **Screen reader support** - The component announces date changes and validation messages to screen readers
+- **Focus management** - Use `onFocus` and `onBlur` events to manage validation state and provide user feedback
+- **Required field indication** - Use the `required` prop and provide clear validation messages for mandatory fields
+
+### Performance
+- **Controlled vs Uncontrolled** - Use controlled components (with `value` and `onChange`) for form state management, uncontrolled (with `defaultValue`) for simple cases
+- **Validation optimization** - Implement validation logic efficiently, avoiding complex calculations on every change event
+- **Event handler optimization** - Use useCallback hooks for event handlers in React function components to prevent unnecessary re-renders
+
+## Common Patterns
+
+### Pattern 1: Date of Birth Input
+```tsx
+function DateOfBirthInput({ value, onChange, required = false }) {
+  const maxDate = new Date(); // Today
+  const minDate = new Date(1900, 0, 1); // Reasonable minimum
+  
+  return (
+    <DateInput
+      value={value}
+      onChange={onChange}
+      format="MM/dd/yyyy"
+      min={minDate}
+      max={maxDate}
+      required={required}
+      label="Date of Birth"
+      placeholder="MM/dd/yyyy"
+      validationMessage={
+        value && value > maxDate ? 'Birth date cannot be in the future' : ''
+      }
+    />
+  );
+}
+```
+
+### Pattern 2: Appointment Scheduler
+```tsx
+function AppointmentScheduler() {
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  
+  // Business logic: Only allow weekdays, 9 AM to 5 PM, starting tomorrow
+  const isWeekday = (date: Date) => {
+    const day = date.getDay();
+    return day !== 0 && day !== 6; // Not Sunday (0) or Saturday (6)
+  };
+  
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  
+  return (
+    <DateInput
+      value={selectedDate}
+      onChange={(event) => {
+        const date = event.value;
+        if (date && isWeekday(date)) {
+          setSelectedDate(date);
+        }
+      }}
+      min={tomorrow}
+      format="EEEE, MMMM d, yyyy"
+      spinners={true}
+      label="Appointment Date"
+      validationMessage={
+        selectedDate && !isWeekday(selectedDate)
+          ? 'Please select a weekday'
+          : ''
+      }
+    />
+  );
+}
+```
+
+### Pattern 3: Date Range Validation
+```tsx
+function DateRangeForm() {
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
+  const [errors, setErrors] = useState<{ start?: string; end?: string }>({});
+
+  const validateDateRange = (start: Date | null, end: Date | null) => {
+    const newErrors: { start?: string; end?: string } = {};
+    
+    if (!start) {
+      newErrors.start = 'Start date is required';
+    }
+    
+    if (!end) {
+      newErrors.end = 'End date is required';
+    }
+    
+    if (start && end && start >= end) {
+      newErrors.end = 'End date must be after start date';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  return (
+    <div>
+      <DateInput
+        value={startDate}
+        onChange={(event) => {
+          setStartDate(event.value);
+          validateDateRange(event.value, endDate);
+        }}
+        format="yyyy-MM-dd"
+        label="Start Date"
+        required
+        validationMessage={errors.start}
+      />
+      
+      <DateInput
+        value={endDate}
+        onChange={(event) => {
+          setEndDate(event.value);
+          validateDateRange(startDate, event.value);
+        }}
+        format="yyyy-MM-dd"
+        min={startDate || undefined}
+        label="End Date"
+        required
+        validationMessage={errors.end}
+      />
+    </div>
+  );
+}
+```

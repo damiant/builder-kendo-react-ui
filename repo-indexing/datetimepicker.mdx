@@ -1,0 +1,626 @@
+# DateTimePicker Component
+
+## Overview
+
+### Purpose
+Use this component to generate date-time picker functionality
+
+### When to Use
+The DateTimePicker component is ideal for scenarios where users need to select both date and time values in a single, integrated control. Use DateTimePicker when you need:
+
+- **Event scheduling** - Collecting start and end times for meetings, appointments, or events
+- **Timestamp recording** - Capturing precise date and time for logs, records, or historical data
+- **Deadline management** - Setting due dates and times for tasks, projects, or submissions
+- **Calendar integration** - Allowing users to schedule items with specific date and time requirements
+- **Form date-time collection** - Gathering birth date-times, registration times, or booking confirmations
+- **Time-sensitive operations** - When both date and time precision are critical for business logic
+- **International scheduling** - When time zone considerations and various date-time formats are needed
+- **Accessible date-time input** - When comprehensive keyboard navigation and screen reader support are essential
+
+### Architecture
+**No Coupling**: DateTimePicker is a standalone component that operates independently without requiring other components. It provides a complete date and time selection solution with built-in popup calendar, time selection, validation, and accessibility features.
+
+## Components
+
+### DateTimePicker
+
+**Purpose:** Provides a comprehensive date and time selection control with popup calendar, time picker, formatting, validation, and accessibility features for collecting precise date-time values from users.
+
+**Interface:**
+```typescript
+interface DateTimePickerProps {
+  // Value and change handling
+  value?: Date | null; // The current date-time value
+  onChange?: (event: DateTimePickerChangeEvent) => void; // Callback when date-time changes
+  defaultValue?: Date | null; // Initial date-time value for uncontrolled usage
+  
+  // Popup control
+  show?: boolean; // Controls popup visibility
+  defaultShow?: boolean; // Initial popup state for uncontrolled usage
+  onOpen?: (event: DateTimePickerOpenEvent) => void; // Callback when popup opens
+  onClose?: (event: DateTimePickerCloseEvent) => void; // Callback when popup closes
+  
+  // Date-time constraints
+  min?: Date; // Minimum allowable date-time
+  max?: Date; // Maximum allowable date-time
+  minTime?: Date; // Minimum allowable time component
+  maxTime?: Date; // Maximum allowable time component
+  
+  // Formatting and display
+  format?: string | DateFormatOptions; // Date-time display format (e.g., 'yyyy-MM-dd HH:mm', 'MM/dd/yyyy h:mm a')
+  formatPlaceholder?: DateInputFormatPlaceholder; // Placeholder format style
+  
+  // Component behavior
+  disabled?: boolean; // Disable the entire component
+  focusedDate?: Date; // Initial focused date in calendar popup
+  steps?: DateInputIncrementalSteps; // Incremental step values for date-time parts
+  weekNumber?: boolean; // Show week numbers in calendar
+  cancelButton?: boolean; // Show cancel button in popup
+  
+  // Input features
+  autoFill?: boolean; // Auto-complete partial date-time input
+  twoDigitYearMax?: number; // Maximum year for two-digit year interpretation
+  enableMouseWheel?: boolean; // Enable mouse wheel for value adjustment
+  
+  // Validation and form integration
+  name?: string; // Form field name
+  required?: boolean; // Mark field as required
+  tabIndex?: number; // Tab order position
+  autoFocus?: boolean; // Auto-focus on component mount
+  
+  // Event handlers
+  onFocus?: (event: React.FocusEvent<HTMLSpanElement | HTMLDivElement>) => void; // Callback when component gains focus
+  onBlur?: (event: React.FocusEvent<HTMLSpanElement | HTMLDivElement>) => void; // Callback when component loses focus
+  
+  // Accessibility
+  id?: string; // Unique identifier
+  ariaLabelledBy?: string; // Reference to labeling element
+  ariaDescribedBy?: string; // Reference to describing element
+  label?: React.ReactNode; // Floating label text
+  
+  // Styling and appearance
+  className?: string; // Custom CSS classes
+  style?: React.CSSProperties; // Inline styles
+  width?: number | string; // Component width
+  size?: 'small' | 'medium' | 'large' | null; // Component size
+  rounded?: 'small' | 'medium' | 'large' | 'full' | null; // Border radius
+  fillMode?: 'solid' | 'flat' | 'outline' | null; // Fill style
+  
+  // Advanced features
+  adaptive?: boolean; // Enable adaptive/mobile mode
+  adaptiveTitle?: string; // Title for adaptive popup
+  adaptiveSubtitle?: string; // Subtitle for adaptive popup
+  
+  // Customization
+  calendar?: React.ComponentType<CalendarProps>; // Custom calendar component
+  dateInput?: React.ComponentType<DateInputProps>; // Custom date input component
+  popup?: React.ComponentType<PopupProps>; // Custom popup component
+  
+  // HTML attributes
+  inputAttributes?: React.InputHTMLAttributes<HTMLInputElement>; // Attributes for inner input element
+  title?: string; // HTML title attribute
+}
+
+interface DateTimePickerChangeEvent {
+  nativeEvent: any; // Native DOM event
+  syntheticEvent: React.SyntheticEvent<any>; // React synthetic event
+  value: Date | null; // The new date-time value
+  show: boolean; // Current popup state
+  target: DateTimePicker; // Reference to the component instance
+}
+
+interface DateTimePickerOpenEvent {
+  target: DateTimePicker; // Reference to the component instance
+}
+
+interface DateTimePickerCloseEvent {
+  target: DateTimePicker; // Reference to the component instance
+}
+
+interface DateInputIncrementalSteps {
+  year?: number; // Step value for year adjustment
+  month?: number; // Step value for month adjustment
+  day?: number; // Step value for day adjustment
+  hour?: number; // Step value for hour adjustment
+  minute?: number; // Step value for minute adjustment
+  second?: number; // Step value for second adjustment
+}
+```
+
+**Usage Example:**
+```tsx
+import { DateTimePicker } from '@progress/kendo-react-dateinputs';
+import { useState } from 'react';
+
+function BasicDateTimePicker() {
+  const [selectedDateTime, setSelectedDateTime] = useState<Date | null>(null);
+
+  return (
+    <DateTimePicker
+      value={selectedDateTime}
+      onChange={(event) => setSelectedDateTime(event.value)}
+      format="MM/dd/yyyy h:mm a"
+      placeholder="Select date and time..."
+    />
+  );
+}
+```
+
+## Integration Patterns
+
+### Basic Usage
+```tsx
+import { DateTimePicker } from '@progress/kendo-react-dateinputs';
+
+// Simple controlled date-time picker
+function SimpleExample() {
+  const [dateTime, setDateTime] = useState<Date | null>(null);
+
+  return (
+    <DateTimePicker
+      value={dateTime}
+      onChange={(event) => setDateTime(event.value)}
+    />
+  );
+}
+
+// Uncontrolled with default value
+function UncontrolledExample() {
+  return (
+    <DateTimePicker
+      defaultValue={new Date()}
+      onChange={(event) => console.log('DateTime selected:', event.value)}
+    />
+  );
+}
+```
+
+### Advanced Usage with Validation
+```tsx
+import { DateTimePicker } from '@progress/kendo-react-dateinputs';
+import { useState } from 'react';
+
+function ValidatedDateTimePicker() {
+  const [appointmentTime, setAppointmentTime] = useState<Date | null>(null);
+  const [isValid, setIsValid] = useState<boolean>(true);
+  const [validationMessage, setValidationMessage] = useState<string>('');
+
+  const handleDateTimeChange = (event: DateTimePickerChangeEvent) => {
+    const selectedDateTime = event.value;
+    setAppointmentTime(selectedDateTime);
+
+    // Custom validation: Must be in the future and during business hours
+    if (selectedDateTime) {
+      const now = new Date();
+      const selectedHour = selectedDateTime.getHours();
+      
+      if (selectedDateTime <= now) {
+        setIsValid(false);
+        setValidationMessage('Appointment must be scheduled for a future date and time');
+      } else if (selectedHour < 9 || selectedHour >= 17) {
+        setIsValid(false);
+        setValidationMessage('Appointments are only available between 9:00 AM and 5:00 PM');
+      } else {
+        setIsValid(true);
+        setValidationMessage('');
+      }
+    }
+  };
+
+  const handleBlur = () => {
+    if (!appointmentTime) {
+      setIsValid(false);
+      setValidationMessage('Appointment date and time is required');
+    }
+  };
+
+  return (
+    <div>
+      <DateTimePicker
+        value={appointmentTime}
+        onChange={handleDateTimeChange}
+        onBlur={handleBlur}
+        onFocus={() => {
+          setIsValid(true);
+          setValidationMessage('');
+        }}
+        format="MM/dd/yyyy h:mm a"
+        min={new Date()} // Cannot select past dates
+        steps={{
+          minute: 15 // 15-minute intervals
+        }}
+        label="Appointment Time"
+        className={!isValid ? 'k-invalid' : ''}
+        weekNumber={true}
+        cancelButton={true}
+      />
+      {validationMessage && (
+        <div className="k-form-error">{validationMessage}</div>
+      )}
+    </div>
+  );
+}
+```
+
+### Time Range Constraints
+```tsx
+function BusinessHoursDateTimePicker() {
+  const [eventDateTime, setEventDateTime] = useState<Date | null>(null);
+  
+  // Create time constraints for business hours (9 AM to 5 PM)
+  const minTime = new Date();
+  minTime.setHours(9, 0, 0, 0);
+  
+  const maxTime = new Date();
+  maxTime.setHours(17, 0, 0, 0);
+  
+  // Only allow dates from today onwards
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  return (
+    <DateTimePicker
+      value={eventDateTime}
+      onChange={(event) => setEventDateTime(event.value)}
+      min={today}
+      minTime={minTime}
+      maxTime={maxTime}
+      format="EEEE, MMMM d, yyyy 'at' h:mm a"
+      steps={{
+        hour: 1,
+        minute: 30 // 30-minute intervals
+      }}
+      label="Event Date & Time"
+      weekNumber={true}
+      focusedDate={today}
+    />
+  );
+}
+```
+
+### Mobile-Responsive with Adaptive Mode
+```tsx
+function ResponsiveDateTimePicker() {
+  const [meetingTime, setMeetingTime] = useState<Date | null>(null);
+
+  return (
+    <DateTimePicker
+      value={meetingTime}
+      onChange={(event) => setMeetingTime(event.value)}
+      format="yyyy-MM-dd HH:mm"
+      adaptive={true}
+      adaptiveTitle="Select Meeting Time"
+      adaptiveSubtitle="Choose the date and time for your meeting"
+      steps={{
+        minute: 15
+      }}
+      label="Meeting Date & Time"
+      cancelButton={true}
+      autoFill={true}
+    />
+  );
+}
+```
+
+### Form Integration with Multiple DateTime Fields
+```tsx
+import { DateTimePicker } from '@progress/kendo-react-dateinputs';
+import { Button } from '@progress/kendo-react-buttons';
+import { useState } from 'react';
+
+function EventSchedulingForm() {
+  const [formData, setFormData] = useState({
+    startDateTime: null as Date | null,
+    endDateTime: null as Date | null,
+    reminderDateTime: null as Date | null
+  });
+
+  const [errors, setErrors] = useState<{[key: string]: string}>({});
+
+  const validateForm = () => {
+    const newErrors: {[key: string]: string} = {};
+    
+    if (!formData.startDateTime) {
+      newErrors.startDateTime = 'Start date and time is required';
+    }
+    
+    if (!formData.endDateTime) {
+      newErrors.endDateTime = 'End date and time is required';
+    }
+    
+    if (formData.startDateTime && formData.endDateTime) {
+      if (formData.endDateTime <= formData.startDateTime) {
+        newErrors.endDateTime = 'End time must be after start time';
+      }
+    }
+    
+    if (formData.reminderDateTime && formData.startDateTime) {
+      if (formData.reminderDateTime >= formData.startDateTime) {
+        newErrors.reminderDateTime = 'Reminder must be before the event start time';
+      }
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    if (validateForm()) {
+      console.log('Event scheduled:', formData);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <div className="form-field">
+        <DateTimePicker
+          value={formData.startDateTime}
+          onChange={(event) => {
+            setFormData(prev => ({ ...prev, startDateTime: event.value }));
+            setErrors(prev => ({ ...prev, startDateTime: '' }));
+          }}
+          format="MM/dd/yyyy h:mm a"
+          min={new Date()}
+          steps={{ minute: 15 }}
+          label="Event Start"
+          name="startDateTime"
+          required
+          className={errors.startDateTime ? 'k-invalid' : ''}
+        />
+        {errors.startDateTime && <div className="k-form-error">{errors.startDateTime}</div>}
+      </div>
+      
+      <div className="form-field">
+        <DateTimePicker
+          value={formData.endDateTime}
+          onChange={(event) => {
+            setFormData(prev => ({ ...prev, endDateTime: event.value }));
+            setErrors(prev => ({ ...prev, endDateTime: '' }));
+          }}
+          format="MM/dd/yyyy h:mm a"
+          min={formData.startDateTime || new Date()}
+          steps={{ minute: 15 }}
+          label="Event End"
+          name="endDateTime"
+          required
+          className={errors.endDateTime ? 'k-invalid' : ''}
+        />
+        {errors.endDateTime && <div className="k-form-error">{errors.endDateTime}</div>}
+      </div>
+      
+      <div className="form-field">
+        <DateTimePicker
+          value={formData.reminderDateTime}
+          onChange={(event) => {
+            setFormData(prev => ({ ...prev, reminderDateTime: event.value }));
+            setErrors(prev => ({ ...prev, reminderDateTime: '' }));
+          }}
+          format="MM/dd/yyyy h:mm a"
+          max={formData.startDateTime || undefined}
+          steps={{ minute: 5 }}
+          label="Reminder Time (Optional)"
+          name="reminderDateTime"
+          className={errors.reminderDateTime ? 'k-invalid' : ''}
+        />
+        {errors.reminderDateTime && <div className="k-form-error">{errors.reminderDateTime}</div>}
+      </div>
+      
+      <Button type="submit" primary>Schedule Event</Button>
+    </form>
+  );
+}
+```
+
+### International Date-Time Formats
+```tsx
+function InternationalDateTimePicker() {
+  const [deliveryTime, setDeliveryTime] = useState<Date | null>(null);
+
+  return (
+    <DateTimePicker
+      value={deliveryTime}
+      onChange={(event) => setDeliveryTime(event.value)}
+      format="dd/MM/yyyy HH:mm" // European 24-hour format
+      steps={{
+        hour: 1,
+        minute: 30
+      }}
+      label="Delivery Date & Time"
+      weekNumber={true}
+      twoDigitYearMax={50} // Years 00-50 = 2000-2050, 51-99 = 1951-1999
+      enableMouseWheel={true}
+    />
+  );
+}
+```
+
+### Custom Popup Behavior
+```tsx
+function ControlledPopupDateTimePicker() {
+  const [selectedDateTime, setSelectedDateTime] = useState<Date | null>(null);
+  const [isPopupOpen, setIsPopupOpen] = useState<boolean>(false);
+
+  return (
+    <DateTimePicker
+      value={selectedDateTime}
+      onChange={(event) => {
+        setSelectedDateTime(event.value);
+        if (event.value) {
+          setIsPopupOpen(false); // Auto-close popup when date is selected
+        }
+      }}
+      show={isPopupOpen}
+      onOpen={() => setIsPopupOpen(true)}
+      onClose={() => setIsPopupOpen(false)}
+      format="yyyy-MM-dd'T'HH:mm"
+      focusedDate={selectedDateTime || new Date()}
+      label="Precise Timestamp"
+      steps={{
+        minute: 1 // 1-minute precision
+      }}
+    />
+  );
+}
+```
+
+## Best Practices
+
+### Usage Guidelines
+- **Always provide a clear format** - Use the `format` prop to specify the expected date-time format and ensure consistency across your application
+- **Set appropriate time constraints** - Use `min`, `max`, `minTime`, and `maxTime` props to define reasonable date-time ranges for your use case
+- **Use meaningful step intervals** - Configure the `steps` prop to match your business requirements (e.g., 15-minute appointments, hourly scheduling)
+- **Implement comprehensive validation** - Combine built-in validation with custom validation logic for date-time ranges and business rules
+- **Provide clear labeling** - Use the `label` prop or associate the DateTimePicker with a label element for accessibility
+- **Handle timezone considerations** - Be mindful of timezone differences when working with date-time values in international applications
+
+### Accessibility
+- **Semantic labeling** - Always provide accessible labels using the `label` prop or `ariaLabelledBy` attribute
+- **Keyboard navigation** - DateTimePicker supports full keyboard navigation including arrow keys, Enter, Escape, and Tab keys
+- **Screen reader support** - The component announces date-time changes, popup state, and validation messages to screen readers
+- **Focus management** - Use `onFocus` and `onBlur` events to manage validation state and provide user feedback
+- **Required field indication** - Use the `required` prop and provide clear validation messages for mandatory fields
+- **High contrast support** - The component adapts to high contrast themes and accessibility preferences
+
+### Performance
+- **Controlled vs Uncontrolled** - Use controlled components (with `value` and `onChange`) for complex form state management, uncontrolled (with `defaultValue`) for simple cases
+- **Validation optimization** - Implement validation logic efficiently, avoiding complex calculations on every change event
+- **Event handler optimization** - Use useCallback hooks for event handlers in React function components to prevent unnecessary re-renders
+- **Popup state management** - Control popup visibility strategically to improve user experience and performance
+
+## Common Patterns
+
+### Pattern 1: Appointment Scheduler
+```tsx
+function AppointmentScheduler({ existingAppointments = [] }) {
+  const [appointmentDateTime, setAppointmentDateTime] = useState<Date | null>(null);
+
+  const isTimeSlotAvailable = (dateTime: Date) => {
+    // Check if the selected time conflicts with existing appointments
+    return !existingAppointments.some(appointment => 
+      Math.abs(appointment.getTime() - dateTime.getTime()) < 60 * 60 * 1000 // 1 hour buffer
+    );
+  };
+
+  const validateAppointment = (dateTime: Date | null) => {
+    if (!dateTime) return 'Please select an appointment time';
+    
+    const now = new Date();
+    if (dateTime <= now) return 'Appointment must be in the future';
+    
+    const hour = dateTime.getHours();
+    if (hour < 9 || hour >= 17) return 'Appointments available 9 AM - 5 PM';
+    
+    if (!isTimeSlotAvailable(dateTime)) return 'This time slot is not available';
+    
+    return '';
+  };
+
+  return (
+    <DateTimePicker
+      value={appointmentDateTime}
+      onChange={(event) => setAppointmentDateTime(event.value)}
+      format="EEEE, MMMM d, yyyy 'at' h:mm a"
+      min={new Date()}
+      steps={{ minute: 30 }}
+      weekNumber={true}
+      label="Appointment Time"
+      validationMessage={validateAppointment(appointmentDateTime)}
+    />
+  );
+}
+```
+
+### Pattern 2: Event Duration Calculator
+```tsx
+function EventDurationForm() {
+  const [startTime, setStartTime] = useState<Date | null>(null);
+  const [endTime, setEndTime] = useState<Date | null>(null);
+  const [duration, setDuration] = useState<string>('');
+
+  const calculateDuration = (start: Date | null, end: Date | null) => {
+    if (!start || !end) return '';
+    
+    const diffMs = end.getTime() - start.getTime();
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+    
+    return `${diffHours}h ${diffMinutes}m`;
+  };
+
+  useEffect(() => {
+    setDuration(calculateDuration(startTime, endTime));
+  }, [startTime, endTime]);
+
+  return (
+    <div>
+      <DateTimePicker
+        value={startTime}
+        onChange={(event) => setStartTime(event.value)}
+        format="MM/dd/yyyy h:mm a"
+        label="Event Start"
+        steps={{ minute: 15 }}
+      />
+      
+      <DateTimePicker
+        value={endTime}
+        onChange={(event) => setEndTime(event.value)}
+        format="MM/dd/yyyy h:mm a"
+        min={startTime || undefined}
+        label="Event End"
+        steps={{ minute: 15 }}
+      />
+      
+      {duration && (
+        <div className="duration-display">
+          Duration: {duration}
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+### Pattern 3: Deadline with Reminders
+```tsx
+function DeadlineWithReminders() {
+  const [deadline, setDeadline] = useState<Date | null>(null);
+  const [reminderTimes, setReminderTimes] = useState<Date[]>([]);
+
+  const addReminder = () => {
+    if (deadline) {
+      // Add a reminder 1 hour before the deadline
+      const reminderTime = new Date(deadline.getTime() - 60 * 60 * 1000);
+      setReminderTimes(prev => [...prev, reminderTime]);
+    }
+  };
+
+  return (
+    <div>
+      <DateTimePicker
+        value={deadline}
+        onChange={(event) => {
+          setDeadline(event.value);
+          setReminderTimes([]); // Clear reminders when deadline changes
+        }}
+        format="MM/dd/yyyy h:mm a"
+        min={new Date()}
+        label="Deadline"
+        steps={{ minute: 15 }}
+      />
+      
+      {deadline && (
+        <button onClick={addReminder} type="button">
+          Add Reminder (1 hour before)
+        </button>
+      )}
+      
+      {reminderTimes.map((reminderTime, index) => (
+        <div key={index} className="reminder-item">
+          Reminder: {reminderTime.toLocaleString()}
+        </div>
+      ))}
+    </div>
+  );
+}
+```

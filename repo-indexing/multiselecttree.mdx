@@ -1,0 +1,695 @@
+# MultiSelectTree Components
+
+## Overview
+
+### Purpose
+Use this component to generate multi-select tree functionality
+
+### When to Use
+The MultiSelectTree component is ideal for scenarios requiring hierarchical data selection with multiple choices:
+- File and folder selection interfaces where users need to select multiple items from a tree structure
+- Organizational hierarchies (departments, teams, roles) where multiple selections are needed
+- Category and subcategory selection for content management systems
+- Permission systems where users select multiple resources from a tree structure
+- Product catalogs with hierarchical categories where multiple items need selection
+- Geographic location selection (countries, states, cities) with multiple selections
+- Menu item selection in configuration interfaces
+- Tag hierarchies where users need to select multiple tags and subtags
+
+### Architecture
+**No Coupling**: MultiSelectTree is a standalone component that manages its own state and provides comprehensive multi-select tree functionality without requiring additional child components.
+
+## Components
+
+### MultiSelectTree {Standalone Component}
+
+**Purpose:** A comprehensive dropdown component that displays hierarchical data in a tree structure with multi-selection capabilities, filtering, and tag-based selection management.
+
+**Interface:**
+```typescript
+interface MultiSelectTreeProps {
+  // Data and Value Management
+  data?: any[]; // Hierarchical tree data structure
+  value?: Array<any>; // Currently selected items
+  dataItemKey: string; // Required - field for comparing items (e.g., 'id')
+  textField: string; // Required - field containing display text (e.g., 'text')
+  
+  // Tree Structure Configuration
+  subItemsField?: string; // Field containing child items (default: 'items')
+  expandField?: string; // Field for expanded state
+  checkField?: string; // Field for checked state
+  checkIndeterminateField?: string; // Field for indeterminate checked state
+  
+  // UI Configuration
+  placeholder?: string; // Placeholder text
+  label?: string; // Floating label
+  disabled?: boolean; // Disabled state
+  className?: string; // Additional CSS classes
+  style?: React.CSSProperties; // Inline styles
+  id?: string; // Component ID
+  
+  // Popup Configuration
+  opened?: boolean; // Control popup open state
+  popupSettings?: DropDownsPopupSettings; // Popup configuration
+  
+  // Filtering
+  filterable?: boolean; // Enable filtering
+  filter?: string; // Current filter value (controlled)
+  loading?: boolean; // Show loading state
+  
+  // Tags and Display
+  tags?: Array<TagData>; // Custom tag data
+  
+  // Styling Options
+  size?: null | 'small' | 'medium' | 'large'; // Component size (default: 'medium')
+  rounded?: null | 'small' | 'medium' | 'large' | 'full'; // Border radius (default: 'medium')
+  fillMode?: null | 'solid' | 'flat' | 'outline'; // Visual style (default: 'solid')
+  
+  // Adaptive/Responsive
+  adaptive?: boolean; // Adaptive mode for mobile (default: false)
+  adaptiveTitle?: string | React.ReactNode; // Title in adaptive popup
+  adaptiveSubtitle?: string; // Subtitle in adaptive popup
+  
+  // Accessibility
+  dir?: string; // Text direction ('ltr' | 'rtl')
+  tabIndex?: number; // Tab order
+  accessKey?: string; // Access key
+  ariaDescribedBy?: string; // ARIA described by
+  ariaLabelledBy?: string; // ARIA labelled by
+  
+  // Value Processing
+  valueMap?: (value: Array<any>) => any; // Value transformation for form submission
+  
+  // Event Handlers
+  onChange?: (event: MultiSelectTreeChangeEvent) => void; // Value change
+  onOpen?: (event: MultiSelectTreeOpenEvent) => void; // Popup open
+  onClose?: (event: MultiSelectTreeCloseEvent) => void; // Popup close
+  onFocus?: (event: MultiSelectTreeFocusEvent) => void; // Focus
+  onBlur?: (event: MultiSelectTreeBlurEvent) => void; // Blur
+  onFilterChange?: (event: MultiSelectTreeFilterChangeEvent) => void; // Filter change
+  onExpandChange?: (event: any) => void; // Tree node expand/collapse
+  onCancel?: (event: MultiSelectTreeCancelEvent) => void; // Adaptive mode cancel
+  
+  // Custom Rendering
+  item?: React.ComponentType<MultiSelectTreeItemProps>; // Custom item renderer
+  tag?: React.ComponentType<MultiSelectTreeTagProps>; // Custom tag renderer
+  listNoData?: React.ComponentType<MultiSelectTreeListNoDataProps>; // No data renderer
+}
+
+// Event Interfaces
+interface MultiSelectTreeChangeEvent {
+  value: any[]; // New value
+  items: any[]; // Related items
+  operation: 'clear' | 'delete' | 'toggle'; // Type of change
+}
+
+interface MultiSelectTreeFilterChangeEvent {
+  filter: string; // New filter value
+}
+```
+
+**Usage Example:**
+```tsx
+import { MultiSelectTree } from '@progress/kendo-react-dropdowns';
+
+function BasicExample() {
+  const [value, setValue] = React.useState([]);
+  
+  const treeData = [
+    {
+      id: 1,
+      text: 'Furniture',
+      expanded: true,
+      items: [
+        { id: 2, text: 'Tables and Chairs' },
+        { id: 3, text: 'Sofas' },
+        { id: 4, text: 'Occasional Furniture' }
+      ]
+    },
+    {
+      id: 5,
+      text: 'Decor',
+      items: [
+        { id: 6, text: 'Bed Linen' },
+        { id: 7, text: 'Curtains and Blinds' },
+        { id: 8, text: 'Carpets' }
+      ]
+    }
+  ];
+
+  return (
+    <MultiSelectTree
+      data={treeData}
+      value={value}
+      onChange={(event) => setValue(event.value)}
+      dataItemKey="id"
+      textField="text"
+      placeholder="Select categories..."
+    />
+  );
+}
+```
+
+## Integration Patterns
+
+### Basic Usage
+```tsx
+import { MultiSelectTree } from '@progress/kendo-react-dropdowns';
+
+// Simple hierarchical selection
+function BasicMultiSelectTree() {
+  const [selectedItems, setSelectedItems] = React.useState([]);
+  
+  const data = [
+    {
+      id: 1,
+      text: 'Documents',
+      items: [
+        { id: 2, text: 'Reports' },
+        { id: 3, text: 'Presentations' }
+      ]
+    },
+    {
+      id: 4,
+      text: 'Images',
+      items: [
+        { id: 5, text: 'Photos' },
+        { id: 6, text: 'Graphics' }
+      ]
+    }
+  ];
+
+  return (
+    <MultiSelectTree
+      data={data}
+      value={selectedItems}
+      onChange={(e) => setSelectedItems(e.value)}
+      dataItemKey="id"
+      textField="text"
+      placeholder="Select items..."
+    />
+  );
+}
+```
+
+### Advanced Usage with Filtering
+```tsx
+import { MultiSelectTree } from '@progress/kendo-react-dropdowns';
+
+// Complex usage with filtering and custom rendering
+function AdvancedMultiSelectTree() {
+  const [selectedItems, setSelectedItems] = React.useState([]);
+  const [filter, setFilter] = React.useState('');
+  const [loading, setLoading] = React.useState(false);
+  
+  const organizationData = [
+    {
+      id: 1,
+      text: 'Engineering',
+      expanded: true,
+      items: [
+        {
+          id: 2,
+          text: 'Frontend',
+          items: [
+            { id: 3, text: 'React Team' },
+            { id: 4, text: 'Vue Team' }
+          ]
+        },
+        {
+          id: 5,
+          text: 'Backend',
+          items: [
+            { id: 6, text: 'Node.js Team' },
+            { id: 7, text: 'Python Team' }
+          ]
+        }
+      ]
+    },
+    {
+      id: 8,
+      text: 'Design',
+      items: [
+        { id: 9, text: 'UX Team' },
+        { id: 10, text: 'UI Team' }
+      ]
+    }
+  ];
+
+  const handleFilterChange = (event) => {
+    setFilter(event.filter);
+    setLoading(true);
+    // Simulate API filtering
+    setTimeout(() => setLoading(false), 500);
+  };
+
+  return (
+    <MultiSelectTree
+      data={organizationData}
+      value={selectedItems}
+      onChange={(e) => setSelectedItems(e.value)}
+      dataItemKey="id"
+      textField="text"
+      placeholder="Select teams..."
+      filterable={true}
+      filter={filter}
+      onFilterChange={handleFilterChange}
+      loading={loading}
+      size="large"
+      rounded="medium"
+      fillMode="outline"
+      label="Select Teams"
+    />
+  );
+}
+```
+
+### Common Variations
+
+#### File System Selection
+```tsx
+// File and folder selection interface
+function FileSystemSelector() {
+  const [selectedFiles, setSelectedFiles] = React.useState([]);
+  
+  const fileSystem = [
+    {
+      id: 'root',
+      text: 'Documents',
+      type: 'folder',
+      expanded: true,
+      items: [
+        {
+          id: 'projects',
+          text: 'Projects',
+          type: 'folder',
+          items: [
+            { id: 'project1.pdf', text: 'Project1.pdf', type: 'file' },
+            { id: 'project2.docx', text: 'Project2.docx', type: 'file' }
+          ]
+        },
+        { id: 'readme.txt', text: 'README.txt', type: 'file' }
+      ]
+    }
+  ];
+
+  const customItemRender = ({ item }) => (
+    <span>
+      <span className={`k-icon k-i-${item.type === 'folder' ? 'folder' : 'file'}`} />
+      {item.text}
+    </span>
+  );
+
+  return (
+    <MultiSelectTree
+      data={fileSystem}
+      value={selectedFiles}
+      onChange={(e) => setSelectedFiles(e.value)}
+      dataItemKey="id"
+      textField="text"
+      placeholder="Select files and folders..."
+      item={customItemRender}
+      filterable={true}
+    />
+  );
+}
+```
+
+#### Permission Management
+```tsx
+// Role-based permission selection
+function PermissionSelector() {
+  const [selectedPermissions, setSelectedPermissions] = React.useState([]);
+  
+  const permissions = [
+    {
+      id: 'users',
+      text: 'User Management',
+      items: [
+        { id: 'users.create', text: 'Create Users' },
+        { id: 'users.edit', text: 'Edit Users' },
+        { id: 'users.delete', text: 'Delete Users' },
+        { id: 'users.view', text: 'View Users' }
+      ]
+    },
+    {
+      id: 'content',
+      text: 'Content Management',
+      items: [
+        { id: 'content.create', text: 'Create Content' },
+        { id: 'content.publish', text: 'Publish Content' },
+        { id: 'content.moderate', text: 'Moderate Content' }
+      ]
+    }
+  ];
+
+  const handlePermissionChange = (event) => {
+    setSelectedPermissions(event.value);
+    console.log('Operation:', event.operation, 'Items:', event.items);
+  };
+
+  return (
+    <MultiSelectTree
+      data={permissions}
+      value={selectedPermissions}
+      onChange={handlePermissionChange}
+      dataItemKey="id"
+      textField="text"
+      placeholder="Select permissions..."
+      checkField="checked"
+      label="User Permissions"
+      size="medium"
+    />
+  );
+}
+```
+
+#### Adaptive Mobile Interface
+```tsx
+// Mobile-optimized multi-select tree
+function MobileMultiSelectTree() {
+  const [selectedCategories, setSelectedCategories] = React.useState([]);
+  
+  const categories = [
+    {
+      id: 'electronics',
+      text: 'Electronics',
+      items: [
+        {
+          id: 'computers',
+          text: 'Computers',
+          items: [
+            { id: 'laptops', text: 'Laptops' },
+            { id: 'desktops', text: 'Desktops' }
+          ]
+        },
+        { id: 'phones', text: 'Mobile Phones' }
+      ]
+    }
+  ];
+
+  return (
+    <MultiSelectTree
+      data={categories}
+      value={selectedCategories}
+      onChange={(e) => setSelectedCategories(e.value)}
+      dataItemKey="id"
+      textField="text"
+      placeholder="Select categories..."
+      adaptive={true}
+      adaptiveTitle="Select Categories"
+      adaptiveSubtitle="Choose one or more categories"
+      filterable={true}
+    />
+  );
+}
+```
+
+## Best Practices
+
+### Usage Guidelines
+- Always provide both `dataItemKey` and `textField` props for proper data binding and display
+- Use `value` and `onChange` props to create controlled components for predictable state management
+- Enable `filterable` for large datasets to improve user experience and item discoverability
+- Consider using `adaptive` mode for mobile interfaces to provide native-like interaction patterns
+- Implement proper loading states when filtering or loading data asynchronously
+
+### Accessibility
+- Provide meaningful `label` or `ariaLabelledBy` for screen reader accessibility
+- Use `ariaDescribedBy` to associate help text or error messages with the component
+- Ensure proper keyboard navigation through tree items using arrow keys and space bar
+- Tree structure provides natural hierarchical navigation for assistive technologies
+- Selected items are announced as tags with removal capabilities
+
+### Performance
+- Use `dataItemKey` for efficient item comparison and prevent unnecessary re-renders
+- Implement server-side filtering for large datasets rather than client-side filtering
+- Consider virtualization for extremely large tree structures (contact Kendo support for guidance)
+- Optimize `onChange` handlers to avoid expensive operations on every selection change
+- Use React.memo for custom item renderers if they contain complex logic
+
+## Common Patterns
+
+### Pattern 1: Department and Team Selection
+```tsx
+// Enterprise organization structure selection
+function OrganizationSelector() {
+  const [selectedTeams, setSelectedTeams] = React.useState([]);
+  const [filterValue, setFilterValue] = React.useState('');
+  
+  const organizationStructure = [
+    {
+      id: 'eng',
+      text: 'Engineering Department',
+      expanded: true,
+      items: [
+        {
+          id: 'frontend',
+          text: 'Frontend Engineering',
+          items: [
+            { id: 'react-team', text: 'React Development Team' },
+            { id: 'angular-team', text: 'Angular Development Team' },
+            { id: 'vue-team', text: 'Vue Development Team' }
+          ]
+        },
+        {
+          id: 'backend',
+          text: 'Backend Engineering',
+          items: [
+            { id: 'nodejs-team', text: 'Node.js Team' },
+            { id: 'python-team', text: 'Python Team' },
+            { id: 'java-team', text: 'Java Team' }
+          ]
+        },
+        {
+          id: 'devops',
+          text: 'DevOps',
+          items: [
+            { id: 'infrastructure', text: 'Infrastructure Team' },
+            { id: 'security', text: 'Security Team' }
+          ]
+        }
+      ]
+    },
+    {
+      id: 'design',
+      text: 'Design Department',
+      items: [
+        { id: 'ux-team', text: 'UX Research Team' },
+        { id: 'ui-team', text: 'UI Design Team' },
+        { id: 'brand-team', text: 'Brand Design Team' }
+      ]
+    }
+  ];
+
+  return (
+    <MultiSelectTree
+      data={organizationStructure}
+      value={selectedTeams}
+      onChange={(event) => {
+        setSelectedTeams(event.value);
+        console.log('Selected teams changed:', event.operation, event.items);
+      }}
+      dataItemKey="id"
+      textField="text"
+      placeholder="Select teams for assignment..."
+      filterable={true}
+      filter={filterValue}
+      onFilterChange={(event) => setFilterValue(event.filter)}
+      label="Assign to Teams"
+      size="large"
+      className="organization-selector"
+    />
+  );
+}
+```
+
+### Pattern 2: Multi-level Category Selection
+```tsx
+// E-commerce category selection with custom rendering
+function ProductCategorySelector() {
+  const [selectedCategories, setSelectedCategories] = React.useState([]);
+  
+  const categories = [
+    {
+      id: 'clothing',
+      text: 'Clothing & Accessories',
+      icon: 'shirt',
+      items: [
+        {
+          id: 'mens-clothing',
+          text: "Men's Clothing",
+          items: [
+            { id: 'mens-shirts', text: 'Shirts', count: 45 },
+            { id: 'mens-pants', text: 'Pants', count: 32 },
+            { id: 'mens-shoes', text: 'Shoes', count: 28 }
+          ]
+        },
+        {
+          id: 'womens-clothing',
+          text: "Women's Clothing",
+          items: [
+            { id: 'womens-dresses', text: 'Dresses', count: 67 },
+            { id: 'womens-tops', text: 'Tops', count: 54 },
+            { id: 'womens-shoes', text: 'Shoes', count: 41 }
+          ]
+        }
+      ]
+    },
+    {
+      id: 'electronics',
+      text: 'Electronics',
+      icon: 'laptop',
+      items: [
+        {
+          id: 'computers',
+          text: 'Computers & Laptops',
+          items: [
+            { id: 'gaming-laptops', text: 'Gaming Laptops', count: 23 },
+            { id: 'business-laptops', text: 'Business Laptops', count: 18 }
+          ]
+        }
+      ]
+    }
+  ];
+
+  const customItemRenderer = ({ item }) => (
+    <div className="category-item">
+      {item.icon && <span className={`k-icon k-i-${item.icon}`} />}
+      <span className="category-text">{item.text}</span>
+      {item.count && <span className="item-count">({item.count})</span>}
+    </div>
+  );
+
+  const customTagRenderer = ({ tagData, onTagDelete }) => (
+    <span className="custom-tag">
+      {tagData.text}
+      <button onClick={onTagDelete} className="tag-remove">
+        <span className="k-icon k-i-close" />
+      </button>
+    </span>
+  );
+
+  return (
+    <MultiSelectTree
+      data={categories}
+      value={selectedCategories}
+      onChange={(event) => setSelectedCategories(event.value)}
+      dataItemKey="id"
+      textField="text"
+      placeholder="Select product categories..."
+      item={customItemRenderer}
+      tag={customTagRenderer}
+      filterable={true}
+      label="Product Categories"
+      fillMode="outline"
+      rounded="large"
+    />
+  );
+}
+```
+
+### Pattern 3: File and Folder Selection with Icons
+```tsx
+// Advanced file system browser with type-specific icons
+function FileSystemBrowser() {
+  const [selectedItems, setSelectedItems] = React.useState([]);
+  const [isLoading, setIsLoading] = React.useState(false);
+  
+  const fileSystem = [
+    {
+      id: 'documents',
+      text: 'Documents',
+      type: 'folder',
+      size: null,
+      expanded: true,
+      items: [
+        {
+          id: 'work',
+          text: 'Work Files',
+          type: 'folder',
+          items: [
+            { id: 'report.pdf', text: 'Annual Report.pdf', type: 'pdf', size: '2.3 MB' },
+            { id: 'presentation.pptx', text: 'Q4 Presentation.pptx', type: 'powerpoint', size: '5.1 MB' },
+            { id: 'budget.xlsx', text: 'Budget 2024.xlsx', type: 'excel', size: '1.8 MB' }
+          ]
+        },
+        {
+          id: 'personal',
+          text: 'Personal',
+          type: 'folder',
+          items: [
+            { id: 'photo1.jpg', text: 'Vacation Photo.jpg', type: 'image', size: '4.2 MB' },
+            { id: 'music.mp3', text: 'Favorite Song.mp3', type: 'audio', size: '6.8 MB' }
+          ]
+        }
+      ]
+    }
+  ];
+
+  const getFileIcon = (type) => {
+    const iconMap = {
+      folder: 'folder',
+      pdf: 'pdf',
+      powerpoint: 'presentation',
+      excel: 'table',
+      image: 'image',
+      audio: 'volume-up',
+      default: 'file'
+    };
+    return iconMap[type] || iconMap.default;
+  };
+
+  const fileItemRenderer = ({ item }) => (
+    <div className="file-item">
+      <span className={`k-icon k-i-${getFileIcon(item.type)}`} />
+      <span className="file-name">{item.text}</span>
+      {item.size && <span className="file-size">{item.size}</span>}
+    </div>
+  );
+
+  const handleSelectionChange = (event) => {
+    setSelectedItems(event.value);
+    
+    if (event.operation === 'toggle') {
+      console.log('File selected:', event.items[0].text);
+    } else if (event.operation === 'delete') {
+      console.log('Files removed from selection:', event.items.map(item => item.text));
+    }
+  };
+
+  const handleFilterChange = (event) => {
+    setIsLoading(true);
+    // Simulate search delay
+    setTimeout(() => setIsLoading(false), 300);
+  };
+
+  return (
+    <div>
+      <MultiSelectTree
+        data={fileSystem}
+        value={selectedItems}
+        onChange={handleSelectionChange}
+        dataItemKey="id"
+        textField="text"
+        placeholder="Select files and folders..."
+        item={fileItemRenderer}
+        filterable={true}
+        onFilterChange={handleFilterChange}
+        loading={isLoading}
+        label="File Selection"
+        size="large"
+        adaptive={true}
+        adaptiveTitle="Select Files"
+        adaptiveSubtitle="Choose files to include in your selection"
+      />
+      
+      {selectedItems.length > 0 && (
+        <div style={{ marginTop: '1rem' }}>
+          <strong>Selected: {selectedItems.length} items</strong>
+        </div>
+      )}
+    </div>
+  );
+}
+```

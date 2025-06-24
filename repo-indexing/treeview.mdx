@@ -1,0 +1,528 @@
+# TreeView Component
+
+## Overview
+
+### Purpose
+Use this component to generate tree view functionality
+
+### When to Use
+The TreeView component is ideal for displaying hierarchical data structures in an expandable tree format. Use this component when you need to:
+
+- **Display file system structures** - Show folders, subfolders, and files with proper nesting
+- **Organize navigation menus** - Create hierarchical navigation with expandable categories
+- **Present organizational charts** - Display company structure or reporting hierarchies  
+- **Show product categories** - Display nested product catalogs with expandable sections
+- **Manage taxonomies and tags** - Organize content with hierarchical tag structures
+- **Display decision trees** - Show branching workflows or decision processes
+- **Create interactive data exploration** - Allow users to drill down through nested datasets
+- **Build configuration interfaces** - Organize complex settings in a hierarchical structure
+- **Show dependency graphs** - Visualize relationships between interconnected items
+- **Implement content management systems** - Organize documents, pages, and media assets
+
+### Architecture
+**No Coupling** - The TreeView is a standalone component that can work independently. It manages its own state, data binding, and user interactions while providing extensive customization options for different use cases.
+
+## Components
+
+### TreeView {Standalone Component}
+
+**Purpose:** A comprehensive tree view component that displays hierarchical data with support for expansion, selection, checkboxes, drag-and-drop, and custom rendering.
+
+**Interface:**
+```typescript
+interface TreeViewProps {
+  // Data Configuration
+  data?: any[]; // Array of tree items to display
+  textField?: string; // Field name for item text (default: 'text')
+  childrenField?: string; // Field name for child items (default: 'items')
+  hasChildrenField?: string; // Field name indicating if item has children
+  expandField?: string; // Field name for expanded state
+  selectField?: string; // Field name for selected state
+  checkField?: string; // Field name for checked state
+  checkIndeterminateField?: string; // Field name for indeterminate checkbox state
+  disableField?: string; // Field name for disabled state
+  iconField?: string; // Field name for item icons
+  
+  // Selection Behavior
+  checkboxes?: boolean; // Enable checkboxes for multi-selection
+  
+  // Visual Configuration
+  expandIcons?: boolean; // Show expand/collapse icons (default: true)
+  size?: 'small' | 'medium' | 'large' | null; // Component size
+  
+  // Interaction Features
+  draggable?: boolean; // Enable drag-and-drop functionality
+  animate?: boolean; // Enable expand/collapse animations
+  
+  // Custom Rendering
+  item?: React.ComponentType<ItemRenderProps>; // Custom item renderer component
+  
+  // Focus Management
+  focusIdField?: string; // Field name for focused item identifier
+  getFocusHierarchicalIndex?: (itemId: any) => undefined | string; // Function to get hierarchical index
+  
+  // Event Handlers
+  onExpandChange?: (event: TreeViewExpandChangeEvent) => void; // Fired when item expand state changes
+  onItemClick?: (event: TreeViewItemClickEvent) => void; // Fired when item is clicked
+  onCheckChange?: (event: TreeViewCheckChangeEvent) => void; // Fired when checkbox state changes
+  onContextMenu?: (event: TreeViewContextMenuEvent) => void; // Fired on right-click
+  
+  // Drag and Drop Events
+  onItemDragStart?: (event: TreeViewItemDragStartEvent) => void; // Fired when drag operation starts
+  onItemDragOver?: (event: TreeViewItemDragOverEvent) => void; // Fired when dragging over item
+  onItemDragEnd?: (event: TreeViewItemDragEndEvent) => void; // Fired when drag operation ends
+  
+  // Styling and Accessibility
+  className?: string; // Additional CSS classes
+  style?: React.CSSProperties; // Inline styles
+  id?: string; // Component identifier
+  tabIndex?: number; // Tab order for keyboard navigation
+  dir?: string; // Text direction ('ltr' | 'rtl')
+  
+  // ARIA Accessibility
+  'aria-label'?: string; // Accessible label for the tree
+  'aria-labelledby'?: string; // Reference to labeling element
+  'aria-multiselectable'?: boolean | 'false' | 'true'; // Indicates multi-select capability
+}
+
+// Event interfaces
+interface TreeViewExpandChangeEvent {
+  item: any; // The item being expanded/collapsed
+  expanded: boolean; // New expanded state
+  dataItem: any; // Complete data item
+}
+
+interface TreeViewItemClickEvent {
+  item: any; // The clicked item
+  dataItem: any; // Complete data item
+  nativeEvent: Event; // Original DOM event
+}
+
+interface TreeViewCheckChangeEvent {
+  item: any; // The item being checked/unchecked
+  checked: boolean; // New checked state
+  dataItem: any; // Complete data item
+}
+
+interface TreeViewContextMenuEvent {
+  item: any; // The right-clicked item
+  dataItem: any; // Complete data item
+  nativeEvent: Event; // Original context menu event
+}
+
+interface TreeViewItemDragStartEvent {
+  item: any; // Item being dragged
+  dataItem: any; // Complete data item
+  nativeEvent: DragEvent; // Original drag event
+}
+
+interface TreeViewItemDragOverEvent {
+  item: any; // Item being dragged over
+  dataItem: any; // Complete data item
+  nativeEvent: DragEvent; // Original drag event
+}
+
+interface TreeViewItemDragEndEvent {
+  item: any; // Item that was dragged
+  dataItem: any; // Complete data item
+  destinationItem?: any; // Drop target item
+  nativeEvent: DragEvent; // Original drag event
+}
+
+interface ItemRenderProps {
+  item: any; // The tree item data
+  children?: React.ReactNode; // Child tree items
+  className?: string; // Computed CSS classes
+  style?: React.CSSProperties; // Computed styles
+  [key: string]: any; // Additional props
+}
+```
+
+**Usage Example:**
+```tsx
+import { TreeView } from '@progress/kendo-react-treeview';
+
+function BasicTreeView() {
+  const treeData = [
+    {
+      text: 'Documents',
+      expanded: true,
+      items: [
+        { text: 'Reports', items: [
+          { text: 'Q1 Report.pdf' },
+          { text: 'Q2 Report.pdf' }
+        ]},
+        { text: 'Presentations', items: [
+          { text: 'Company Overview.pptx' },
+          { text: 'Product Demo.pptx' }
+        ]}
+      ]
+    },
+    {
+      text: 'Images',
+      items: [
+        { text: 'logo.png' },
+        { text: 'banner.jpg' }
+      ]
+    }
+  ];
+  
+  const handleItemClick = (event) => {
+    console.log('Clicked item:', event.item.text);
+  };
+  
+  return (
+    <TreeView 
+      data={treeData}
+      textField="text"
+      childrenField="items"
+      expandField="expanded"
+      onItemClick={handleItemClick}
+    />
+  );
+}
+```
+
+## Integration Patterns
+
+### Basic Usage
+```tsx
+import { TreeView } from '@progress/kendo-react-treeview';
+
+// Simple tree with default configuration
+function SimpleTree() {
+  const data = [
+    { text: 'Folder 1', items: [
+      { text: 'File 1.txt' },
+      { text: 'File 2.txt' }
+    ]},
+    { text: 'Folder 2', items: [
+      { text: 'Subfolder', items: [
+        { text: 'Nested File.doc' }
+      ]}
+    ]}
+  ];
+  
+  return (
+    <TreeView 
+      data={data}
+      textField="text"
+      childrenField="items"
+    />
+  );
+}
+```
+
+### Advanced Usage with Checkboxes
+```tsx
+// Tree with multi-selection using checkboxes
+function CheckboxTreeView() {
+  const [treeData, setTreeData] = useState([
+    { 
+      text: 'All Items', 
+      checked: false,
+      expanded: true,
+      items: [
+        { text: 'Item 1', checked: false },
+        { text: 'Item 2', checked: true },
+        { text: 'Item 3', checked: false }
+      ]
+    }
+  ]);
+  
+  const handleCheckChange = (event) => {
+    const newData = [...treeData];
+    // Update the checked state in your data
+    updateItemCheckedState(newData, event.item, event.checked);
+    setTreeData(newData);
+  };
+  
+  return (
+    <TreeView 
+      data={treeData}
+      textField="text"
+      childrenField="items"
+      checkField="checked"
+      checkboxes={true}
+      onCheckChange={handleCheckChange}
+    />
+  );
+}
+```
+
+### Custom Item Rendering
+```tsx
+// Tree with custom item appearance
+function CustomTreeView() {
+  const CustomTreeItem = (props) => {
+    const { item } = props;
+    
+    return (
+      <div className="custom-tree-item">
+        {item.icon && <i className={`icon ${item.icon}`} />}
+        <span className="item-text">{item.text}</span>
+        {item.badge && <span className="badge">{item.badge}</span>}
+      </div>
+    );
+  };
+  
+  const data = [
+    { 
+      text: 'Dashboard', 
+      icon: 'k-i-dashboard',
+      badge: '3'
+    },
+    { 
+      text: 'Reports', 
+      icon: 'k-i-chart',
+      items: [
+        { text: 'Sales Report', icon: 'k-i-dollar' },
+        { text: 'Analytics', icon: 'k-i-chart-line' }
+      ]
+    }
+  ];
+  
+  return (
+    <TreeView 
+      data={data}
+      textField="text"
+      childrenField="items"
+      iconField="icon"
+      item={CustomTreeItem}
+    />
+  );
+}
+```
+
+### Drag and Drop Functionality
+```tsx
+// Tree with reorderable items
+function DraggableTreeView() {
+  const [treeData, setTreeData] = useState([
+    { text: 'Draggable Item 1' },
+    { text: 'Draggable Item 2' },
+    { text: 'Folder', items: [
+      { text: 'Nested Item 1' },
+      { text: 'Nested Item 2' }
+    ]}
+  ]);
+  
+  const handleDragEnd = (event) => {
+    console.log('Drag ended:', event.item.text);
+    // Implement reordering logic based on destination
+    if (event.destinationItem) {
+      console.log('Dropped on:', event.destinationItem.text);
+      // Update your data structure accordingly
+    }
+  };
+  
+  return (
+    <TreeView 
+      data={treeData}
+      textField="text"
+      childrenField="items"
+      draggable={true}
+      onItemDragEnd={handleDragEnd}
+    />
+  );
+}
+```
+
+### Controlled Expansion State
+```tsx
+// Tree with programmatic expand/collapse control
+function ControlledTreeView() {
+  const [expandedItems, setExpandedItems] = useState(['folder1']);
+  
+  const data = [
+    { 
+      id: 'folder1',
+      text: 'Folder 1', 
+      expanded: expandedItems.includes('folder1'),
+      items: [
+        { text: 'File 1.txt' },
+        { text: 'File 2.txt' }
+      ]
+    },
+    { 
+      id: 'folder2',
+      text: 'Folder 2', 
+      expanded: expandedItems.includes('folder2'),
+      items: [
+        { text: 'File 3.txt' }
+      ]
+    }
+  ];
+  
+  const handleExpandChange = (event) => {
+    const itemId = event.item.id;
+    if (event.expanded) {
+      setExpandedItems([...expandedItems, itemId]);
+    } else {
+      setExpandedItems(expandedItems.filter(id => id !== itemId));
+    }
+  };
+  
+  return (
+    <div>
+      <button onClick={() => setExpandedItems([])}>
+        Collapse All
+      </button>
+      <button onClick={() => setExpandedItems(['folder1', 'folder2'])}>
+        Expand All
+      </button>
+      <TreeView 
+        data={data}
+        textField="text"
+        childrenField="items"
+        expandField="expanded"
+        onExpandChange={handleExpandChange}
+      />
+    </div>
+  );
+}
+```
+
+## Best Practices
+
+### Usage Guidelines
+- **Structure your data hierarchically** with consistent field names for text, children, and state properties
+- **Use controlled state management** for expanded, selected, and checked states when you need to programmatically control the tree
+- **Implement proper accessibility** by providing meaningful aria-label and ensuring keyboard navigation works correctly
+- **Optimize large datasets** by implementing lazy loading for tree nodes with many children
+
+### Accessibility
+- **Keyboard Navigation**: TreeView automatically handles arrow key navigation, Enter to expand/collapse, and Space for selection
+- **Screen Reader Support**: Provides proper ARIA tree structure with role="tree" and role="treeitem"
+- **Focus Management**: Maintains focus state and provides visual focus indicators for keyboard users
+- **ARIA Attributes**: Automatically includes aria-expanded, aria-selected, and aria-checked states
+
+### Performance
+- **Lazy Loading**: For large trees, consider loading child nodes on demand rather than loading the entire tree upfront
+- **Virtual Scrolling**: For trees with many visible items, implement virtual scrolling to improve rendering performance
+- **Memoization**: Use React.memo() for custom item renderers to prevent unnecessary re-renders
+- **Data Structure Optimization**: Structure your data efficiently to minimize deep nesting and frequent updates
+
+## Common Patterns
+
+### Pattern 1: File Explorer Tree
+```tsx
+// File system browser with icons and context menus
+function FileExplorerTree() {
+  const [selectedPath, setSelectedPath] = useState('');
+  
+  const fileSystemData = [
+    {
+      text: 'Documents',
+      type: 'folder',
+      icon: 'k-i-folder',
+      expanded: true,
+      items: [
+        { text: 'report.pdf', type: 'file', icon: 'k-i-file-pdf' },
+        { text: 'presentation.pptx', type: 'file', icon: 'k-i-file-presentation' }
+      ]
+    },
+    {
+      text: 'Images',
+      type: 'folder',
+      icon: 'k-i-folder',
+      items: [
+        { text: 'photo1.jpg', type: 'file', icon: 'k-i-image' },
+        { text: 'logo.png', type: 'file', icon: 'k-i-image' }
+      ]
+    }
+  ];
+  
+  const handleItemClick = (event) => {
+    if (event.item.type === 'file') {
+      setSelectedPath(event.item.text);
+    }
+  };
+  
+  const handleContextMenu = (event) => {
+    event.nativeEvent.preventDefault();
+    // Show context menu based on item type
+    console.log('Context menu for:', event.item.text);
+  };
+  
+  return (
+    <div>
+      <TreeView 
+        data={fileSystemData}
+        textField="text"
+        childrenField="items"
+        iconField="icon"
+        onItemClick={handleItemClick}
+        onContextMenu={handleContextMenu}
+      />
+      {selectedPath && (
+        <div>Selected file: {selectedPath}</div>
+      )}
+    </div>
+  );
+}
+```
+
+### Pattern 2: Organizational Chart
+```tsx
+// Company hierarchy display with employee information
+function OrganizationalChart() {
+  const [expandedDepartments, setExpandedDepartments] = useState(['engineering']);
+  
+  const orgData = [
+    {
+      id: 'ceo',
+      text: 'CEO - John Doe',
+      title: 'Chief Executive Officer',
+      department: 'executive',
+      expanded: true,
+      items: [
+        {
+          id: 'engineering',
+          text: 'Engineering Department',
+          department: 'engineering',
+          expanded: expandedDepartments.includes('engineering'),
+          items: [
+            { text: 'Alice Smith - Senior Developer', title: 'Senior Developer' },
+            { text: 'Bob Johnson - Developer', title: 'Developer' }
+          ]
+        },
+        {
+          id: 'marketing',
+          text: 'Marketing Department',
+          department: 'marketing',
+          expanded: expandedDepartments.includes('marketing'),
+          items: [
+            { text: 'Carol Brown - Marketing Manager', title: 'Marketing Manager' }
+          ]
+        }
+      ]
+    }
+  ];
+  
+  const CustomEmployeeItem = ({ item }) => (
+    <div className="employee-item">
+      <div className="employee-name">{item.text}</div>
+      {item.title && <div className="employee-title">{item.title}</div>}
+    </div>
+  );
+  
+  return (
+    <TreeView 
+      data={orgData}
+      textField="text"
+      childrenField="items"
+      expandField="expanded"
+      item={CustomEmployeeItem}
+      onExpandChange={(event) => {
+        const dept = event.item.department;
+        if (event.expanded && dept) {
+          setExpandedDepartments([...expandedDepartments, dept]);
+        } else if (dept) {
+          setExpandedDepartments(expandedDepartments.filter(d => d !== dept));
+        }
+      }}
+    />
+  );
+}
+```

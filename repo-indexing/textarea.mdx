@@ -1,0 +1,626 @@
+# TextArea Component
+
+## Overview
+
+### Purpose
+Use this component to generate textarea input functionality
+
+### When to Use
+The TextArea component is essential for collecting multi-line text input from users. It provides a robust solution for scenarios requiring extended text entry with enhanced user experience features. Use TextArea when you need:
+
+- **Multi-line text collection** - Comments, feedback, descriptions, or any content requiring paragraph-length input
+- **Character counting** - When you need to display real-time character count or enforce character limits
+- **Resizable text areas** - Auto-growing or manually resizable text input areas that adapt to content
+- **Form integration** - Rich text input fields that integrate seamlessly with form validation and state management
+- **Content creation interfaces** - Blog posts, article drafts, or any content creation workflows
+- **User-generated content** - Reviews, testimonials, support tickets, or social media posts
+- **Configuration text fields** - Settings descriptions, custom CSS, JSON configuration, or script input
+- **Accessibility-focused text input** - When keyboard navigation and screen reader support are critical
+
+Perfect for modern applications requiring sophisticated text input capabilities with built-in accessibility, validation, and user experience enhancements.
+
+### Architecture
+**No Coupling**: TextArea is a standalone component that operates independently without requiring other components. It provides comprehensive multi-line text input functionality with built-in character counting, resizing capabilities, and form integration features.
+
+## Components
+
+### TextArea
+
+**Purpose:** Provides a feature-rich multi-line text input control with character counting, resizing capabilities, validation, and accessibility features for collecting extended text content from users.
+
+**Interface:**
+```typescript
+interface TextAreaProps {
+  // Value and change handling
+  value?: string; // The current text value
+  onChange?: (event: TextAreaChangeEvent) => void; // Callback when text changes
+  defaultValue?: string; // Initial text value for uncontrolled usage
+  
+  // Size and dimensions
+  rows?: number; // Number of visible text lines (default: 3)
+  cols?: number; // Number of visible character columns
+  resize?: 'none' | 'both' | 'horizontal' | 'vertical'; // Resize behavior
+  autoSize?: boolean; // Auto-resize based on content
+  
+  // Character management
+  maxLength?: number; // Maximum character limit
+  showCharacterCounter?: boolean; // Display character count
+  
+  // UI state
+  disabled?: boolean; // Disable the textarea
+  readonly?: boolean; // Make the textarea read-only
+  placeholder?: string; // Placeholder text when empty
+  
+  // Validation
+  required?: boolean; // Mark field as required
+  valid?: boolean; // Override validation state
+  validationMessage?: string; // Custom validation message
+  
+  // Event handlers
+  onFocus?: (event: TextAreaFocusEvent) => void; // Callback when textarea gains focus
+  onBlur?: (event: TextAreaBlurEvent) => void; // Callback when textarea loses focus
+  onKeyDown?: (event: React.KeyboardEvent) => void; // Keyboard event handler
+  onKeyPress?: (event: React.KeyboardEvent) => void; // Key press event handler
+  
+  // Accessibility
+  id?: string; // Unique identifier
+  name?: string; // Form field name
+  ariaLabel?: string; // Accessible label
+  ariaLabelledBy?: string; // Reference to labeling element
+  ariaDescribedBy?: string; // Reference to describing element
+  
+  // Styling
+  className?: string; // Custom CSS classes
+  style?: React.CSSProperties; // Inline styles
+  dir?: 'ltr' | 'rtl'; // Text direction for internationalization
+  
+  // Form integration
+  tabIndex?: number; // Tab order position
+}
+
+interface TextAreaChangeEvent {
+  value: string; // The new text value
+  target: TextArea; // Reference to the component instance
+}
+
+interface TextAreaFocusEvent {
+  target: TextArea; // Reference to the component instance
+}
+
+interface TextAreaBlurEvent {
+  target: TextArea; // Reference to the component instance
+}
+```
+
+**Usage Example:**
+```tsx
+import { TextArea } from '@progress/kendo-react-inputs';
+import { useState } from 'react';
+
+function BasicTextArea() {
+  const [text, setText] = useState('');
+
+  return (
+    <TextArea
+      value={text}
+      onChange={(event) => setText(event.value)}
+      placeholder="Enter your comments..."
+      rows={4}
+      maxLength={500}
+      showCharacterCounter={true}
+    />
+  );
+}
+```
+
+## Integration Patterns
+
+### Basic Usage
+```tsx
+import { TextArea } from '@progress/kendo-react-inputs';
+
+// Simple controlled textarea
+function SimpleExample() {
+  const [content, setContent] = useState('');
+
+  return (
+    <TextArea
+      value={content}
+      onChange={(event) => setContent(event.value)}
+      placeholder="Type your message here..."
+    />
+  );
+}
+
+// Uncontrolled with default value
+function UncontrolledExample() {
+  return (
+    <TextArea
+      defaultValue="Initial content"
+      onChange={(event) => console.log('Content changed:', event.value)}
+      rows={5}
+    />
+  );
+}
+```
+
+### Advanced Usage with Character Counting
+```tsx
+import { TextArea } from '@progress/kendo-react-inputs';
+import { useState } from 'react';
+
+function CommentTextArea() {
+  const [comment, setComment] = useState('');
+  const [validationMessage, setValidationMessage] = useState('');
+
+  const maxLength = 1000;
+  const minLength = 10;
+
+  const handleCommentChange = (event: TextAreaChangeEvent) => {
+    const newValue = event.value;
+    setComment(newValue);
+
+    // Real-time validation
+    if (newValue.length < minLength && newValue.length > 0) {
+      setValidationMessage(`Comment must be at least ${minLength} characters`);
+    } else if (newValue.length > maxLength) {
+      setValidationMessage(`Comment cannot exceed ${maxLength} characters`);
+    } else {
+      setValidationMessage('');
+    }
+  };
+
+  const handleBlur = () => {
+    if (comment.length === 0) {
+      setValidationMessage('Comment is required');
+    } else if (comment.length < minLength) {
+      setValidationMessage(`Comment must be at least ${minLength} characters`);
+    }
+  };
+
+  return (
+    <div>
+      <label htmlFor="comment-textarea">Your Comment *</label>
+      <TextArea
+        id="comment-textarea"
+        value={comment}
+        onChange={handleCommentChange}
+        onBlur={handleBlur}
+        onFocus={() => setValidationMessage('')}
+        placeholder="Share your thoughts... (minimum 10 characters)"
+        rows={6}
+        maxLength={maxLength}
+        showCharacterCounter={true}
+        autoSize={true}
+        required
+        validationMessage={validationMessage}
+        valid={!validationMessage && comment.length >= minLength}
+      />
+    </div>
+  );
+}
+```
+
+### Auto-Resizing Text Area
+```tsx
+function AutoResizingTextArea() {
+  const [description, setDescription] = useState('');
+
+  return (
+    <TextArea
+      value={description}
+      onChange={(event) => setDescription(event.value)}
+      placeholder="Describe your project... (this field will grow as you type)"
+      autoSize={true}
+      rows={3} // Minimum height
+      maxLength={2000}
+      showCharacterCounter={true}
+      resize="none" // Disable manual resize when auto-sizing
+    />
+  );
+}
+```
+
+### Form Integration Example
+```tsx
+import { TextArea } from '@progress/kendo-react-inputs';
+import { Button } from '@progress/kendo-react-buttons';
+import { useState } from 'react';
+
+function FeedbackForm() {
+  const [formData, setFormData] = useState({
+    summary: '',
+    details: '',
+    suggestions: ''
+  });
+
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const validateField = (field: string, value: string) => {
+    const newErrors = { ...errors };
+    
+    switch (field) {
+      case 'summary':
+        if (!value.trim()) {
+          newErrors.summary = 'Summary is required';
+        } else if (value.length < 10) {
+          newErrors.summary = 'Summary must be at least 10 characters';
+        } else {
+          delete newErrors.summary;
+        }
+        break;
+      case 'details':
+        if (value.length > 0 && value.length < 20) {
+          newErrors.details = 'Details must be at least 20 characters if provided';
+        } else {
+          delete newErrors.details;
+        }
+        break;
+      default:
+        delete newErrors[field];
+    }
+    
+    setErrors(newErrors);
+  };
+
+  const handleFieldChange = (field: string) => (event: TextAreaChangeEvent) => {
+    const value = event.value;
+    setFormData(prev => ({ ...prev, [field]: value }));
+    validateField(field, value);
+  };
+
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    
+    // Validate all fields
+    Object.keys(formData).forEach(field => {
+      validateField(field, formData[field as keyof typeof formData]);
+    });
+    
+    if (Object.keys(errors).length === 0) {
+      console.log('Form submitted:', formData);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <div>
+        <label htmlFor="summary">Summary *</label>
+        <TextArea
+          id="summary"
+          name="summary"
+          value={formData.summary}
+          onChange={handleFieldChange('summary')}
+          placeholder="Brief summary of your feedback..."
+          rows={2}
+          maxLength={200}
+          showCharacterCounter={true}
+          required
+          validationMessage={errors.summary}
+        />
+      </div>
+
+      <div>
+        <label htmlFor="details">Detailed Description</label>
+        <TextArea
+          id="details"
+          name="details"
+          value={formData.details}
+          onChange={handleFieldChange('details')}
+          placeholder="Provide more details about your feedback (optional)..."
+          rows={5}
+          autoSize={true}
+          maxLength={1000}
+          showCharacterCounter={true}
+          validationMessage={errors.details}
+        />
+      </div>
+
+      <div>
+        <label htmlFor="suggestions">Suggestions for Improvement</label>
+        <TextArea
+          id="suggestions"
+          name="suggestions"
+          value={formData.suggestions}
+          onChange={handleFieldChange('suggestions')}
+          placeholder="Any suggestions for how we can improve? (optional)"
+          rows={3}
+          maxLength={500}
+          showCharacterCounter={true}
+        />
+      </div>
+
+      <Button type="submit" primary>Submit Feedback</Button>
+    </form>
+  );
+}
+```
+
+### Dynamic Configuration TextArea
+```tsx
+function ConfigurationEditor() {
+  const [config, setConfig] = useState('');
+  const [isValidJson, setIsValidJson] = useState(true);
+
+  const validateJson = (value: string) => {
+    if (!value.trim()) {
+      setIsValidJson(true);
+      return;
+    }
+
+    try {
+      JSON.parse(value);
+      setIsValidJson(true);
+    } catch {
+      setIsValidJson(false);
+    }
+  };
+
+  const handleConfigChange = (event: TextAreaChangeEvent) => {
+    const value = event.value;
+    setConfig(value);
+    validateJson(value);
+  };
+
+  return (
+    <div>
+      <label htmlFor="json-config">JSON Configuration</label>
+      <TextArea
+        id="json-config"
+        value={config}
+        onChange={handleConfigChange}
+        placeholder='{"key": "value", "array": [1, 2, 3]}'
+        rows={10}
+        resize="vertical"
+        valid={isValidJson}
+        validationMessage={!isValidJson ? 'Invalid JSON format' : ''}
+        style={{
+          fontFamily: 'monospace',
+          fontSize: '14px'
+        }}
+      />
+      {isValidJson && config && (
+        <div style={{ marginTop: '8px', color: 'green' }}>
+          ✓ Valid JSON configuration
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+## Best Practices
+
+### Usage Guidelines
+- **Set appropriate dimensions** - Use `rows` to define initial height and consider `autoSize` for content that varies in length
+- **Implement character limits** - Use `maxLength` with `showCharacterCounter` to guide users and prevent excessive input
+- **Provide clear placeholders** - Use descriptive placeholder text that explains the expected content format or purpose
+- **Handle validation gracefully** - Combine real-time validation with clear error messages to guide user input
+- **Choose appropriate resize behavior** - Use `resize` property to control user resizing capabilities based on your layout needs
+
+### Accessibility
+- **Semantic labeling** - Always associate TextArea with a label using `htmlFor` and `id` attributes or `ariaLabelledBy`
+- **Descriptive placeholders** - Use meaningful placeholder text that explains the expected input without replacing proper labels
+- **Validation feedback** - Ensure validation messages are announced to screen readers using `ariaDescribedBy` for error associations
+- **Keyboard navigation** - TextArea supports full keyboard navigation including Tab, Enter, and arrow key movements
+- **Required field indication** - Use the `required` prop and provide clear visual and textual indicators for mandatory fields
+
+### Performance
+- **Controlled vs Uncontrolled** - Use controlled components for complex forms with validation, uncontrolled for simple use cases
+- **Debounced validation** - For expensive validation operations, consider debouncing the validation logic to avoid excessive processing
+- **Event handler optimization** - Use useCallback hooks for event handlers to prevent unnecessary re-renders in React applications
+- **Character counting efficiency** - When using character counters, ensure the counting logic is optimized for frequent updates
+
+## Common Patterns
+
+### Pattern 1: Blog Post Editor
+```tsx
+function BlogPostEditor() {
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
+  const [excerpt, setExcerpt] = useState('');
+
+  const generateExcerpt = (content: string) => {
+    // Auto-generate excerpt from first 150 characters
+    return content.substring(0, 150) + (content.length > 150 ? '...' : '');
+  };
+
+  useEffect(() => {
+    if (content && !excerpt) {
+      setExcerpt(generateExcerpt(content));
+    }
+  }, [content, excerpt]);
+
+  return (
+    <div className="blog-editor">
+      <div>
+        <label htmlFor="post-title">Post Title</label>
+        <input
+          id="post-title"
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Enter post title..."
+        />
+      </div>
+
+      <div>
+        <label htmlFor="post-content">Content</label>
+        <TextArea
+          id="post-content"
+          value={content}
+          onChange={(event) => setContent(event.value)}
+          placeholder="Write your blog post content here..."
+          rows={15}
+          autoSize={true}
+          maxLength={10000}
+          showCharacterCounter={true}
+          resize="vertical"
+        />
+      </div>
+
+      <div>
+        <label htmlFor="post-excerpt">Excerpt</label>
+        <TextArea
+          id="post-excerpt"
+          value={excerpt}
+          onChange={(event) => setExcerpt(event.value)}
+          placeholder="Brief excerpt for post preview..."
+          rows={3}
+          maxLength={300}
+          showCharacterCounter={true}
+        />
+      </div>
+    </div>
+  );
+}
+```
+
+### Pattern 2: Support Ticket Form
+```tsx
+function SupportTicketForm() {
+  const [ticketData, setTicketData] = useState({
+    issue: '',
+    stepsToReproduce: '',
+    expectedBehavior: '',
+    actualBehavior: ''
+  });
+
+  const [priority, setPriority] = useState('medium');
+
+  const updateField = (field: string) => (event: TextAreaChangeEvent) => {
+    setTicketData(prev => ({ ...prev, [field]: event.value }));
+  };
+
+  const getFieldValidation = (field: string, value: string) => {
+    switch (field) {
+      case 'issue':
+        return value.length < 10 ? 'Please provide more details about the issue' : '';
+      case 'stepsToReproduce':
+        return value.length < 20 ? 'Please provide detailed steps to reproduce the issue' : '';
+      default:
+        return '';
+    }
+  };
+
+  return (
+    <form className="support-ticket-form">
+      <div>
+        <label htmlFor="issue-description">Issue Description *</label>
+        <TextArea
+          id="issue-description"
+          value={ticketData.issue}
+          onChange={updateField('issue')}
+          placeholder="Describe the issue you're experiencing..."
+          rows={4}
+          maxLength={1000}
+          showCharacterCounter={true}
+          required
+          validationMessage={getFieldValidation('issue', ticketData.issue)}
+        />
+      </div>
+
+      <div>
+        <label htmlFor="steps-reproduce">Steps to Reproduce *</label>
+        <TextArea
+          id="steps-reproduce"
+          value={ticketData.stepsToReproduce}
+          onChange={updateField('stepsToReproduce')}
+          placeholder="1. Go to...
+2. Click on...
+3. Notice that..."
+          rows={6}
+          maxLength={2000}
+          showCharacterCounter={true}
+          required
+          validationMessage={getFieldValidation('stepsToReproduce', ticketData.stepsToReproduce)}
+        />
+      </div>
+
+      <div>
+        <label htmlFor="expected-behavior">Expected Behavior</label>
+        <TextArea
+          id="expected-behavior"
+          value={ticketData.expectedBehavior}
+          onChange={updateField('expectedBehavior')}
+          placeholder="What did you expect to happen?"
+          rows={3}
+          maxLength={500}
+          showCharacterCounter={true}
+        />
+      </div>
+
+      <div>
+        <label htmlFor="actual-behavior">Actual Behavior</label>
+        <TextArea
+          id="actual-behavior"
+          value={ticketData.actualBehavior}
+          onChange={updateField('actualBehavior')}
+          placeholder="What actually happened?"
+          rows={3}
+          maxLength={500}
+          showCharacterCounter={true}
+        />
+      </div>
+    </form>
+  );
+}
+```
+
+### Pattern 3: User Review Component
+```tsx
+function UserReviewForm({ productId, onSubmit }) {
+  const [review, setReview] = useState('');
+  const [rating, setRating] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async () => {
+    if (review.length < 50 || rating === 0) return;
+
+    setIsSubmitting(true);
+    try {
+      await onSubmit({ productId, review, rating });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const getReviewValidation = () => {
+    if (review.length === 0) return '';
+    if (review.length < 50) return 'Review must be at least 50 characters';
+    if (review.length > 1000) return 'Review must be less than 1000 characters';
+    return '';
+  };
+
+  return (
+    <div className="review-form">
+      <div>
+        <label htmlFor="product-review">Your Review *</label>
+        <TextArea
+          id="product-review"
+          value={review}
+          onChange={(event) => setReview(event.value)}
+          placeholder="Share your experience with this product... (minimum 50 characters)"
+          rows={5}
+          autoSize={true}
+          maxLength={1000}
+          showCharacterCounter={true}
+          disabled={isSubmitting}
+          validationMessage={getReviewValidation()}
+          valid={review.length >= 50 && review.length <= 1000}
+        />
+      </div>
+
+      <div className="review-actions">
+        <Button
+          onClick={handleSubmit}
+          disabled={review.length < 50 || rating === 0 || isSubmitting}
+          primary
+        >
+          {isSubmitting ? 'Submitting...' : 'Submit Review'}
+        </Button>
+      </div>
+    </div>
+  );
+}
+```

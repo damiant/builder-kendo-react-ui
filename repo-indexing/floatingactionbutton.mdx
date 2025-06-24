@@ -1,0 +1,391 @@
+# FloatingActionButton Components
+
+## Overview
+
+### Purpose
+Use this component group to generate floating action button functionality with items
+
+### When to Use
+FloatingActionButton components are ideal for providing quick access to primary actions in an interface. Common use cases include:
+
+- **Primary action triggers** - Display the most important action prominently (add, create, compose)
+- **Multi-action menus** - Show a main action with expandable sub-actions in a popup
+- **Contextual actions** - Provide quick access to relevant actions based on current page or state
+- **Mobile interfaces** - Offer thumb-friendly access to key functions on mobile devices
+- **Persistent actions** - Keep important actions accessible while users scroll through content
+- **Workflow shortcuts** - Enable rapid task completion with prominent action buttons
+- **Content creation** - Provide easy access to creation tools (new post, add item, upload)
+
+### Architecture
+**Moderate Coupling**: The FloatingActionButton serves as the primary component that can optionally display a collection of FloatingActionButtonItem components in a popup. The items are defined as data and rendered internally by the FloatingActionButton, creating a cohesive action menu system.
+
+### Component Interdependencies
+The components work together through a data-driven approach:
+- **FloatingActionButton** acts as the main trigger button and popup container
+- **FloatingActionButtonItem** components are defined as data objects and rendered internally
+- **Popup system** manages the display and positioning of item collections
+- **Event handling** coordinates between main button clicks and item selections
+
+## Components
+
+### FloatingActionButton
+
+**Purpose:** Provides a prominent floating button that can trigger single actions or display a popup menu with multiple action items.
+
+**Interface:**
+```typescript
+interface FloatingActionButtonProps {
+  children?: React.ReactNode; // Child elements (typically not used with items)
+  className?: string; // Additional CSS classes
+  dir?: string; // Text direction for RTL support
+  style?: React.CSSProperties; // Inline styles
+  id?: string; // Element ID
+  disabled?: boolean; // Disable the button (default: false)
+  
+  // Visual appearance
+  icon?: string; // Icon class name for main button
+  svgIcon?: SVGIcon; // SVG icon for main button
+  iconClass?: string; // Custom icon CSS class
+  text?: string; // Button text label
+  
+  // Sizing and styling
+  size?: null | 'small' | 'medium' | 'large'; // Button size (default: 'medium')
+  rounded?: null | 'small' | 'medium' | 'large' | 'full'; // Border radius (default: 'full')
+  themeColor?: null | 'primary' | 'secondary' | 'tertiary' | 'info' | 'success' | 'warning' | 'error' | 'dark' | 'light' | 'inverse'; // Color theme (default: 'primary')
+  
+  // Positioning
+  align?: {
+    horizontal?: 'start' | 'center' | 'end'; // Horizontal alignment (default: 'end')
+    vertical?: 'top' | 'middle' | 'bottom'; // Vertical alignment (default: 'bottom')
+  };
+  alignOffset?: {
+    x?: number | string; // Horizontal offset
+    y?: number | string; // Vertical offset
+  };
+  positionMode?: 'absolute' | 'fixed'; // CSS position mode (default: 'fixed')
+  
+  // Items and popup
+  items?: Array<FloatingActionButtonItemProps>; // Collection of action items
+  item?: React.ComponentType<FloatingActionButtonItemProps>; // Custom item component
+  popupSettings?: {
+    animate?: boolean | PopupAnimation; // Animation settings
+    popupClass?: string; // CSS class for popup
+  };
+  
+  // Modal behavior
+  modal?: boolean; // Enable modal overlay
+  overlayStyle?: React.CSSProperties; // Overlay styling
+  
+  // Accessibility
+  tabIndex?: number; // Tab index for keyboard navigation
+  accessKey?: string; // Access key for shortcuts
+  
+  // Events
+  onClick?: (event: FloatingActionButtonEvent) => void; // Main button click
+  onItemClick?: (event: FloatingActionButtonItemEvent) => void; // Item click
+  onFocus?: (event: FloatingActionButtonEvent) => void; // Focus event
+  onBlur?: (event: FloatingActionButtonEvent) => void; // Blur event
+  onKeyDown?: (event: FloatingActionButtonEvent) => void; // Key press
+  onOpen?: (event: FloatingActionButtonEvent) => void; // Popup open
+  onClose?: (event: FloatingActionButtonEvent) => void; // Popup close
+}
+```
+
+**Dependencies:** None - can be used standalone or with items
+**Provides:** Main button interface and popup container for items
+
+**Usage Example:**
+```tsx
+import { FloatingActionButton } from '@progress/kendo-react-buttons';
+
+function Example() {
+  return (
+    <FloatingActionButton
+      icon="plus"
+      text="Create"
+      themeColor="primary"
+      size="large"
+      onClick={(event) => console.log('Main action triggered')}
+    />
+  );
+}
+```
+
+### FloatingActionButtonItem
+
+**Purpose:** Defines individual action items that appear in the FloatingActionButton popup menu.
+
+**Interface:**
+```typescript
+interface FloatingActionButtonItemProps {
+  children?: React.ReactNode; // Custom content for the item
+  className?: string; // Additional CSS classes
+  style?: React.CSSProperties; // Inline styles
+  disabled?: boolean; // Disable this item (default: false)
+  
+  // Visual content
+  icon?: string; // Icon class name
+  svgIcon?: SVGIcon; // SVG icon
+  text?: string; // Item text label
+  
+  // Accessibility
+  tabIndex?: number; // Tab index (default: 0)
+  
+  // Data properties
+  [customProp: string]: any; // Custom properties for data binding
+}
+```
+
+**Context Dependencies:** Must be used within FloatingActionButton items array
+**Parent Requirements:** FloatingActionButton component with items prop
+
+**Usage Example:**
+```tsx
+// Items are defined as data objects, not JSX components
+const actionItems = [
+  {
+    icon: 'edit',
+    text: 'Edit',
+    disabled: false
+  },
+  {
+    icon: 'delete',
+    text: 'Delete',
+    disabled: false
+  }
+];
+
+<FloatingActionButton
+  icon="plus"
+  items={actionItems}
+  onItemClick={(event) => {
+    console.log('Item clicked:', event.itemProps.text);
+    console.log('Item index:', event.itemIndex);
+  }}
+/>
+```
+
+## Integration Patterns
+
+### Basic Usage
+```tsx
+import { FloatingActionButton } from '@progress/kendo-react-buttons';
+
+// Simple single-action button
+function BasicExample() {
+  return (
+    <FloatingActionButton
+      icon="plus"
+      text="Add New"
+      onClick={() => console.log('Add action')}
+    />
+  );
+}
+```
+
+### Advanced Usage with Items
+```tsx
+import { FloatingActionButton } from '@progress/kendo-react-buttons';
+
+// Multi-action button with popup items
+function AdvancedExample() {
+  const actionItems = [
+    { icon: 'file-add', text: 'New Document', type: 'document' },
+    { icon: 'folder-add', text: 'New Folder', type: 'folder' },
+    { icon: 'image', text: 'Upload Image', type: 'image' },
+    { icon: 'link', text: 'Add Link', type: 'link', disabled: true }
+  ];
+
+  const handleItemClick = (event) => {
+    const { itemProps, itemIndex } = event;
+    console.log(`Action: ${itemProps.text}, Type: ${itemProps.type}`);
+  };
+
+  return (
+    <FloatingActionButton
+      icon="plus"
+      text="Create"
+      items={actionItems}
+      themeColor="primary"
+      size="large"
+      align={{ horizontal: 'end', vertical: 'bottom' }}
+      alignOffset={{ x: 16, y: 16 }}
+      modal={true}
+      onItemClick={handleItemClick}
+      onOpen={() => console.log('Menu opened')}
+      onClose={() => console.log('Menu closed')}
+    />
+  );
+}
+```
+
+### Common Variations
+
+#### Positioned FAB
+```tsx
+// Absolute positioning within a container
+function PositionedExample() {
+  return (
+    <div style={{ position: 'relative', height: '400px' }}>
+      <FloatingActionButton
+        icon="plus"
+        positionMode="absolute"
+        align={{ horizontal: 'start', vertical: 'top' }}
+        alignOffset={{ x: 20, y: 20 }}
+      />
+    </div>
+  );
+}
+```
+
+#### Custom Styled FAB
+```tsx
+// Custom appearance and behavior
+function CustomExample() {
+  return (
+    <FloatingActionButton
+      icon="message"
+      text="Chat"
+      size="small"
+      rounded="medium"
+      themeColor="success"
+      className="custom-fab"
+      style={{ zIndex: 1000 }}
+      popupSettings={{
+        animate: true,
+        popupClass: 'custom-popup'
+      }}
+    />
+  );
+}
+```
+
+#### Modal FAB with Overlay
+```tsx
+// FAB with modal overlay when expanded
+function ModalExample() {
+  const items = [
+    { icon: 'phone', text: 'Call' },
+    { icon: 'email', text: 'Email' },
+    { icon: 'chat', text: 'Message' }
+  ];
+
+  return (
+    <FloatingActionButton
+      icon="communication"
+      items={items}
+      modal={true}
+      overlayStyle={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
+      themeColor="info"
+    />
+  );
+}
+```
+
+## Component Relationships
+
+### Data Flow
+The FloatingActionButton manages the display and interaction of items through a unidirectional data flow:
+1. Items are passed as data objects to the `items` prop
+2. FloatingActionButton renders items internally using FloatingActionButtonItem
+3. Click events bubble up through `onItemClick` with item data and index
+4. Main button clicks are handled through `onClick` event
+
+### Popup Management
+The component handles popup lifecycle automatically:
+- **Opening**: Triggered by main button click when items are present
+- **Positioning**: Managed by internal popup positioning system
+- **Closing**: Triggered by item selection, outside clicks, or escape key
+- **Animation**: Controlled through `popupSettings.animate`
+
+### Event Handling
+Events are coordinated between the main button and popup items:
+- **Main button events**: `onClick`, `onFocus`, `onBlur`, `onKeyDown`
+- **Popup events**: `onOpen`, `onClose`
+- **Item events**: `onItemClick` with item context and index
+- **Keyboard navigation**: Built-in support for arrow keys and enter/escape
+
+## Best Practices
+
+### Usage Guidelines
+- **Single primary action**: Use standalone FAB for the most important page action
+- **Related actions**: Group related actions using items to reduce UI clutter
+- **Consistent positioning**: Maintain consistent FAB placement across similar pages
+- **Appropriate sizing**: Use larger sizes for primary actions, smaller for secondary
+- **Clear labeling**: Provide descriptive text for better accessibility
+- **Item organization**: Order items by frequency of use or logical workflow
+
+### Accessibility
+- **Keyboard navigation**: Full keyboard support with tab navigation and arrow keys
+- **Screen readers**: Proper ARIA labeling and role assignments
+- **Focus management**: Clear focus indicators and logical tab order
+- **High contrast**: Ensure sufficient color contrast for all theme colors
+- **Reduced motion**: Respect user preferences for reduced animations
+
+### Performance
+- **Item rendering**: Items are rendered on-demand when popup opens
+- **Event optimization**: Use React event delegation for efficient handling
+- **Animation performance**: Leverage CSS transitions for smooth animations
+- **Z-index management**: Proper layering to avoid conflicts with other UI
+
+## Common Patterns
+
+### Pattern 1: Content Creation Hub
+```tsx
+// Central creation point for different content types
+function CreationHub() {
+  const creationItems = [
+    { icon: 'file-text', text: 'Text Document' },
+    { icon: 'table', text: 'Spreadsheet' },
+    { icon: 'presentation', text: 'Presentation' },
+    { icon: 'image', text: 'Image Upload' }
+  ];
+
+  return (
+    <FloatingActionButton
+      icon="plus"
+      text="Create"
+      items={creationItems}
+      size="large"
+      themeColor="primary"
+      onItemClick={(event) => {
+        // Route to appropriate creation flow
+        const action = event.itemProps.text;
+        navigateToCreation(action);
+      }}
+    />
+  );
+}
+```
+
+### Pattern 2: Contextual Actions
+```tsx
+// Actions that change based on current context
+function ContextualActions({ currentPage, userPermissions }) {
+  const getAvailableActions = () => {
+    const actions = [];
+    
+    if (currentPage === 'documents' && userPermissions.canCreate) {
+      actions.push({ icon: 'file-add', text: 'New Document' });
+    }
+    
+    if (userPermissions.canInvite) {
+      actions.push({ icon: 'user-add', text: 'Invite User' });
+    }
+    
+    return actions;
+  };
+
+  const actions = getAvailableActions();
+  
+  if (actions.length === 0) return null;
+  
+  return (
+    <FloatingActionButton
+      icon="plus"
+      items={actions}
+      themeColor="secondary"
+    />
+  );
+}
+```

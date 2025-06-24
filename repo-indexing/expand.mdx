@@ -1,0 +1,543 @@
+# Expand Animation
+
+## Overview
+
+### Purpose
+Use this component to generate expand animation functionality that smoothly animates the expansion and collapse of content. The Expand component provides a flexible animation wrapper that can expand content in both horizontal and vertical directions.
+
+### When to Use
+The Expand animation component is ideal for creating smooth expand/collapse interactions in your user interface. Use this component when you need to:
+
+- Animate the opening and closing of collapsible content sections
+- Create smooth reveal effects for hidden content areas  
+- Implement accordion-style interfaces with animated transitions
+- Show/hide content with a natural expansion effect
+- Animate the appearance of dropdown content or secondary information
+- Provide visual feedback when expanding or collapsing UI elements like panels, cards, or sidebars
+- Create progressive disclosure patterns where content is revealed on demand
+
+### Architecture
+**No Coupling** - The Expand component is a standalone animation component that doesn't require any other components to function. It serves as an animation wrapper around any React content.
+
+### Component Interdependencies
+None - This is a standalone component that can wrap any React children and animate their expansion/collapse.
+
+## Components
+
+### Expand {Standalone Component}
+
+**Purpose:** Provides smooth expand/collapse animation effects for wrapped content, supporting both horizontal and vertical expansion directions.
+
+**Interface:**
+```typescript
+interface ExpandProps extends AnimationInterface {
+  // Animation container configuration
+  children?: React.ReactNode; // Content to be animated
+  component?: React.ReactNode; // HTML tag for container (default: 'div')
+  className?: string; // CSS classes for animation container
+  id?: string; // ID attribute for container element
+  style?: any; // Inline styles for animation container
+  
+  // Expand-specific configuration
+  direction?: ExpandDirection; // 'horizontal' | 'vertical' (default: 'vertical')
+  childFactory?: any; // Function for customizing child element rendering
+  
+  // Animation behavior (inherited from AnimationInterface)
+  appear?: boolean; // Animate on first mount (default: false)
+  enter?: boolean; // Animate entering elements (default: true)
+  exit?: boolean; // Animate exiting elements (default: true)
+  transitionEnterDuration?: number; // Enter animation duration (default: 300ms)
+  transitionExitDuration?: number; // Exit animation duration (default: 300ms)
+  mountOnEnter?: boolean; // Lazy mount on first show (default: false)
+  unmountOnExit?: boolean; // Unmount after exit (default: false)
+  
+  // Styling hooks for animation states
+  componentChildClassName?: string; // CSS classes for animated children
+  componentChildStyle?: any; // Styles for animated children
+  
+  // Event handlers for animation lifecycle
+  onEnter?: (event: AnimationEventArguments) => void; // Before enter animation starts
+  onEntering?: (event: AnimationEventArguments) => void; // During enter animation
+  onEntered?: (event: AnimationEventArguments) => void; // After enter animation completes
+  onExit?: (event: AnimationEventArguments) => void; // Before exit animation starts
+  onExiting?: (event: AnimationEventArguments) => void; // During exit animation
+  onExited?: (event: AnimationEventArguments) => void; // After exit animation completes
+}
+
+type ExpandDirection = 'horizontal' | 'vertical';
+
+interface AnimationEventArguments {
+  animatedElement: HTMLElement; // The element being animated
+  target: AnimationChildHandle; // The animation component instance
+}
+```
+
+**Usage Example:**
+```tsx
+import { Expand } from '@progress/kendo-react-animation';
+
+function CollapsePanel() {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  return (
+    <div>
+      <button onClick={() => setIsExpanded(!isExpanded)}>
+        {isExpanded ? 'Collapse' : 'Expand'} Content
+      </button>
+      
+      <Expand
+        direction="vertical"
+        transitionEnterDuration={300}
+        transitionExitDuration={300}
+      >
+        {isExpanded && (
+          <div className="expandable-content">
+            <h3>Expanded Content</h3>
+            <p>This content will animate when expanding or collapsing.</p>
+            <p>The animation smoothly reveals the height of this content.</p>
+          </div>
+        )}
+      </Expand>
+    </div>
+  );
+}
+```
+
+## Integration Patterns
+
+### Basic Vertical Expansion
+```tsx
+import { Expand } from '@progress/kendo-react-animation';
+import { useState } from 'react';
+
+// Simple show/hide with vertical expansion
+function BasicExpansion() {
+  const [show, setShow] = useState(false);
+
+  return (
+    <div>
+      <button onClick={() => setShow(!show)}>
+        Toggle Content
+      </button>
+      <Expand direction="vertical">
+        {show && (
+          <div className="content">
+            Content that expands vertically
+          </div>
+        )}
+      </Expand>
+    </div>
+  );
+}
+```
+
+### Horizontal Expansion
+```tsx
+// Expand content horizontally (width animation)
+function HorizontalExpansion() {
+  const [show, setShow] = useState(false);
+
+  return (
+    <div className="horizontal-container">
+      <button onClick={() => setShow(!show)}>
+        Show Sidebar
+      </button>
+      <Expand direction="horizontal">
+        {show && (
+          <div className="sidebar">
+            <nav>Navigation items</nav>
+          </div>
+        )}
+      </Expand>
+    </div>
+  );
+}
+```
+
+### Advanced Configuration
+```tsx
+// Complex usage with lifecycle hooks and custom timing
+function AdvancedExpansion() {
+  const [expanded, setExpanded] = useState(false);
+  const [animating, setAnimating] = useState(false);
+
+  const handleEnter = (event) => {
+    setAnimating(true);
+    console.log('Animation starting:', event.animatedElement);
+  };
+
+  const handleEntered = (event) => {
+    setAnimating(false);
+    console.log('Animation completed:', event.animatedElement);
+  };
+
+  return (
+    <div>
+      <button 
+        onClick={() => setExpanded(!expanded)}
+        disabled={animating}
+      >
+        {expanded ? 'Collapse' : 'Expand'} Panel
+        {animating && ' (Animating...)'}
+      </button>
+
+      <Expand
+        direction="vertical"
+        transitionEnterDuration={500}
+        transitionExitDuration={300}
+        className="custom-expand-animation"
+        onEnter={handleEnter}
+        onEntered={handleEntered}
+        componentChildStyle={{ padding: '20px' }}
+      >
+        {expanded && (
+          <div className="panel-content">
+            <h3>Animated Panel</h3>
+            <p>This panel uses custom timing and lifecycle hooks.</p>
+            <button>Action Button</button>
+          </div>
+        )}
+      </Expand>
+    </div>
+  );
+}
+```
+
+### Accordion Pattern
+```tsx
+// Multiple expandable sections
+function AccordionWithExpand() {
+  const [activeSection, setActiveSection] = useState(null);
+
+  const toggleSection = (section) => {
+    setActiveSection(activeSection === section ? null : section);
+  };
+
+  const sections = [
+    { id: 'section1', title: 'Section 1', content: 'Content for section 1' },
+    { id: 'section2', title: 'Section 2', content: 'Content for section 2' },
+    { id: 'section3', title: 'Section 3', content: 'Content for section 3' }
+  ];
+
+  return (
+    <div className="accordion">
+      {sections.map((section) => (
+        <div key={section.id} className="accordion-item">
+          <button 
+            className="accordion-header"
+            onClick={() => toggleSection(section.id)}
+          >
+            {section.title}
+            <span className={`icon ${activeSection === section.id ? 'expanded' : ''}`}>
+              ▼
+            </span>
+          </button>
+          
+          <Expand
+            direction="vertical"
+            transitionEnterDuration={250}
+            transitionExitDuration={200}
+          >
+            {activeSection === section.id && (
+              <div className="accordion-content">
+                <p>{section.content}</p>
+              </div>
+            )}
+          </Expand>
+        </div>
+      ))}
+    </div>
+  );
+}
+```
+
+## Common Patterns
+
+### Pattern 1: Conditional Content Expansion
+```tsx
+// Show/hide content based on state with smooth animation
+import { Expand } from '@progress/kendo-react-animation';
+
+function ConditionalExpansion({ isVisible, children }) {
+  return (
+    <Expand
+      direction="vertical"
+      unmountOnExit={true} // Clean up DOM when hidden
+      mountOnEnter={true}  // Lazy mount when shown
+    >
+      {isVisible && children}
+    </Expand>
+  );
+}
+
+// Usage
+function App() {
+  const [showDetails, setShowDetails] = useState(false);
+  
+  return (
+    <div>
+      <h2>Product Overview</h2>
+      <button onClick={() => setShowDetails(!showDetails)}>
+        {showDetails ? 'Hide' : 'Show'} Details
+      </button>
+      
+      <ConditionalExpansion isVisible={showDetails}>
+        <div className="product-details">
+          <p>Detailed product information...</p>
+          <ul>
+            <li>Feature 1</li>
+            <li>Feature 2</li>
+            <li>Feature 3</li>
+          </ul>
+        </div>
+      </ConditionalExpansion>
+    </div>
+  );
+}
+```
+
+### Pattern 2: Progressive Disclosure
+```tsx
+// Reveal content progressively with different timing
+function ProgressiveDisclosure() {
+  const [step, setStep] = useState(0);
+
+  const nextStep = () => setStep(prev => Math.min(prev + 1, 3));
+  const prevStep = () => setStep(prev => Math.max(prev - 1, 0));
+
+  return (
+    <div className="progressive-form">
+      <h2>Step {step + 1} of 3</h2>
+      
+      <Expand direction="vertical" transitionEnterDuration={300}>
+        {step >= 0 && (
+          <div className="form-step">
+            <h3>Basic Information</h3>
+            <input type="text" placeholder="Name" />
+            <input type="email" placeholder="Email" />
+          </div>
+        )}
+      </Expand>
+
+      <Expand direction="vertical" transitionEnterDuration={400}>
+        {step >= 1 && (
+          <div className="form-step">
+            <h3>Address Details</h3>
+            <input type="text" placeholder="Street" />
+            <input type="text" placeholder="City" />
+          </div>
+        )}
+      </Expand>
+
+      <Expand direction="vertical" transitionEnterDuration={500}>
+        {step >= 2 && (
+          <div className="form-step">
+            <h3>Confirmation</h3>
+            <p>Please review your information...</p>
+            <button type="submit">Submit</button>
+          </div>
+        )}
+      </Expand>
+
+      <div className="navigation">
+        <button onClick={prevStep} disabled={step === 0}>
+          Previous
+        </button>
+        <button onClick={nextStep} disabled={step === 2}>
+          Next
+        </button>
+      </div>
+    </div>
+  );
+}
+```
+
+### Pattern 3: Responsive Sidebar
+```tsx
+// Horizontal expansion for sidebar navigation
+function ResponsiveSidebar() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  return (
+    <div className="layout">
+      <header>
+        <button 
+          className="menu-toggle"
+          onClick={() => setIsOpen(!isOpen)}
+        >
+          ☰ Menu
+        </button>
+        <h1>App Header</h1>
+      </header>
+
+      <div className="content-wrapper">
+        <Expand
+          direction="horizontal"
+          transitionEnterDuration={isMobile ? 200 : 300}
+          className="sidebar-container"
+        >
+          {(isOpen || !isMobile) && (
+            <nav className="sidebar">
+              <ul>
+                <li><a href="#home">Home</a></li>
+                <li><a href="#products">Products</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#contact">Contact</a></li>
+              </ul>
+            </nav>
+          )}
+        </Expand>
+
+        <main className="main-content">
+          <h2>Main Content Area</h2>
+          <p>Content that adjusts when sidebar expands/collapses.</p>
+        </main>
+      </div>
+    </div>
+  );
+}
+```
+
+## Best Practices
+
+### Usage Guidelines
+- Use `direction="vertical"` for most content reveals as it feels more natural for reading flow
+- Set appropriate `transitionEnterDuration` and `transitionExitDuration` based on content size - larger content may need longer animations
+- Combine with conditional rendering (&&) to control when content is present in the DOM
+- Use `mountOnEnter` and `unmountOnExit` for performance optimization with expensive content
+
+### Accessibility
+- Ensure expand/collapse triggers have proper ARIA labels indicating their state
+- Use `aria-expanded` on trigger buttons to communicate state to screen readers  
+- Provide keyboard navigation support for expand/collapse interactions
+- Consider adding `aria-controls` to link triggers with their expandable content
+
+### Performance
+- Use `unmountOnExit={true}` for heavy content to remove it from DOM when collapsed
+- Use `mountOnEnter={true}` for content that's expensive to render initially
+- Keep animation durations reasonable (200-500ms) to avoid perceived slowness
+- Consider using `componentChildStyle` for consistent styling across animated children
+
+### Animation Timing
+- Match enter and exit durations for symmetrical feel, or make exit slightly faster for responsiveness
+- Use shorter durations (200-300ms) for small content areas
+- Use longer durations (400-600ms) for large content areas or complex layouts
+- Test animations on slower devices to ensure smooth performance
+
+## Common Use Cases
+
+### Collapsible Cards
+```tsx
+// Expandable card components with details
+function CollapsibleCard({ title, summary, details }) {
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <div className="card">
+      <div className="card-header" onClick={() => setExpanded(!expanded)}>
+        <h3>{title}</h3>
+        <span className={`expand-icon ${expanded ? 'rotated' : ''}`}>▼</span>
+      </div>
+      
+      <div className="card-body">
+        <p>{summary}</p>
+        
+        <Expand direction="vertical" transitionEnterDuration={300}>
+          {expanded && (
+            <div className="card-details">
+              {details}
+            </div>
+          )}
+        </Expand>
+      </div>
+    </div>
+  );
+}
+```
+
+### FAQ Section
+```tsx
+// Frequently asked questions with expandable answers
+function FAQSection({ faqs }) {
+  const [openItems, setOpenItems] = useState(new Set());
+
+  const toggleItem = (index) => {
+    const newOpenItems = new Set(openItems);
+    if (newOpenItems.has(index)) {
+      newOpenItems.delete(index);
+    } else {
+      newOpenItems.add(index);
+    }
+    setOpenItems(newOpenItems);
+  };
+
+  return (
+    <div className="faq-section">
+      <h2>Frequently Asked Questions</h2>
+      {faqs.map((faq, index) => (
+        <div key={index} className="faq-item">
+          <button 
+            className="faq-question"
+            onClick={() => toggleItem(index)}
+            aria-expanded={openItems.has(index)}
+          >
+            {faq.question}
+          </button>
+          
+          <Expand direction="vertical">
+            {openItems.has(index) && (
+              <div className="faq-answer">
+                <p>{faq.answer}</p>
+              </div>
+            )}
+          </Expand>
+        </div>
+      ))}
+    </div>
+  );
+}
+```
+
+### Mobile Menu
+```tsx
+// Mobile-friendly expanding navigation menu
+function MobileMenu() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="mobile-nav">
+      <button 
+        className="nav-toggle"
+        onClick={() => setIsOpen(!isOpen)}
+        aria-label={isOpen ? 'Close menu' : 'Open menu'}
+      >
+        <span className="hamburger"></span>
+      </button>
+
+      <Expand 
+        direction="vertical"
+        transitionEnterDuration={250}
+        className="mobile-menu-container"
+      >
+        {isOpen && (
+          <nav className="mobile-menu">
+            <a href="#home" onClick={() => setIsOpen(false)}>Home</a>
+            <a href="#services" onClick={() => setIsOpen(false)}>Services</a>
+            <a href="#portfolio" onClick={() => setIsOpen(false)}>Portfolio</a>
+            <a href="#contact" onClick={() => setIsOpen(false)}>Contact</a>
+          </nav>
+        )}
+      </Expand>
+    </div>
+  );
+}
+```

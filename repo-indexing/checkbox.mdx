@@ -1,0 +1,767 @@
+# Checkbox Components
+
+## Overview
+
+### Purpose
+Use this component to generate checkbox input functionality
+
+### When to Use
+The Checkbox component is ideal for scenarios where users need to make binary (yes/no) or multi-option selections. Use this component when you need to:
+
+- Allow users to toggle between checked and unchecked states for individual options
+- Enable multi-select functionality where users can choose multiple items from a list
+- Implement "Select All" functionality with indeterminate state support
+- Create form inputs with terms acceptance, preferences, or feature toggles
+- Build accessible forms that require boolean input validation
+- Provide clear visual feedback for selected/unselected states with custom styling
+- Implement grouped checkboxes for related options with consistent styling
+- Create responsive form controls that work across different screen sizes
+- Support keyboard navigation and screen reader accessibility in forms
+
+### Architecture
+**No Coupling**: This is a standalone component that can be used independently. The Checkbox component encapsulates all its functionality within a single, self-contained element that manages its own state, styling, and accessibility features.
+
+## Components
+
+### Checkbox {Standalone Component}
+A comprehensive checkbox input component that provides enhanced functionality over native HTML checkbox elements.
+
+**Purpose:** Enables users to select or deselect options with support for indeterminate states, custom styling, accessibility features, and form integration.
+
+**Interface:**
+```typescript
+interface CheckboxProps extends FormComponentProps {
+  // Value and State Configuration
+  checked?: boolean | null; // Current checked state (null enables indeterminate)
+  value?: string | number | string[] | boolean | null; // Input value for form submission
+  defaultChecked?: boolean; // Initial checked state for uncontrolled usage
+  defaultValue?: any; // Default value for uncontrolled usage
+  
+  // Label and Content
+  label?: React.ReactNode; // Text or element displayed next to checkbox
+  labelPlacement?: 'before' | 'after'; // Position of label relative to checkbox (default: 'after')
+  labelOptional?: boolean; // Display optional indicator on label
+  children?: any; // Alternative way to provide label content
+  
+  // Styling and Appearance
+  className?: string; // Additional CSS classes for wrapper element
+  labelClassName?: string; // CSS classes specifically for label element
+  style?: React.CSSProperties; // Inline styles
+  size?: null | 'small' | 'medium' | 'large'; // Component size (default: 'medium')
+  rounded?: null | 'small' | 'medium' | 'large'; // Border radius styling (default: 'medium')
+  
+  // Interaction and Behavior
+  disabled?: boolean; // Disable user interaction
+  tabIndex?: number; // Tab order for keyboard navigation (default: 0)
+  autoFocus?: boolean; // Automatically focus on component mount (default: false)
+  
+  // Accessibility
+  id?: string; // Component identifier
+  name?: string; // Form field name for submission
+  dir?: string; // Text direction ('ltr' | 'rtl')
+  ariaLabel?: string; // Accessible label when no visible label
+  ariaLabelledBy?: string; // Reference to labeling element
+  ariaDescribedBy?: string; // Reference to description/error element
+  
+  // Form Integration
+  required?: boolean; // Mark as required field
+  validationMessage?: string; // Error message for validation
+  validityStyles?: boolean; // Apply validation styling
+  
+  // Event Handlers
+  onChange?: (event: CheckboxChangeEvent) => void; // Fired when checked state changes
+  onFocus?: (event: CheckboxFocusEvent) => void; // Fired when checkbox receives focus
+  onBlur?: (event: CheckboxBlurEvent) => void; // Fired when checkbox loses focus
+}
+
+// Event interfaces
+interface CheckboxChangeEvent extends BaseEvent<CheckboxHandle> {
+  value: boolean; // The new checked state
+}
+
+interface CheckboxFocusEvent extends BaseEvent<CheckboxHandle> {}
+
+interface CheckboxBlurEvent extends BaseEvent<CheckboxHandle> {}
+
+// Ref interface
+interface CheckboxHandle {
+  element: HTMLInputElement | null; // Reference to underlying input element
+  focus: any; // Method to programmatically focus the checkbox
+  value?: string | number | string[] | boolean | null; // Current value
+  name?: string | null; // Form field name
+}
+```
+
+**Usage Example:**
+```tsx
+import { Checkbox } from '@progress/kendo-react-inputs';
+
+// Basic checkbox usage
+function BasicCheckbox() {
+  const [isChecked, setIsChecked] = React.useState(false);
+  
+  return (
+    <Checkbox
+      checked={isChecked}
+      onChange={(event) => setIsChecked(event.value)}
+      label="I agree to the terms and conditions"
+    />
+  );
+}
+
+// Advanced checkbox with all features
+function AdvancedCheckbox() {
+  const [acceptedTerms, setAcceptedTerms] = React.useState(false);
+  const [isValid, setIsValid] = React.useState(true);
+  
+  const handleChange = (event) => {
+    const newValue = event.value;
+    setAcceptedTerms(newValue);
+    setIsValid(newValue); // Simple validation
+  };
+  
+  return (
+    <Checkbox
+      checked={acceptedTerms}
+      onChange={handleChange}
+      label="I have read and accept the terms of service"
+      labelPlacement="after"
+      size="large"
+      rounded="medium"
+      required={true}
+      validationMessage={!isValid ? 'You must accept the terms to continue' : ''}
+      ariaDescribedBy="terms-error"
+      className={!isValid ? 'k-invalid' : ''}
+    />
+  );
+}
+
+// Indeterminate state usage
+function IndeterminateCheckbox() {
+  const [selectAll, setSelectAll] = React.useState(null); // null = indeterminate
+  const [items, setItems] = React.useState([
+    { id: 1, name: 'Item 1', selected: false },
+    { id: 2, name: 'Item 2', selected: true },
+    { id: 3, name: 'Item 3', selected: false }
+  ]);
+  
+  React.useEffect(() => {
+    const selectedCount = items.filter(item => item.selected).length;
+    if (selectedCount === 0) {
+      setSelectAll(false);
+    } else if (selectedCount === items.length) {
+      setSelectAll(true);
+    } else {
+      setSelectAll(null); // Indeterminate state
+    }
+  }, [items]);
+  
+  const handleSelectAll = (event) => {
+    const newValue = event.value;
+    setItems(items.map(item => ({ ...item, selected: newValue })));
+  };
+  
+  return (
+    <div>
+      <Checkbox
+        checked={selectAll}
+        onChange={handleSelectAll}
+        label="Select All"
+        size="medium"
+      />
+      {items.map(item => (
+        <Checkbox
+          key={item.id}
+          checked={item.selected}
+          onChange={(event) => {
+            setItems(items.map(i => 
+              i.id === item.id ? { ...i, selected: event.value } : i
+            ));
+          }}
+          label={item.name}
+        />
+      ))}
+    </div>
+  );
+}
+```
+
+## Integration Patterns
+
+### Basic Form Integration
+```tsx
+import { Checkbox } from '@progress/kendo-react-inputs';
+import { Button } from '@progress/kendo-react-buttons';
+
+function PreferencesForm() {
+  const [preferences, setPreferences] = React.useState({
+    newsletter: false,
+    notifications: true,
+    analytics: false
+  });
+  
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log('User preferences:', preferences);
+  };
+  
+  const updatePreference = (key, value) => {
+    setPreferences(prev => ({ ...prev, [key]: value }));
+  };
+  
+  return (
+    <form onSubmit={handleSubmit}>
+      <h3>Communication Preferences</h3>
+      
+      <Checkbox
+        checked={preferences.newsletter}
+        onChange={(event) => updatePreference('newsletter', event.value)}
+        label="Subscribe to newsletter"
+        name="newsletter"
+      />
+      
+      <Checkbox
+        checked={preferences.notifications}
+        onChange={(event) => updatePreference('notifications', event.value)}
+        label="Enable push notifications"
+        name="notifications"
+      />
+      
+      <Checkbox
+        checked={preferences.analytics}
+        onChange={(event) => updatePreference('analytics', event.value)}
+        label="Allow analytics tracking"
+        name="analytics"
+      />
+      
+      <Button type="submit">Save Preferences</Button>
+    </form>
+  );
+}
+```
+
+### Multi-Select List with Select All
+```tsx
+function MultiSelectList() {
+  const [items, setItems] = React.useState([
+    { id: 1, name: 'Task 1', completed: false },
+    { id: 2, name: 'Task 2', completed: true },
+    { id: 3, name: 'Task 3', completed: false },
+    { id: 4, name: 'Task 4', completed: true }
+  ]);
+  
+  const completedCount = items.filter(item => item.completed).length;
+  const allCompleted = completedCount === items.length;
+  const someCompleted = completedCount > 0 && completedCount < items.length;
+  
+  const handleSelectAll = (event) => {
+    const newValue = event.value;
+    setItems(items.map(item => ({ ...item, completed: newValue })));
+  };
+  
+  const handleItemToggle = (itemId, value) => {
+    setItems(items.map(item => 
+      item.id === itemId ? { ...item, completed: value } : item
+    ));
+  };
+  
+  return (
+    <div className="task-list">
+      <Checkbox
+        checked={someCompleted ? null : allCompleted} // null for indeterminate
+        onChange={handleSelectAll}
+        label={`Complete All Tasks (${completedCount}/${items.length})`}
+        size="large"
+        className="select-all-checkbox"
+      />
+      
+      <hr />
+      
+      {items.map(item => (
+        <Checkbox
+          key={item.id}
+          checked={item.completed}
+          onChange={(event) => handleItemToggle(item.id, event.value)}
+          label={item.name}
+          className={item.completed ? 'completed-task' : ''}
+        />
+      ))}
+    </div>
+  );
+}
+```
+
+### Form Validation and Error Handling
+```tsx
+function RegistrationForm() {
+  const [formData, setFormData] = React.useState({
+    terms: false,
+    privacy: false,
+    newsletter: false
+  });
+  
+  const [errors, setErrors] = React.useState({});
+  const [submitted, setSubmitted] = React.useState(false);
+  
+  const validateForm = () => {
+    const newErrors = {};
+    
+    if (!formData.terms) {
+      newErrors.terms = 'You must accept the terms and conditions';
+    }
+    
+    if (!formData.privacy) {
+      newErrors.privacy = 'You must accept the privacy policy';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+  
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setSubmitted(true);
+    
+    if (validateForm()) {
+      console.log('Registration successful:', formData);
+      // Proceed with registration
+    }
+  };
+  
+  const updateField = (field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    
+    // Clear error when user corrects it
+    if (errors[field] && value) {
+      setErrors(prev => ({ ...prev, [field]: '' }));
+    }
+  };
+  
+  return (
+    <form onSubmit={handleSubmit} noValidate>
+      <h2>Create Account</h2>
+      
+      <Checkbox
+        checked={formData.terms}
+        onChange={(event) => updateField('terms', event.value)}
+        label={
+          <span>
+            I agree to the <a href="/terms" target="_blank">Terms and Conditions</a>
+          </span>
+        }
+        required={true}
+        validationMessage={submitted ? errors.terms : ''}
+        className={submitted && errors.terms ? 'k-invalid' : ''}
+        ariaDescribedBy={errors.terms ? 'terms-error' : undefined}
+      />
+      {submitted && errors.terms && (
+        <div id="terms-error" className="error-message">{errors.terms}</div>
+      )}
+      
+      <Checkbox
+        checked={formData.privacy}
+        onChange={(event) => updateField('privacy', event.value)}
+        label={
+          <span>
+            I have read and accept the <a href="/privacy" target="_blank">Privacy Policy</a>
+          </span>
+        }
+        required={true}
+        validationMessage={submitted ? errors.privacy : ''}
+        className={submitted && errors.privacy ? 'k-invalid' : ''}
+        ariaDescribedBy={errors.privacy ? 'privacy-error' : undefined}
+      />
+      {submitted && errors.privacy && (
+        <div id="privacy-error" className="error-message">{errors.privacy}</div>
+      )}
+      
+      <Checkbox
+        checked={formData.newsletter}
+        onChange={(event) => updateField('newsletter', event.value)}
+        label="Send me promotional emails and updates (optional)"
+        labelOptional={true}
+      />
+      
+      <Button type="submit" primary>Create Account</Button>
+    </form>
+  );
+}
+```
+
+### Checkbox Groups with Categories
+```tsx
+function PermissionsSettings() {
+  const [permissions, setPermissions] = React.useState({
+    content: {
+      read: true,
+      write: false,
+      delete: false
+    },
+    users: {
+      read: false,
+      write: false,
+      delete: false
+    },
+    settings: {
+      read: true,
+      write: true,
+      delete: false
+    }
+  });
+  
+  const updatePermission = (category, permission, value) => {
+    setPermissions(prev => ({
+      ...prev,
+      [category]: {
+        ...prev[category],
+        [permission]: value
+      }
+    }));
+  };
+  
+  const getCategoryState = (category) => {
+    const perms = permissions[category];
+    const enabledCount = Object.values(perms).filter(Boolean).length;
+    const totalCount = Object.keys(perms).length;
+    
+    if (enabledCount === 0) return false;
+    if (enabledCount === totalCount) return true;
+    return null; // Indeterminate
+  };
+  
+  const toggleCategoryAll = (category, value) => {
+    setPermissions(prev => ({
+      ...prev,
+      [category]: Object.keys(prev[category]).reduce((acc, key) => ({
+        ...acc,
+        [key]: value
+      }), {})
+    }));
+  };
+  
+  return (
+    <div className="permissions-panel">
+      <h3>User Permissions</h3>
+      
+      {Object.entries(permissions).map(([category, perms]) => (
+        <div key={category} className="permission-group">
+          <Checkbox
+            checked={getCategoryState(category)}
+            onChange={(event) => toggleCategoryAll(category, event.value)}
+            label={`${category.charAt(0).toUpperCase() + category.slice(1)} (All)`}
+            size="large"
+            className="category-header"
+          />
+          
+          <div className="permission-items">
+            {Object.entries(perms).map(([permission, enabled]) => (
+              <Checkbox
+                key={permission}
+                checked={enabled}
+                onChange={(event) => updatePermission(category, permission, event.value)}
+                label={permission.charAt(0).toUpperCase() + permission.slice(1)}
+                className="permission-item"
+              />
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+```
+
+## Component Relationships
+
+### Data Flow
+The Checkbox component manages its own checked state when used in uncontrolled mode or accepts controlled state via the `checked` prop. User interactions trigger `onChange` events that allow parent components to update the controlled state or respond to value changes.
+
+### Event Handling
+- **onChange**: Primary event fired when the checked state changes, providing the new boolean value
+- **onFocus**: Fired when the checkbox receives focus, useful for form field highlighting
+- **onBlur**: Fired when the checkbox loses focus, often used for validation triggers
+- Events bubble up to parent components for form management and validation
+
+## Best Practices
+
+### Usage Guidelines
+- Always provide meaningful `label` text or use `ariaLabel` for accessibility when no visible label exists
+- Use the indeterminate state (`checked={null}`) for "Select All" scenarios with partial selections
+- Group related checkboxes visually and semantically using fieldsets or container elements
+- Implement proper form validation with clear error messages using `validationMessage`
+- Consider `labelPlacement` for optimal layout in different form designs
+- Use appropriate `size` prop to match your form's visual hierarchy
+
+### Accessibility
+- Ensure proper labeling with `label` prop or `ariaLabelledBy` for screen reader compatibility
+- Use `ariaDescribedBy` to reference error messages or help text for additional context
+- Maintain sufficient color contrast for custom styled checkboxes
+- Test keyboard navigation (Space bar to toggle, Tab to navigate between checkboxes)
+- Verify screen reader announcements include current state (checked/unchecked/indeterminate)
+- Group related checkboxes with fieldset elements and legend tags for better navigation
+
+### Performance
+- Use controlled components (`checked` prop) for form libraries and complex state management
+- Implement debounced handlers for checkboxes that trigger expensive operations
+- Consider React.memo for checkbox lists that don't change frequently
+- Minimize inline function creation in onChange handlers to prevent unnecessary re-renders
+- Use stable key props when rendering dynamic checkbox lists
+
+## Common Patterns
+
+### Terms and Conditions Acceptance
+```tsx
+function TermsAcceptance() {
+  const [accepted, setAccepted] = React.useState(false);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  
+  const handleSubmit = async () => {
+    if (!accepted) {
+      alert('Please accept the terms and conditions');
+      return;
+    }
+    
+    setIsSubmitting(true);
+    try {
+      await submitRegistration();
+      // Handle success
+    } catch (error) {
+      // Handle error
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+  
+  return (
+    <div className="terms-section">
+      <div className="terms-content">
+        {/* Terms content here */}
+      </div>
+      
+      <Checkbox
+        checked={accepted}
+        onChange={(event) => setAccepted(event.value)}
+        label={
+          <span>
+            I have read and agree to the{' '}
+            <a href="/terms" target="_blank" rel="noopener noreferrer">
+              Terms of Service
+            </a>{' '}
+            and{' '}
+            <a href="/privacy" target="_blank" rel="noopener noreferrer">
+              Privacy Policy
+            </a>
+          </span>
+        }
+        required={true}
+        size="medium"
+      />
+      
+      <Button
+        onClick={handleSubmit}
+        disabled={!accepted || isSubmitting}
+        primary
+      >
+        {isSubmitting ? 'Processing...' : 'Continue'}
+      </Button>
+    </div>
+  );
+}
+```
+
+### Feature Toggle Configuration
+```tsx
+function FeatureToggles() {
+  const [features, setFeatures] = React.useState({
+    darkMode: true,
+    notifications: false,
+    analyticsTracking: true,
+    betaFeatures: false,
+    autoSave: true
+  });
+  
+  const [hasChanges, setHasChanges] = React.useState(false);
+  const originalFeatures = React.useRef(features);
+  
+  React.useEffect(() => {
+    const changed = JSON.stringify(features) !== JSON.stringify(originalFeatures.current);
+    setHasChanges(changed);
+  }, [features]);
+  
+  const updateFeature = (featureKey, value) => {
+    setFeatures(prev => ({ ...prev, [featureKey]: value }));
+  };
+  
+  const saveChanges = async () => {
+    try {
+      await api.updateUserPreferences(features);
+      originalFeatures.current = { ...features };
+      setHasChanges(false);
+      // Show success message
+    } catch (error) {
+      // Show error message
+    }
+  };
+  
+  const resetChanges = () => {
+    setFeatures({ ...originalFeatures.current });
+    setHasChanges(false);
+  };
+  
+  return (
+    <div className="feature-settings">
+      <h3>Application Settings</h3>
+      
+      <div className="settings-group">
+        <h4>Appearance</h4>
+        <Checkbox
+          checked={features.darkMode}
+          onChange={(event) => updateFeature('darkMode', event.value)}
+          label="Enable dark mode"
+          size="medium"
+        />
+      </div>
+      
+      <div className="settings-group">
+        <h4>Notifications</h4>
+        <Checkbox
+          checked={features.notifications}
+          onChange={(event) => updateFeature('notifications', event.value)}
+          label="Push notifications"
+        />
+      </div>
+      
+      <div className="settings-group">
+        <h4>Privacy & Data</h4>
+        <Checkbox
+          checked={features.analyticsTracking}
+          onChange={(event) => updateFeature('analyticsTracking', event.value)}
+          label="Allow analytics tracking"
+        />
+      </div>
+      
+      <div className="settings-group">
+        <h4>Advanced</h4>
+        <Checkbox
+          checked={features.betaFeatures}
+          onChange={(event) => updateFeature('betaFeatures', event.value)}
+          label="Enable beta features"
+        />
+        <Checkbox
+          checked={features.autoSave}
+          onChange={(event) => updateFeature('autoSave', event.value)}
+          label="Auto-save documents"
+        />
+      </div>
+      
+      {hasChanges && (
+        <div className="settings-actions">
+          <Button onClick={saveChanges} primary>Save Changes</Button>
+          <Button onClick={resetChanges}>Reset</Button>
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+### Dynamic Checkbox List with Search
+```tsx
+function FilterableCheckboxList() {
+  const [items] = React.useState([
+    { id: 1, name: 'JavaScript', category: 'Programming' },
+    { id: 2, name: 'React', category: 'Framework' },
+    { id: 3, name: 'Node.js', category: 'Runtime' },
+    { id: 4, name: 'TypeScript', category: 'Programming' },
+    { id: 5, name: 'Vue.js', category: 'Framework' }
+  ]);
+  
+  const [selectedItems, setSelectedItems] = React.useState(new Set());
+  const [searchTerm, setSearchTerm] = React.useState('');
+  
+  const filteredItems = items.filter(item =>
+    item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.category.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+  
+  const toggleItem = (itemId, checked) => {
+    setSelectedItems(prev => {
+      const newSet = new Set(prev);
+      if (checked) {
+        newSet.add(itemId);
+      } else {
+        newSet.delete(itemId);
+      }
+      return newSet;
+    });
+  };
+  
+  const selectAllVisible = (checked) => {
+    setSelectedItems(prev => {
+      const newSet = new Set(prev);
+      filteredItems.forEach(item => {
+        if (checked) {
+          newSet.add(item.id);
+        } else {
+          newSet.delete(item.id);
+        }
+      });
+      return newSet;
+    });
+  };
+  
+  const visibleSelectedCount = filteredItems.filter(item => 
+    selectedItems.has(item.id)
+  ).length;
+  
+  const allVisibleSelected = visibleSelectedCount === filteredItems.length;
+  const someVisibleSelected = visibleSelectedCount > 0 && !allVisibleSelected;
+  
+  return (
+    <div className="checkbox-list">
+      <input
+        type="text"
+        placeholder="Search technologies..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        className="search-input"
+      />
+      
+      {filteredItems.length > 0 && (
+        <Checkbox
+          checked={someVisibleSelected ? null : allVisibleSelected}
+          onChange={(event) => selectAllVisible(event.value)}
+          label={`Select All Visible (${visibleSelectedCount}/${filteredItems.length})`}
+          size="medium"
+          className="select-all"
+        />
+      )}
+      
+      <div className="checkbox-items">
+        {filteredItems.map(item => (
+          <Checkbox
+            key={item.id}
+            checked={selectedItems.has(item.id)}
+            onChange={(event) => toggleItem(item.id, event.value)}
+            label={
+              <span>
+                <strong>{item.name}</strong>
+                <span className="category">({item.category})</span>
+              </span>
+            }
+            className="checkbox-item"
+          />
+        ))}
+      </div>
+      
+      {filteredItems.length === 0 && (
+        <div className="no-results">No items match your search.</div>
+      )}
+      
+      <div className="selection-summary">
+        Selected: {selectedItems.size} of {items.length} items
+      </div>
+    </div>
+  );
+}
+```

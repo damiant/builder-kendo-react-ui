@@ -1,0 +1,866 @@
+# Loader Component
+
+## Overview
+
+### Purpose
+Use this component to generate loading indicator functionality
+
+### When to Use
+The Loader component is ideal for providing visual feedback to users during asynchronous operations and processing states. Common use cases include:
+
+- **Data fetching** - Display loading indicators while retrieving data from APIs or databases
+- **Form submissions** - Show progress during form processing, validation, or server communication
+- **Page transitions** - Indicate loading state during navigation between routes or sections
+- **File operations** - Display progress during file uploads, downloads, or processing
+- **Authentication flows** - Show loading state during login, registration, or token validation
+- **Content rendering** - Indicate when complex UI components or charts are being generated
+- **Search operations** - Provide feedback during search queries or filtering operations
+- **Initial app loading** - Display while the application bootstraps or loads essential resources
+- **Background processes** - Indicate ongoing operations like auto-save, sync, or background updates
+
+### Architecture
+**No Coupling**: Loader is a standalone component that operates independently without requiring other components. It provides a complete loading indicator solution with multiple animation types, customizable appearance, and flexible sizing options.
+
+## Components
+
+### Loader
+
+**Purpose:** Provides a visual loading indicator that informs users about ongoing processes, featuring multiple animation types and customizable appearance options.
+
+**Interface:**
+```typescript
+interface LoaderProps {
+  // Visual customization
+  size?: 'small' | 'medium' | 'large'; // Size of the loader indicator
+  themeColor?: 
+    | 'primary' 
+    | 'secondary' 
+    | 'tertiary' 
+    | 'info' 
+    | 'success' 
+    | 'warning' 
+    | 'error' 
+    | 'dark' 
+    | 'light' 
+    | 'inverse'; // Color theme for the loader
+  
+  // Animation type
+  type?: 
+    | 'pulsing' 
+    | 'infinite-spinner' 
+    | 'converging-spinner'; // Animation style of the loader
+  
+  // Standard component props
+  className?: string; // Custom CSS classes
+  style?: React.CSSProperties; // Inline styles
+  id?: string; // Unique identifier
+}
+```
+
+**Usage Example:**
+```tsx
+import { Loader } from '@progress/kendo-react-indicators';
+
+function BasicLoader() {
+  return (
+    <Loader
+      size="medium"
+      themeColor="primary"
+      type="pulsing"
+    />
+  );
+}
+```
+
+## Integration Patterns
+
+### Basic Usage
+```tsx
+import { Loader } from '@progress/kendo-react-indicators';
+
+// Simple loading indicator
+function SimpleExample() {
+  return (
+    <div className="loading-container">
+      <Loader />
+    </div>
+  );
+}
+
+// Customized loader with specific appearance
+function CustomizedExample() {
+  return (
+    <div className="loading-area">
+      <Loader
+        size="large"
+        themeColor="success"
+        type="infinite-spinner"
+      />
+    </div>
+  );
+}
+```
+
+### Conditional Loading States
+```tsx
+import { Loader } from '@progress/kendo-react-indicators';
+import { useState, useEffect } from 'react';
+
+function DataLoadingExample() {
+  const [isLoading, setIsLoading] = useState(true);
+  const [data, setData] = useState(null);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch('/api/data');
+        const result = await response.json();
+        setData(result);
+      } catch (err) {
+        setError(err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="data-loading">
+        <Loader 
+          size="medium" 
+          themeColor="primary" 
+          type="infinite-spinner" 
+        />
+        <p>Loading data...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="error-state">
+        <p>Error loading data: {error.message}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="data-display">
+      {/* Render your data here */}
+      <pre>{JSON.stringify(data, null, 2)}</pre>
+    </div>
+  );
+}
+```
+
+### Form Submission Loading
+```tsx
+import { Loader } from '@progress/kendo-react-indicators';
+import { Button } from '@progress/kendo-react-buttons';
+import { TextBox } from '@progress/kendo-react-inputs';
+import { useState } from 'react';
+
+function FormWithLoading() {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    message: ''
+  });
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+      
+      // Reset form on success
+      setFormData({ name: '', email: '', message: '' });
+      alert('Form submitted successfully!');
+    } catch (error) {
+      alert('Submission failed. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="contact-form">
+      <div className="form-field">
+        <label htmlFor="name">Name:</label>
+        <TextBox
+          id="name"
+          value={formData.name}
+          onChange={(event) => setFormData(prev => ({ 
+            ...prev, 
+            name: event.target.value 
+          }))}
+          disabled={isSubmitting}
+        />
+      </div>
+
+      <div className="form-field">
+        <label htmlFor="email">Email:</label>
+        <TextBox
+          id="email"
+          type="email"
+          value={formData.email}
+          onChange={(event) => setFormData(prev => ({ 
+            ...prev, 
+            email: event.target.value 
+          }))}
+          disabled={isSubmitting}
+        />
+      </div>
+
+      <div className="form-field">
+        <label htmlFor="message">Message:</label>
+        <TextBox
+          id="message"
+          value={formData.message}
+          onChange={(event) => setFormData(prev => ({ 
+            ...prev, 
+            message: event.target.value 
+          }))}
+          disabled={isSubmitting}
+        />
+      </div>
+
+      <div className="form-actions">
+        <Button
+          type="submit"
+          primary
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? (
+            <span className="button-loading">
+              <Loader 
+                size="small" 
+                themeColor="light" 
+                type="pulsing" 
+              />
+              Submitting...
+            </span>
+          ) : (
+            'Submit'
+          )}
+        </Button>
+      </div>
+    </form>
+  );
+}
+```
+
+### Page Loading Overlay
+```tsx
+import { Loader } from '@progress/kendo-react-indicators';
+import { useState, useEffect } from 'react';
+
+function PageWithLoadingOverlay() {
+  const [isPageLoading, setIsPageLoading] = useState(true);
+  const [content, setContent] = useState(null);
+
+  useEffect(() => {
+    const loadPageContent = async () => {
+      setIsPageLoading(true);
+      
+      try {
+        // Simulate loading multiple resources
+        const [userData, settingsData, notificationsData] = await Promise.all([
+          fetch('/api/user').then(r => r.json()),
+          fetch('/api/settings').then(r => r.json()),
+          fetch('/api/notifications').then(r => r.json())
+        ]);
+
+        setContent({
+          user: userData,
+          settings: settingsData,
+          notifications: notificationsData
+        });
+      } catch (error) {
+        console.error('Failed to load page content:', error);
+      } finally {
+        setIsPageLoading(false);
+      }
+    };
+
+    loadPageContent();
+  }, []);
+
+  return (
+    <div className="page-container">
+      {isPageLoading && (
+        <div className="loading-overlay">
+          <div className="loading-content">
+            <Loader 
+              size="large" 
+              themeColor="primary" 
+              type="converging-spinner" 
+            />
+            <h3>Loading your dashboard...</h3>
+            <p>Please wait while we prepare your content</p>
+          </div>
+        </div>
+      )}
+
+      {!isPageLoading && content && (
+        <div className="page-content">
+          <header>
+            <h1>Welcome, {content.user.name}</h1>
+          </header>
+          
+          <main>
+            {/* Your page content here */}
+            <div className="dashboard-sections">
+              <section>Settings</section>
+              <section>Notifications</section>
+            </div>
+          </main>
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+### Multiple Loading States
+```tsx
+import { Loader } from '@progress/kendo-react-indicators';
+import { useState } from 'react';
+
+function MultiStateLoadingExample() {
+  const [loadingStates, setLoadingStates] = useState({
+    primary: false,
+    secondary: false,
+    background: false
+  });
+
+  const startOperation = (operationType: string) => {
+    setLoadingStates(prev => ({
+      ...prev,
+      [operationType]: true
+    }));
+
+    // Simulate operation
+    setTimeout(() => {
+      setLoadingStates(prev => ({
+        ...prev,
+        [operationType]: false
+      }));
+    }, 3000);
+  };
+
+  return (
+    <div className="multi-state-demo">
+      <h2>Multiple Loading Operations</h2>
+
+      <div className="operation-section">
+        <h3>Primary Data Loading</h3>
+        <button 
+          onClick={() => startOperation('primary')}
+          disabled={loadingStates.primary}
+        >
+          Load Primary Data
+        </button>
+        {loadingStates.primary && (
+          <div className="loading-indicator">
+            <Loader 
+              size="medium" 
+              themeColor="primary" 
+              type="infinite-spinner" 
+            />
+            <span>Loading primary data...</span>
+          </div>
+        )}
+      </div>
+
+      <div className="operation-section">
+        <h3>Secondary Processing</h3>
+        <button 
+          onClick={() => startOperation('secondary')}
+          disabled={loadingStates.secondary}
+        >
+          Process Secondary Data
+        </button>
+        {loadingStates.secondary && (
+          <div className="loading-indicator">
+            <Loader 
+              size="small" 
+              themeColor="success" 
+              type="pulsing" 
+            />
+            <span>Processing...</span>
+          </div>
+        )}
+      </div>
+
+      <div className="operation-section">
+        <h3>Background Sync</h3>
+        <button 
+          onClick={() => startOperation('background')}
+          disabled={loadingStates.background}
+        >
+          Sync in Background
+        </button>
+        {loadingStates.background && (
+          <div className="loading-indicator">
+            <Loader 
+              size="small" 
+              themeColor="info" 
+              type="converging-spinner" 
+            />
+            <span>Syncing...</span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+```
+
+### Loading with Progress Text
+```tsx
+import { Loader } from '@progress/kendo-react-indicators';
+import { useState, useEffect } from 'react';
+
+function LoadingWithProgress() {
+  const [loadingStep, setLoadingStep] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const loadingSteps = [
+    'Initializing application...',
+    'Loading user preferences...',
+    'Fetching dashboard data...',
+    'Preparing interface...',
+    'Finalizing setup...'
+  ];
+
+  const startLoadingSequence = () => {
+    setIsLoading(true);
+    setLoadingStep(0);
+
+    // Simulate step-by-step loading
+    loadingSteps.forEach((_, index) => {
+      setTimeout(() => {
+        setLoadingStep(index);
+        if (index === loadingSteps.length - 1) {
+          setTimeout(() => setIsLoading(false), 1000);
+        }
+      }, index * 1500);
+    });
+  };
+
+  return (
+    <div className="progressive-loading">
+      <button 
+        onClick={startLoadingSequence}
+        disabled={isLoading}
+      >
+        Start Application
+      </button>
+
+      {isLoading && (
+        <div className="loading-progress">
+          <Loader 
+            size="large" 
+            themeColor="primary" 
+            type="infinite-spinner" 
+          />
+          
+          <div className="progress-text">
+            <h3>{loadingSteps[loadingStep]}</h3>
+            <p>Step {loadingStep + 1} of {loadingSteps.length}</p>
+          </div>
+
+          <div className="progress-bar">
+            <div 
+              className="progress-fill"
+              style={{ 
+                width: `${((loadingStep + 1) / loadingSteps.length) * 100}%` 
+              }}
+            />
+          </div>
+        </div>
+      )}
+
+      {!isLoading && loadingStep > 0 && (
+        <div className="completion-message">
+          <h2>Application ready!</h2>
+          <p>All systems loaded successfully.</p>
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+## Best Practices
+
+### Usage Guidelines
+- **Choose appropriate animation types** - Use `pulsing` for gentle feedback, `infinite-spinner` for active processing, `converging-spinner` for completion-focused operations
+- **Match theme colors to context** - Use `success` for positive operations, `warning` for cautionary states, `error` for failed operations, `primary` for general loading
+- **Size appropriately for context** - Use `small` for inline elements, `medium` for standard content areas, `large` for full-page loading states
+- **Provide contextual text** - Always accompany loaders with descriptive text explaining what is happening
+- **Consider user experience** - Don't show loaders for operations under 500ms, provide progress indicators for operations over 10 seconds
+
+### Accessibility
+- **Semantic loading announcements** - Use ARIA live regions to announce loading states to screen readers
+- **Keyboard navigation support** - Ensure loading states don't trap keyboard focus or break navigation flow
+- **Visual clarity** - Ensure sufficient color contrast between loader and background for visibility
+- **Screen reader context** - Provide text alternatives that describe the loading operation and expected duration
+- **Focus management** - Handle focus appropriately when content changes from loading to loaded state
+
+### Performance
+- **Conditional rendering** - Only render loaders when needed to avoid unnecessary DOM nodes
+- **Animation efficiency** - Kendo React loaders are optimized for smooth performance across devices
+- **State management** - Use appropriate state management patterns to avoid unnecessary re-renders during loading
+- **Resource optimization** - Consider lazy loading and code splitting to reduce initial bundle size
+
+## Common Patterns
+
+### Pattern 1: API Data Loading
+```tsx
+import { Loader } from '@progress/kendo-react-indicators';
+import { useState, useEffect } from 'react';
+
+function ApiDataLoader({ apiEndpoint, children }) {
+  const [isLoading, setIsLoading] = useState(true);
+  const [data, setData] = useState(null);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        
+        const response = await fetch(apiEndpoint);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        setData(result);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (apiEndpoint) {
+      fetchData();
+    }
+  }, [apiEndpoint]);
+
+  if (isLoading) {
+    return (
+      <div className="api-loading" role="status" aria-live="polite">
+        <Loader 
+          size="medium" 
+          themeColor="primary" 
+          type="infinite-spinner" 
+        />
+        <span className="sr-only">Loading data from {apiEndpoint}</span>
+        <p>Fetching latest data...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="api-error" role="alert">
+        <p>Failed to load data: {error}</p>
+        <button onClick={() => window.location.reload()}>
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  return children({ data });
+}
+
+// Usage example
+function UserDashboard() {
+  return (
+    <ApiDataLoader apiEndpoint="/api/user/dashboard">
+      {({ data }) => (
+        <div className="dashboard">
+          <h1>Welcome, {data.user.name}</h1>
+          <div className="dashboard-stats">
+            <div>Total Posts: {data.stats.posts}</div>
+            <div>Followers: {data.stats.followers}</div>
+            <div>Following: {data.stats.following}</div>
+          </div>
+        </div>
+      )}
+    </ApiDataLoader>
+  );
+}
+```
+
+### Pattern 2: File Upload with Loading
+```tsx
+import { Loader } from '@progress/kendo-react-indicators';
+import { Button } from '@progress/kendo-react-buttons';
+import { useState, useRef } from 'react';
+
+function FileUploadWithLoading() {
+  const [uploadState, setUploadState] = useState({
+    isUploading: false,
+    progress: 0,
+    fileName: '',
+    success: false,
+    error: null
+  });
+  
+  const fileInputRef = useRef(null);
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      uploadFile(file);
+    }
+  };
+
+  const uploadFile = async (file: File) => {
+    setUploadState({
+      isUploading: true,
+      progress: 0,
+      fileName: file.name,
+      success: false,
+      error: null
+    });
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      // Simulate upload progress
+      const progressInterval = setInterval(() => {
+        setUploadState(prev => ({
+          ...prev,
+          progress: Math.min(prev.progress + 10, 90)
+        }));
+      }, 200);
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData
+      });
+
+      clearInterval(progressInterval);
+
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
+
+      setUploadState(prev => ({
+        ...prev,
+        isUploading: false,
+        progress: 100,
+        success: true
+      }));
+
+    } catch (error) {
+      setUploadState(prev => ({
+        ...prev,
+        isUploading: false,
+        error: error.message
+      }));
+    }
+  };
+
+  const resetUpload = () => {
+    setUploadState({
+      isUploading: false,
+      progress: 0,
+      fileName: '',
+      success: false,
+      error: null
+    });
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  return (
+    <div className="file-upload-container">
+      <h3>File Upload</h3>
+
+      {!uploadState.isUploading && !uploadState.success && !uploadState.error && (
+        <div className="upload-area">
+          <input
+            ref={fileInputRef}
+            type="file"
+            onChange={handleFileSelect}
+            style={{ display: 'none' }}
+            id="file-input"
+          />
+          <label htmlFor="file-input">
+            <Button>Choose File</Button>
+          </label>
+          <p>Select a file to upload</p>
+        </div>
+      )}
+
+      {uploadState.isUploading && (
+        <div className="upload-progress" role="status" aria-live="polite">
+          <Loader 
+            size="medium" 
+            themeColor="info" 
+            type="converging-spinner" 
+          />
+          <div className="upload-details">
+            <h4>Uploading {uploadState.fileName}</h4>
+            <div className="progress-bar">
+              <div 
+                className="progress-fill"
+                style={{ width: `${uploadState.progress}%` }}
+              />
+            </div>
+            <span>{uploadState.progress}% complete</span>
+          </div>
+        </div>
+      )}
+
+      {uploadState.success && (
+        <div className="upload-success">
+          <h4>✓ Upload Complete</h4>
+          <p>{uploadState.fileName} uploaded successfully</p>
+          <Button onClick={resetUpload}>Upload Another File</Button>
+        </div>
+      )}
+
+      {uploadState.error && (
+        <div className="upload-error" role="alert">
+          <h4>Upload Failed</h4>
+          <p>{uploadState.error}</p>
+          <Button onClick={resetUpload}>Try Again</Button>
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+### Pattern 3: Search with Loading
+```tsx
+import { Loader } from '@progress/kendo-react-indicators';
+import { TextBox } from '@progress/kendo-react-inputs';
+import { useState, useEffect, useMemo } from 'react';
+
+function SearchWithLoading() {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchError, setSearchError] = useState(null);
+
+  // Debounce search to avoid too many API calls
+  const debouncedSearchQuery = useMemo(() => {
+    const handler = setTimeout(() => searchQuery, 300);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    const performSearch = async () => {
+      if (!searchQuery.trim()) {
+        setSearchResults([]);
+        return;
+      }
+
+      setIsSearching(true);
+      setSearchError(null);
+
+      try {
+        const response = await fetch(
+          `/api/search?q=${encodeURIComponent(searchQuery)}`
+        );
+        
+        if (!response.ok) {
+          throw new Error('Search failed');
+        }
+
+        const results = await response.json();
+        setSearchResults(results);
+      } catch (error) {
+        setSearchError(error.message);
+        setSearchResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    };
+
+    const timeoutId = setTimeout(performSearch, 300);
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery]);
+
+  return (
+    <div className="search-container">
+      <div className="search-input-container">
+        <TextBox
+          placeholder="Search for products, articles, or users..."
+          value={searchQuery}
+          onChange={(event) => setSearchQuery(event.target.value)}
+        />
+        
+        {isSearching && (
+          <div className="search-loading">
+            <Loader 
+              size="small" 
+              themeColor="primary" 
+              type="pulsing" 
+            />
+          </div>
+        )}
+      </div>
+
+      <div className="search-results" role="region" aria-live="polite">
+        {isSearching && (
+          <div className="searching-message">
+            <span>Searching for "{searchQuery}"...</span>
+          </div>
+        )}
+
+        {!isSearching && searchQuery && searchResults.length === 0 && !searchError && (
+          <div className="no-results">
+            <p>No results found for "{searchQuery}"</p>
+            <p>Try adjusting your search terms</p>
+          </div>
+        )}
+
+        {!isSearching && searchError && (
+          <div className="search-error" role="alert">
+            <p>Search error: {searchError}</p>
+            <p>Please try again</p>
+          </div>
+        )}
+
+        {!isSearching && searchResults.length > 0 && (
+          <div className="results-list">
+            <h3>Results for "{searchQuery}" ({searchResults.length})</h3>
+            {searchResults.map((result, index) => (
+              <div key={index} className="result-item">
+                <h4>{result.title}</h4>
+                <p>{result.description}</p>
+                <span className="result-category">{result.category}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+```

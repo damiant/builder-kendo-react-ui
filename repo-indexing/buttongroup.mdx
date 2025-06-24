@@ -1,0 +1,289 @@
+# ButtonGroup Components
+
+## Overview
+
+### Purpose
+Use this component to generate button group functionality for grouping multiple buttons
+
+### When to Use
+The ButtonGroup component is ideal for scenarios where you need to visually group related buttons that perform similar or complementary actions. Common use cases include:
+
+- **Action toolbars** - Group editing actions like Bold, Italic, Underline in a rich text editor
+- **View mode toggles** - Switch between List, Grid, and Card views in data displays
+- **Selection filters** - Group category filters or sorting options
+- **Navigation clusters** - Cluster related navigation actions like Previous, Next, and Home
+- **Status controls** - Group state-changing actions like Play, Pause, Stop
+- **Layout controls** - Group layout modification buttons in design applications
+
+### Architecture
+**No Coupling**: The ButtonGroup is a standalone container component that wraps multiple Button components. It provides visual grouping and consistent styling but does not manage state or enforce specific button relationships.
+
+### Component Interdependencies
+The ButtonGroup component works independently but is designed to contain Button components:
+- **Container role**: Acts as a visual and structural container for multiple buttons
+- **Button compatibility**: Works seamlessly with KendoReact Button components
+- **Styling coordination**: Ensures consistent spacing and borders between grouped buttons
+
+## Components
+
+### ButtonGroup
+
+**Purpose:** A container component that visually groups multiple buttons together with consistent styling and spacing
+
+**Interface:**
+```typescript
+interface ButtonGroupProps {
+  children?: React.ReactNode; // Button components to be grouped
+  className?: string; // Additional CSS classes for custom styling
+  disabled?: boolean; // Disables all buttons in the group
+  width?: string; // Sets the width of the button group container
+  dir?: string; // Text direction: 'rtl', 'ltr', or 'auto'
+}
+```
+
+**Usage Example:**
+```tsx
+import { ButtonGroup, Button } from '@progress/kendo-react-buttons';
+
+function ToolbarExample() {
+  return (
+    <ButtonGroup>
+      <Button icon="bold">Bold</Button>
+      <Button icon="italic">Italic</Button>
+      <Button icon="underline">Underline</Button>
+    </ButtonGroup>
+  );
+}
+```
+
+## Integration Patterns
+
+### Basic Usage
+```tsx
+import { ButtonGroup, Button } from '@progress/kendo-react-buttons';
+
+// Simple button grouping
+function BasicExample() {
+  return (
+    <ButtonGroup>
+      <Button>First</Button>
+      <Button>Second</Button>
+      <Button>Third</Button>
+    </ButtonGroup>
+  );
+}
+```
+
+### Advanced Usage
+```tsx
+// Full-width button group with disabled state
+function AdvancedExample() {
+  const [isDisabled, setIsDisabled] = useState(false);
+  
+  return (
+    <ButtonGroup 
+      width="300px"
+      disabled={isDisabled}
+      className="custom-button-group"
+    >
+      <Button themeColor="primary">Save</Button>
+      <Button themeColor="secondary">Cancel</Button>
+      <Button themeColor="error">Delete</Button>
+    </ButtonGroup>
+  );
+}
+```
+
+### Common Variations
+
+#### Icon-Only Button Group
+```tsx
+function IconGroupExample() {
+  return (
+    <ButtonGroup>
+      <Button icon="home" title="Home" />
+      <Button icon="folder" title="Folder" />
+      <Button icon="gear" title="Settings" />
+    </ButtonGroup>
+  );
+}
+```
+
+#### Mixed Button Types
+```tsx
+function MixedButtonExample() {
+  return (
+    <ButtonGroup>
+      <Button fillMode="solid" themeColor="primary">Primary</Button>
+      <Button fillMode="outline" themeColor="secondary">Secondary</Button>
+      <Button fillMode="flat" themeColor="info">Info</Button>
+    </ButtonGroup>
+  );
+}
+```
+
+#### Responsive Button Group
+```tsx
+function ResponsiveExample() {
+  return (
+    <ButtonGroup 
+      width="100%"
+      className="responsive-group"
+    >
+      <Button>Option A</Button>
+      <Button>Option B</Button>
+      <Button>Option C</Button>
+    </ButtonGroup>
+  );
+}
+```
+
+#### Disabled State Management
+```tsx
+function DisabledStateExample() {
+  const [selectedAction, setSelectedAction] = useState(null);
+  
+  return (
+    <ButtonGroup disabled={!selectedAction}>
+      <Button onClick={() => handleEdit()}>Edit</Button>
+      <Button onClick={() => handleDelete()}>Delete</Button>
+      <Button onClick={() => handleShare()}>Share</Button>
+    </ButtonGroup>
+  );
+}
+```
+
+## Best Practices
+
+### Usage Guidelines
+- **Limit group size** - Keep button groups to 2-6 buttons for optimal usability and visual clarity
+- **Maintain visual consistency** - Use buttons with similar sizes and styles within the same group
+- **Provide meaningful grouping** - Only group buttons that are functionally related or perform similar actions
+- **Consider responsive behavior** - Use the `width` prop to ensure button groups adapt appropriately to different screen sizes
+
+### Accessibility
+- **Keyboard navigation** - Each button in the group maintains individual keyboard focus and activation
+- **ARIA relationships** - The group automatically provides appropriate ARIA container semantics
+- **Screen reader support** - Button groups are announced as a single unit with individual button identification
+- **Focus management** - Tab navigation moves through each button in the group sequentially
+
+### Performance
+- **Minimal re-renders** - ButtonGroup only re-renders when its props change, not when individual button states change
+- **Efficient styling** - CSS classes are applied at the group level to minimize style recalculation
+- **Memory optimization** - Group container doesn't maintain internal state, reducing memory overhead
+
+## Common Patterns
+
+### Pattern 1: Text Formatting Toolbar
+```tsx
+// Rich text editor formatting controls
+function FormattingToolbar() {
+  const [formats, setFormats] = useState(new Set());
+  
+  const toggleFormat = (format) => {
+    const newFormats = new Set(formats);
+    if (newFormats.has(format)) {
+      newFormats.delete(format);
+    } else {
+      newFormats.add(format);
+    }
+    setFormats(newFormats);
+  };
+  
+  return (
+    <ButtonGroup>
+      <Button 
+        icon="bold"
+        selected={formats.has('bold')}
+        togglable={true}
+        onClick={() => toggleFormat('bold')}
+        title="Bold"
+      />
+      <Button 
+        icon="italic"
+        selected={formats.has('italic')}
+        togglable={true}
+        onClick={() => toggleFormat('italic')}
+        title="Italic"
+      />
+      <Button 
+        icon="underline"
+        selected={formats.has('underline')}
+        togglable={true}
+        onClick={() => toggleFormat('underline')}
+        title="Underline"
+      />
+    </ButtonGroup>
+  );
+}
+```
+
+### Pattern 2: View Mode Selector
+```tsx
+// Data display view switching
+function ViewModeSelector() {
+  const [viewMode, setViewMode] = useState('grid');
+  
+  return (
+    <ButtonGroup>
+      <Button 
+        icon="grid"
+        selected={viewMode === 'grid'}
+        onClick={() => setViewMode('grid')}
+        fillMode={viewMode === 'grid' ? 'solid' : 'outline'}
+      >
+        Grid
+      </Button>
+      <Button 
+        icon="list"
+        selected={viewMode === 'list'}
+        onClick={() => setViewMode('list')}
+        fillMode={viewMode === 'list' ? 'solid' : 'outline'}
+      >
+        List
+      </Button>
+      <Button 
+        icon="card"
+        selected={viewMode === 'card'}
+        onClick={() => setViewMode('card')}
+        fillMode={viewMode === 'card' ? 'solid' : 'outline'}
+      >
+        Card
+      </Button>
+    </ButtonGroup>
+  );
+}
+```
+
+### Pattern 3: Action Controls with Confirmation
+```tsx
+// Dangerous actions with confirmation states
+function ActionControls() {
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  
+  const handleDelete = () => {
+    if (!confirmingDelete) {
+      setConfirmingDelete(true);
+      setTimeout(() => setConfirmingDelete(false), 3000); // Reset after 3 seconds
+    } else {
+      // Perform actual deletion
+      performDelete();
+      setConfirmingDelete(false);
+    }
+  };
+  
+  return (
+    <ButtonGroup>
+      <Button themeColor="primary" icon="edit">Edit</Button>
+      <Button themeColor="info" icon="copy">Duplicate</Button>
+      <Button 
+        themeColor={confirmingDelete ? "warning" : "error"}
+        icon={confirmingDelete ? "warning" : "delete"}
+        onClick={handleDelete}
+      >
+        {confirmingDelete ? "Confirm Delete" : "Delete"}
+      </Button>
+    </ButtonGroup>
+  );
+}
+```

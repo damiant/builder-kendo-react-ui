@@ -1,0 +1,422 @@
+# PanelBar Components
+
+## Overview
+
+### Purpose
+Use this component to generate panel bar navigation functionality
+
+### When to Use
+The PanelBar component is ideal for creating hierarchical, expandable navigation menus and content organization systems. Use this component when you need to:
+
+- Create collapsible sidebar navigation with nested menu items
+- Display hierarchical data structures with multiple levels of depth
+- Build accordion-style layouts for organizing related content sections
+- Implement file explorer or tree-like navigation interfaces
+- Provide users with expandable/collapsible content organization
+- Create settings panels with grouped configuration options
+- Build FAQ sections with categorized questions and answers
+- Implement documentation navigation with sections and subsections
+
+### Architecture
+**Moderate Coupling**: The PanelBar component works as a standalone component but achieves full functionality when used with its companion components PanelBarItem and PanelBarContent. While PanelBar can be used independently, the complete navigation experience requires these related components working together to create the hierarchical structure.
+
+### Component Interdependencies
+The PanelBar component group has the following relationships:
+
+- **PanelBar** (Primary): Acts as the root container managing expansion states, selection, and keyboard navigation
+- **PanelBarItem** (Companion): Represents individual expandable items within the panel bar structure
+- **PanelBarContent** (Companion): Contains the content displayed within each panel bar item
+
+**Data Flow**: PanelBar manages global state for expansion and selection, coordinating with nested items
+**Context Sharing**: PanelBar provides configuration context for animation, expansion behavior, and navigation
+**Event Handling**: PanelBar handles item selection, expansion events, and keyboard navigation coordination
+
+## Components
+
+### PanelBar {Primary Component}
+The main container component that provides panel bar navigation functionality with hierarchical item management.
+
+**Purpose:** Serves as the root container for organizing hierarchical navigation items with built-in state management for expansion, selection, and keyboard navigation.
+
+**Interface:**
+```typescript
+interface PanelBarProps {
+  children?: React.ReactNode; // PanelBarItem components for hierarchical structure
+  className?: string; // Additional CSS classes
+  dir?: string; // Text direction ('ltr' | 'rtl' | 'auto')
+  style?: React.CSSProperties; // Inline styles
+  animation?: boolean; // Enable/disable expand/collapse animations (default: true)
+  expanded?: string[]; // Array of keys for expanded items (e.g., ['.0', '.1'])
+  expandMode?: 'single' | 'multiple'; // Expansion behavior (default: 'multiple')
+  focused?: string; // Key of the currently focused item
+  selected?: string; // Key of the currently selected item
+  keepItemsMounted?: boolean; // Keep collapsed items in DOM (default: false)
+  isControlled?: boolean; // Whether component state is controlled externally
+  onSelect?: (event: PanelBarSelectEvent) => void; // Item selection event handler
+  onFocus?: (event: PanelBarFocusEvent) => void; // Focus event handler
+  onBlur?: (event: PanelBarBlurEvent) => void; // Blur event handler
+  onKeyDown?: (event: PanelBarKeyDownEvent) => void; // Keyboard navigation handler
+}
+```
+
+**Provides:** 
+- Hierarchical navigation state management
+- Keyboard navigation support (arrow keys, enter, space)
+- Accessibility attributes for screen readers
+- Animation coordination for expand/collapse transitions
+- Selection and focus management across all items
+
+**Usage Example:**
+```tsx
+import { PanelBar, PanelBarItem, PanelBarContent } from '@progress/kendo-react-layout';
+
+function NavigationPanel() {
+  const [expanded, setExpanded] = useState(['.0']);
+  const [selected, setSelected] = useState('.0.0');
+
+  const handleSelect = (event) => {
+    setSelected(event.target.props.id);
+  };
+
+  return (
+    <PanelBar
+      expanded={expanded}
+      selected={selected}
+      expandMode="multiple"
+      animation={true}
+      onSelect={handleSelect}
+    >
+      <PanelBarItem title="Dashboard" id=".0" expanded={true}>
+        <PanelBarContent>
+          <PanelBarItem title="Overview" id=".0.0" />
+          <PanelBarItem title="Analytics" id=".0.1" />
+          <PanelBarItem title="Reports" id=".0.2" />
+        </PanelBarContent>
+      </PanelBarItem>
+      <PanelBarItem title="Settings" id=".1">
+        <PanelBarContent>
+          <PanelBarItem title="Profile" id=".1.0" />
+          <PanelBarItem title="Preferences" id=".1.1" />
+        </PanelBarContent>
+      </PanelBarItem>
+    </PanelBar>
+  );
+}
+```
+
+### PanelBarItem {Companion Component}
+Represents an individual expandable item within the panel bar structure.
+
+**Purpose:** Defines individual navigation items that can contain content, nested items, and support various display options including icons, images, and custom styling.
+
+**Interface:**
+```typescript
+interface PanelBarItemProps {
+  children?: React.ReactNode; // PanelBarContent or nested PanelBarItem components
+  className?: string; // Additional CSS classes for the item
+  headerClassName?: string; // CSS classes specifically for the item header
+  disabled?: boolean; // Whether the item is disabled and non-interactive
+  expanded?: boolean; // Local expansion state (overrides parent control)
+  focused?: boolean; // Whether the item is currently focused
+  selected?: boolean; // Whether the item is currently selected
+  title?: string; // Display text for the item
+  id?: string; // Unique identifier for selection and expansion tracking
+  icon?: string; // Font icon class name to display
+  iconClass?: string; // Additional CSS classes for the icon
+  svgIcon?: React.ComponentType; // SVG icon component to display
+  imageUrl?: string; // URL of an image to display instead of icon
+  animation?: boolean; // Override parent animation setting for this item
+  uniquePrivateKey?: string; // Internal key for React reconciliation
+}
+```
+
+**Context Dependencies:** 
+- Works best within PanelBar component for state coordination
+- Inherits animation and navigation context from parent PanelBar
+- Can be nested within other PanelBarItem components via PanelBarContent
+
+**Parent Requirements:** Typically used within PanelBar or nested within PanelBarContent for hierarchical structures
+
+**Usage Example:**
+```tsx
+// Basic item with content
+<PanelBarItem title="Section 1" icon="folder" id=".0">
+  <PanelBarContent>
+    <p>Content for Section 1</p>
+  </PanelBarContent>
+</PanelBarItem>
+
+// Nested hierarchical structure
+<PanelBarItem title="Parent Category" id=".1" expanded={true}>
+  <PanelBarContent>
+    <PanelBarItem title="Subcategory 1" id=".1.0" />
+    <PanelBarItem title="Subcategory 2" id=".1.1" />
+  </PanelBarContent>
+</PanelBarItem>
+```
+
+### PanelBarContent {Companion Component}
+Contains the content displayed within each panel bar item when expanded.
+
+**Purpose:** Wraps the content that appears when a PanelBarItem is expanded, providing proper styling and layout for both text content and nested PanelBarItem components.
+
+**Interface:**
+```typescript
+interface PanelBarContentProps {
+  children?: React.ReactNode; // Content to display or nested PanelBarItem components
+  className?: string; // Additional CSS classes for content styling
+}
+```
+
+**Context Dependencies:** 
+- Must be used within PanelBarItem to provide content area
+- Inherits styling context from parent PanelBarItem
+- Provides proper spacing and layout for nested hierarchical content
+
+**Parent Requirements:** Required parent component is PanelBarItem for proper rendering and animation
+
+**Usage Example:**
+```tsx
+// Content with mixed elements
+<PanelBarItem title="User Guide" id=".0">
+  <PanelBarContent>
+    <p>Welcome to the user guide section.</p>
+    <PanelBarItem title="Getting Started" id=".0.0" />
+    <PanelBarItem title="Advanced Features" id=".0.1" />
+  </PanelBarContent>
+</PanelBarItem>
+
+// Simple text content
+<PanelBarItem title="About" id=".1">
+  <PanelBarContent>
+    <div>
+      <h4>Application Information</h4>
+      <p>Version 1.0.0 - Built with Kendo React UI</p>
+    </div>
+  </PanelBarContent>
+</PanelBarItem>
+```
+
+## Integration Patterns
+
+### Basic Hierarchical Navigation
+```tsx
+import { PanelBar, PanelBarItem, PanelBarContent } from '@progress/kendo-react-layout';
+
+// Simple two-level navigation structure
+function BasicNavigation() {
+  return (
+    <PanelBar expandMode="multiple">
+      <PanelBarItem title="Home" icon="home" id=".0" />
+      <PanelBarItem title="Products" icon="grid" id=".1" expanded={true}>
+        <PanelBarContent>
+          <PanelBarItem title="Electronics" id=".1.0" />
+          <PanelBarItem title="Clothing" id=".1.1" />
+          <PanelBarItem title="Books" id=".1.2" />
+        </PanelBarContent>
+      </PanelBarItem>
+      <PanelBarItem title="Support" icon="question" id=".2">
+        <PanelBarContent>
+          <PanelBarItem title="FAQ" id=".2.0" />
+          <PanelBarItem title="Contact" id=".2.1" />
+        </PanelBarContent>
+      </PanelBarItem>
+    </PanelBar>
+  );
+}
+```
+
+### Controlled State Management
+```tsx
+// Advanced usage with full state control
+function ControlledPanelBar() {
+  const [expanded, setExpanded] = useState(['.0', '.1']);
+  const [selected, setSelected] = useState('.0.1');
+
+  const handleSelect = (event) => {
+    const newSelected = event.target.props.id;
+    setSelected(newSelected);
+    
+    // Auto-expand parent if selecting a nested item
+    const parentKey = newSelected.substring(0, newSelected.lastIndexOf('.'));
+    if (parentKey && !expanded.includes(parentKey)) {
+      setExpanded(prev => [...prev, parentKey]);
+    }
+  };
+
+  const handleExpand = (itemKey) => {
+    setExpanded(prev => 
+      prev.includes(itemKey)
+        ? prev.filter(key => key !== itemKey)
+        : [...prev, itemKey]
+    );
+  };
+
+  return (
+    <PanelBar
+      expanded={expanded}
+      selected={selected}
+      expandMode="multiple"
+      keepItemsMounted={true}
+      onSelect={handleSelect}
+    >
+      <PanelBarItem title="File System" id=".0">
+        <PanelBarContent>
+          <PanelBarItem title="Documents" id=".0.0">
+            <PanelBarContent>
+              <PanelBarItem title="Projects" id=".0.0.0" />
+              <PanelBarItem title="Templates" id=".0.0.1" />
+            </PanelBarContent>
+          </PanelBarItem>
+          <PanelBarItem title="Downloads" id=".0.1" />
+        </PanelBarContent>
+      </PanelBarItem>
+      <PanelBarItem title="Settings" id=".1">
+        <PanelBarContent>
+          <PanelBarItem title="General" id=".1.0" />
+          <PanelBarItem title="Advanced" id=".1.1" />
+        </PanelBarContent>
+      </PanelBarItem>
+    </PanelBar>
+  );
+}
+```
+
+### Single Expansion Mode
+```tsx
+// Only one section can be expanded at a time
+function AccordionStyle() {
+  return (
+    <PanelBar expandMode="single" animation={true}>
+      <PanelBarItem title="Personal Information" id=".0" expanded={true}>
+        <PanelBarContent>
+          <p>Update your personal details here.</p>
+          <PanelBarItem title="Basic Info" id=".0.0" />
+          <PanelBarItem title="Contact Details" id=".0.1" />
+        </PanelBarContent>
+      </PanelBarItem>
+      <PanelBarItem title="Account Settings" id=".1">
+        <PanelBarContent>
+          <p>Manage your account preferences.</p>
+          <PanelBarItem title="Password" id=".1.0" />
+          <PanelBarItem title="Privacy" id=".1.1" />
+        </PanelBarContent>
+      </PanelBarItem>
+      <PanelBarItem title="Notifications" id=".2">
+        <PanelBarContent>
+          <p>Configure notification settings.</p>
+          <PanelBarItem title="Email" id=".2.0" />
+          <PanelBarItem title="Push" id=".2.1" />
+        </PanelBarContent>
+      </PanelBarItem>
+    </PanelBar>
+  );
+}
+```
+
+## Component Relationships
+
+### Data Flow
+The PanelBar component manages expansion and selection state at the root level, while individual PanelBarItem components can have local overrides. State flows from the parent PanelBar down to all nested items, with event bubbling back up for selection and expansion changes.
+
+### Context Sharing
+PanelBar provides animation configuration, expansion mode settings, and accessibility context that all nested items inherit. This ensures consistent behavior and styling across the entire hierarchical structure.
+
+### Event Handling
+Selection events bubble up from individual items to the parent PanelBar, which can then update global state. Keyboard navigation is coordinated at the PanelBar level, allowing users to navigate through the entire hierarchy using arrow keys, enter, and space.
+
+## Best Practices
+
+### Usage Guidelines
+- Use meaningful, descriptive titles for PanelBarItem components to ensure clarity in navigation
+- Implement unique id properties following a hierarchical pattern (e.g., '.0', '.0.0', '.0.1') for proper state management
+- Consider using keepItemsMounted={true} for performance when content is expensive to render
+- Leverage expandMode="single" for accordion-style interfaces where only one section should be open
+- Use icons consistently across similar navigation levels to improve visual hierarchy
+
+### Accessibility
+- PanelBar automatically provides ARIA attributes for proper screen reader navigation
+- Keyboard navigation is built-in with arrow keys for traversal and enter/space for selection
+- Each PanelBarItem receives appropriate ARIA expanded/collapsed states
+- Use descriptive titles that make sense when read by screen readers
+- Consider providing additional ARIA labels for complex nested structures
+
+### Performance
+- Use keepItemsMounted sparingly - only when re-rendering content is expensive
+- Implement controlled state only when necessary for complex business logic
+- Consider lazy loading of PanelBarContent for items with heavy content
+- Use React.memo for PanelBarItem components that receive frequent prop updates
+- Optimize deeply nested structures by limiting hierarchy depth where possible
+
+## Common Patterns
+
+### Pattern 1: File Explorer Navigation
+```tsx
+// Tree-like file system navigation
+function FileExplorer({ fileData }) {
+  const renderFileItems = (items, parentKey = '') => {
+    return items.map((item, index) => {
+      const itemKey = `${parentKey}.${index}`;
+      
+      if (item.type === 'folder') {
+        return (
+          <PanelBarItem 
+            key={itemKey}
+            title={item.name} 
+            icon="folder"
+            id={itemKey}
+          >
+            <PanelBarContent>
+              {renderFileItems(item.children, itemKey)}
+            </PanelBarContent>
+          </PanelBarItem>
+        );
+      }
+      
+      return (
+        <PanelBarItem 
+          key={itemKey}
+          title={item.name} 
+          icon="file"
+          id={itemKey}
+        />
+      );
+    });
+  };
+
+  return (
+    <PanelBar expandMode="multiple">
+      {renderFileItems(fileData)}
+    </PanelBar>
+  );
+}
+```
+
+### Pattern 2: Settings Panel with Categories
+```tsx
+// Organized settings with grouped options
+function SettingsPanel() {
+  return (
+    <PanelBar expandMode="single">
+      <PanelBarItem title="General" icon="gear" id=".0" expanded={true}>
+        <PanelBarContent>
+          <div className="settings-section">
+            <PanelBarItem title="Language & Region" id=".0.0" />
+            <PanelBarItem title="Theme Preferences" id=".0.1" />
+            <PanelBarItem title="Startup Options" id=".0.2" />
+          </div>
+        </PanelBarContent>
+      </PanelBarItem>
+      <PanelBarItem title="Privacy & Security" icon="lock" id=".1">
+        <PanelBarContent>
+          <div className="settings-section">
+            <PanelBarItem title="Data Collection" id=".1.0" />
+            <PanelBarItem title="Two-Factor Auth" id=".1.1" />
+            <PanelBarItem title="Login History" id=".1.2" />
+          </div>
+        </PanelBarContent>
+      </PanelBarItem>
+    </PanelBar>
+  );
+}
+```
